@@ -819,3 +819,54 @@ class JCCI(object):
         self.xml_parse_results_new, self.xml_parse_results_old = self._parse_project(self.file_path, self.commit_or_branch_new, None)
 
         self._start_analysis_diff_and_impact()
+
+    def analyze_one_commit(self, commit_id, **kwargs):
+        """只分析一个commit，不对比其他commit，将指定commit的全部代码信息存储到数据库中"""
+        logging.info('*' * 10 + 'Analyze single commit start' + '*' * 10)
+        self.commit_or_branch_new = commit_id[0: 7] if len(commit_id) > 7 else commit_id
+        self.commit_or_branch_old = ''  # 不需要对比其他commit
+
+        # 获取项目基本信息
+        self.project_name = self.git_url.split('/')[-1].split('.git')[0]
+        self.file_path = os.path.join(config.project_path, self.project_name)
+
+        # 创建项目记录（由于是单次commit分析，将old_commit设为空字符串）
+        self.project_id = self.sqlite.add_project(self.project_name, self.git_url, 'master', self.commit_or_branch_new, self.commit_or_branch_old)
+        
+        # 设置CCI文件路径
+        cci_filepath = os.path.join(self.file_path, f'{self.commit_or_branch_new}_full_analysis.cci')
+        self.cci_filepath = cci_filepath
+
+        # 检查是否已有分析结果
+        self._can_analyze(self.file_path, self.cci_filepath)
+
+        # 如果项目不存在，则克隆项目
+        if not os.path.exists(self.file_path):
+            logging.info(f'Cloning project: {self.git_url}')
+            os.system(f'git clone {self.git_url} {self.file_path}')
+
+        dependents: list[dict] = kwargs.get('dependents', [])
+        self._clone_dependents_project(dependents)
+
+        self._occupy_project()
+
+        # 将代码重置到指定commit
+        logging.info(f'Resetting project to commit: {commit_id}')
+        os.system(f'cd {self.file_path} && git reset --hard {commit_id}')
+        time.sleep(2)
+
+        # 初始化空的diff_parse_map，因为这不是对比分析
+        self.diff_parse_map = {}
+
+        # 解析整个项目，不进行对比
+        self.xml_parse_results_new, self.xml_parse_results_old = self._parse_project(self.file_path, self.commit_or_branch_new, None)
+
+        # 由于没有差异分析，直接完成处理
+        self._draw_and_write_result()
+        t2 = datetime.datetime.now()
+        try:
+            logging.info(f'Analyze done, remove occupy, others can analyze now')
+            os.remove(os.path.join(self.file_path, 'Occupy.ing'))
+        finally:
+            pass
+        logging.info(f'Analyze done, spend: {t2 - self.t1}')
