@@ -25,7 +25,8 @@ CREATE TABLE class (
 	is_controller REAL,
 	controller_base_url TEXT,
 	commit_or_branch TEXT,
-	create_at TIMESTAMP NOT NULL DEFAULT (datetime('now','localtime'))
+	change_type TEXT DEFAULT 'UNCHANGED',
+    create_at TIMESTAMP NOT NULL DEFAULT (datetime('now','localtime'))
 );
 
 CREATE TABLE import (
@@ -52,6 +53,7 @@ CREATE TABLE field (
 	start_line INTEGER,
 	end_line INTEGER,
 	documentation TEXT,
+	change_type TEXT DEFAULT 'UNCHANGED',
     create_at TIMESTAMP NOT NULL DEFAULT (datetime('now','localtime'))
 );
 
@@ -74,6 +76,7 @@ CREATE TABLE methods (
 	start_line INTEGER NOT NULL,
 	end_line INTEGER NOT NULL,
 	documentation TEXT,
+	change_type TEXT DEFAULT 'UNCHANGED',
     create_at TIMESTAMP NOT NULL DEFAULT (datetime('now','localtime'))
 );
 '''

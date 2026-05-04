@@ -72,7 +72,7 @@ class JavaParse(object):
         package_class = package_name + '.' + node.name
         class_type = type(node).__name__.replace('Declaration', '')
         access_modifier = [m for m in list(node.modifiers) if m.startswith('p')][0] if list([m for m in list(node.modifiers) if m.startswith('p')]) else 'public'
-        annotations_json = json.dumps(node.annotations, default=lambda obj: obj.__dict__)
+        annotations_json = json.dumps(node.annotations, default=lambda obj: obj.__dict__, ensure_ascii=False)
         is_controller, controller_base_url = self._judge_is_controller(node.annotations)
         extends_package_class = None
         if 'extends' in node.attrs and node.extends:
@@ -105,7 +105,7 @@ class JavaParse(object):
         field_list = []
         package_class = package_name + "." + class_name
         for field_obj in fields:
-            field_annotations = json.dumps(field_obj.annotations, default=lambda obj: obj.__dict__)
+            field_annotations = json.dumps(field_obj.annotations, default=lambda obj: obj.__dict__, ensure_ascii=False)
             access_modifier = next((m for m in list(field_obj.modifiers) if m.startswith('p')), 'public')
             field_name = field_obj.declarators[0].name
             field_type: str = field_obj.type.name
@@ -312,7 +312,7 @@ class JavaParse(object):
         for constructor in constructors:
             method_invocation = {}
             cs_name = constructor.name
-            annotations = json.dumps(constructor.annotations, default=lambda obj: obj.__dict__)  # annotations
+            annotations = json.dumps(constructor.annotations, default=lambda obj: obj.__dict__, ensure_ascii=False)  # annotations
 
             access_modifier = [m for m in list(constructor.modifiers) if m.startswith('p')][0] if list([m for m in list(constructor.modifiers) if m.startswith('p')]) else 'public'
             parameters = []
@@ -342,9 +342,9 @@ class JavaParse(object):
                 'access_modifier': access_modifier,
                 'return_type': return_type,
                 'method_name': cs_name,
-                'parameters': json.dumps(parameters),
-                'body': json.dumps(cs_body),
-                'method_invocation_map': json.dumps(method_invocation),
+                'parameters': json.dumps(parameters, ensure_ascii=False),
+                'body': json.dumps(cs_body, ensure_ascii=False),
+                'method_invocation_map': json.dumps(method_invocation, ensure_ascii=False),
                 'is_static': False,
                 'is_abstract': False,
                 'is_api': False,
@@ -368,7 +368,7 @@ class JavaParse(object):
             variable_map = {}
             method_name = method_obj.name
             documentation = method_obj.documentation  # document
-            annotations = json.dumps(method_obj.annotations, default=lambda obj: obj.__dict__)  # annotations
+            annotations = json.dumps(method_obj.annotations, default=lambda obj: obj.__dict__, ensure_ascii=False)  # annotations
             is_override_method = 'Override' in annotations
             is_api, api_path = self._judge_is_api(method_obj.annotations, base_url, method_name)
             if not is_api and class_implements and is_override_method:
@@ -429,13 +429,13 @@ class JavaParse(object):
                 'access_modifier': access_modifier,
                 'return_type': return_type,
                 'method_name': method_name,
-                'parameters': json.dumps(parameters),
-                'body': json.dumps(method_body),
-                'method_invocation_map': json.dumps(method_invocation),
+                'parameters': json.dumps(parameters, ensure_ascii=False),
+                'body': json.dumps(method_body, ensure_ascii=False),
+                'method_invocation_map': json.dumps(method_invocation, ensure_ascii=False),
                 'is_static': is_static,
                 'is_abstract': is_abstract,
                 'is_api': is_api,
-                'api_path': json.dumps(api_path) if is_api else None,
+                'api_path': json.dumps(api_path, ensure_ascii=False) if is_api else None,
                 'start_line': method_start_line,
                 'end_line': method_end_line,
                 'documentation': documentation

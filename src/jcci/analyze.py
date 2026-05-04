@@ -14,6 +14,12 @@ from . import diff_parse as diff_parse
 from . import graph as graph
 from . import constant as constant
 
+# 导入变更类型分析器
+try:
+    from .change_type_analyzer import ChangeTypeAnalyzer
+except ImportError:
+    ChangeTypeAnalyzer = None
+
 logging.basicConfig(format='%(asctime)s %(message)s', level=logging.DEBUG)
 
 
@@ -682,8 +688,46 @@ class JCCI(object):
         """
         收集方法变更信息
         返回方法变更列表
+        
+        优先使用数据库中的 change_type 字段，如果不存在则基于行号推断
         """
         method_changes = []
+        
+        # 尝试从数据库中查询有变更的方法（使用 change_type 字段）
+        try:
+            methods_with_changes = self.sqlite.select_data(
+                f'SELECT m.method_name, m.parameters, m.change_type, '
+                f'c.class_name, c.package_name, c.filepath, '
+                f'm.start_line as new_start_line '
+                f'FROM methods m '
+                f'JOIN class c ON m.class_id = c.class_id '
+                f'WHERE m.project_id = {self.project_id} '
+                f'AND m.change_type != "UNCHANGED" '
+                f'ORDER BY c.class_name, m.start_line'
+            )
+            
+            if methods_with_changes:
+                # 如果数据库中有 change_type 信息，直接使用
+                for method in methods_with_changes:
+                    params = json.loads(method['parameters']) if method['parameters'] else []
+                    param_types = ','.join([p['parameter_type'] for p in params])
+                    method_signature = f"{method['class_name']}.{method['method_name']}({param_types})"
+                    
+                    method_changes.append({
+                        'change_type': method['change_type'],
+                        'method_signature': method_signature,
+                        'file_path': method['filepath'],
+                        'new_start_line': method['new_start_line'],
+                        'old_start_line': None
+                    })
+                
+                logging.info(f'从数据库获取到 {len(method_changes)} 个变更方法')
+                return method_changes
+        except Exception as e:
+            logging.warning(f'查询 change_type 失败，使用行号推断: {e}')
+        
+        # 如果数据库中没有 change_type 信息，使用原有的行号推断逻辑
+        logging.info('使用行号推断方法变更类型')
         
         # 遍历 diff_parse_map 获取所有变更的文件和方法
         for filepath, diff_info in self.diff_parse_map.items():
@@ -1136,7 +1180,50 @@ class JCCI(object):
             f'{self.commit_or_branch_old}..{self.commit_or_branch_new}_incremental.cci'
         )
         
-        # 6. 开始差异和影响分析（不输出 CCI 文件）
+        # 6. 执行变更类型分析（如果 ChangeTypeAnalyzer 可用）
+        if ChangeTypeAnalyzer is not None:
+            logging.info('开始执行变更类型分析...')
+            try:
+                analyzer = ChangeTypeAnalyzer(self.sqlite.db_path)
+                analyzer.analyze_and_mark_changes(
+                    diff_parse_map=self.diff_parse_map,
+                    commit_new=self.commit_or_branch_new,
+                    commit_old=self.commit_or_branch_old,
+                    project_id=self.project_id
+                )
+                
+                # 获取变更摘要
+                changed_classes = analyzer.get_changed_classes(self.project_id)
+                changed_methods = analyzer.get_changed_methods(self.project_id)
+                
+                logging.info(f'变更类型分析完成: {len(changed_classes)} 个类变更, {len(changed_methods)} 个方法变更')
+                
+                analyzer.close()
+            except Exception as e:
+                logging.error(f'变更类型分析失败: {e}')
+                import traceback
+                traceback.print_exc()
+        else:
+            logging.warning('ChangeTypeAnalyzer 不可用，跳过变更类型分析')
+        
+        # 7. 开始差异和影响分析（不输出 CCI 文件）
         result = self._start_analysis_diff_and_impact(write_file=False)
+        
+        # 8. 在结果中添加变更摘要信息
+        if ChangeTypeAnalyzer is not None:
+            try:
+                # 重新创建分析器以查询结果
+                analyzer = ChangeTypeAnalyzer(self.sqlite.db_path)
+                result['change_summary'] = {
+                    'classes': analyzer.get_changed_classes(self.project_id),
+                    'methods': analyzer.get_changed_methods(self.project_id)
+                }
+                analyzer.close()
+            except Exception as e:
+                logging.error(f'获取变更摘要失败: {e}')
+                result['change_summary'] = {
+                    'classes': [],
+                    'methods': []
+                }
         
         return result
