@@ -45,7 +45,7 @@ class JCCI(object):
             with open(cci_file_path, 'r') as read:
                 result = read.read()
                 result_json = json.loads(result)
-                print(result, flush=True)
+                # print(result, flush=True)
                 print(f'Impacted api list: {result_json["impacted_api_list"]}', flush=True)
             sys.exit(0)
 
@@ -678,23 +678,121 @@ class JCCI(object):
                 return False
         return True
 
-    def _draw_and_write_result(self):
+    def _collect_method_changes(self):
+        """
+        收集方法变更信息
+        返回方法变更列表
+        """
+        method_changes = []
+        
+        # 遍历 diff_parse_map 获取所有变更的文件和方法
+        for filepath, diff_info in self.diff_parse_map.items():
+            # 跳过 XML 文件
+            if filepath.endswith('.xml'):
+                continue
+            
+            # 获取新增行的方法
+            if diff_info.get('line_num_added'):
+                for line_num in diff_info['line_num_added']:
+                    # 查询新方法
+                    methods_list = self.sqlite.select_data(
+                        f'SELECT m.method_name, m.parameters, m.class_id, c.class_name, c.package_name '
+                        f'FROM methods m '
+                        f'JOIN class c ON m.class_id = c.class_id '
+                        f'WHERE m.project_id = {self.project_id} '
+                        f'AND m.start_line <= {line_num} AND m.end_line >= {line_num} '
+                        f'AND c.commit_or_branch = "{self.commit_or_branch_new}"'
+                    )
+                    
+                    for method in methods_list:
+                        params = json.loads(method['parameters']) if method['parameters'] else []
+                        param_types = ','.join([p['parameter_type'] for p in params])
+                        method_signature = f"{method['class_name']}.{method['method_name']}({param_types})"
+                        
+                        method_changes.append({
+                            'change_type': 'ADDED',
+                            'method_signature': method_signature,
+                            'file_path': filepath,
+                            'new_start_line': line_num,
+                            'old_start_line': None
+                        })
+            
+            # 获取删除行的方法(旧版本)
+            if diff_info.get('line_num_removed') and self.commit_or_branch_old:
+                for line_num in diff_info['line_num_removed']:
+                    # 查询旧方法
+                    methods_list = self.sqlite.select_data(
+                        f'SELECT m.method_name, m.parameters, m.class_id, c.class_name, c.package_name '
+                        f'FROM methods m '
+                        f'JOIN class c ON m.class_id = c.class_id '
+                        f'WHERE m.project_id = 0 '
+                        f'AND m.start_line <= {line_num} AND m.end_line >= {line_num} '
+                        f'AND c.commit_or_branch = "{self.commit_or_branch_old}"'
+                    )
+                    
+                    for method in methods_list:
+                        params = json.loads(method['parameters']) if method['parameters'] else []
+                        param_types = ','.join([p['parameter_type'] for p in params])
+                        method_signature = f"{method['class_name']}.{method['method_name']}({param_types})"
+                        
+                        method_changes.append({
+                            'change_type': 'DELETED',
+                            'method_signature': method_signature,
+                            'file_path': filepath,
+                            'new_start_line': None,
+                            'old_start_line': line_num
+                        })
+        
+        return method_changes
+
+    def _draw_and_write_result(self, write_file=True):
+        """
+        生成分析结果
+        
+        Args:
+            write_file: 是否写入 CCI 文件,默认 True
+        
+        Returns:
+            dict: 分析结果字典
+        """
         if self.view.nodes:
             self.view.draw_graph(1200, 600)
-        logging.info('Analyze success, generating cci result file......')
+        
+        # 收集方法变更信息
+        method_changes = self._collect_method_changes()
+        
+        logging.info('Analyze success, generating result...')
         result = {
             'nodes': self.view.nodes,
             'links': self.view.links,
             'categories': self.view.categories,
-            'impacted_api_list': [node['api_path'] for node in self.view.nodes if node.get('is_api')]
+            'impacted_api_list': [node['api_path'] for node in self.view.nodes if node.get('is_api')],
+            'method_changes': method_changes,
+            'cci_file_path': self.cci_filepath if write_file else None
         }
-        print(json.dumps(result), flush=True)
-        print(f'Impacted api list: {result["impacted_api_list"]}', flush=True)
-        with open(self.cci_filepath, 'w') as w:
-            w.write(json.dumps(result, ensure_ascii=False))
-        logging.info(f'Generating cci result file success, location: {self.cci_filepath}')
+        
+        # 根据参数决定是否写入文件
+        if write_file:
+            print(json.dumps(result, ensure_ascii=False), flush=True)
+            print(f'Impacted api list: {result["impacted_api_list"]}', flush=True)
+            with open(self.cci_filepath, 'w') as w:
+                w.write(json.dumps(result, ensure_ascii=False))
+            logging.info(f'Generating cci result file success, location: {self.cci_filepath}')
+        else:
+            logging.info('CCI file output disabled, returning result only')
+        
+        return result
 
-    def _start_analysis_diff_and_impact(self):
+    def _start_analysis_diff_and_impact(self, write_file=True):
+        """
+        开始差异和影响分析
+        
+        Args:
+            write_file: 是否写入 CCI 文件
+        
+        Returns:
+            dict: 分析结果
+        """
         for patch_path, patch_obj in self.diff_parse_map.items():
             self._diff_analyze(patch_path, patch_obj)
 
@@ -704,7 +802,7 @@ class JCCI(object):
                 self.analyzed_obj_set.append(obj)  # 标记为已分析过
                 self._impacted_analyze(obj)  # 处理对象,返回新增对象列表
 
-        self._draw_and_write_result()
+        result = self._draw_and_write_result(write_file=write_file)
         t2 = datetime.datetime.now()
         try:
             logging.info('Analyze done, remove occupy, others can analyze now')
@@ -712,6 +810,8 @@ class JCCI(object):
         finally:
             pass
         logging.info(f'Analyze done, spend: {t2 - self.t1}')
+        
+        return result
 
     def analyze_two_branch(self, commit_new, commit_old, **kwargs):
         logging.info('*' * 10 + 'Analyze start' + '*' * 10)
@@ -870,3 +970,173 @@ class JCCI(object):
         finally:
             pass
         logging.info(f'Analyze done, spend: {t2 - self.t1}')
+
+    def analyze_two_commit_incremental(self, commit_new, commit_old, **kwargs):
+        """
+        基线增量分析策略:以基线为中心的增量分析
+        
+        Args:
+            commit_new: 新的提交ID
+            commit_old: 基线提交ID
+            **kwargs: 其他参数(如 branch, dependents)
+        """
+        logging.info('*' * 10 + 'Incremental Analyze start' + '*' * 10)
+        
+        # 1. 初始化基本信息
+        self.commit_or_branch_new = commit_new[0:7] if len(commit_new) > 7 else commit_new
+        self.commit_or_branch_old = commit_old[0:7] if len(commit_old) > 7 else commit_old
+        self.branch_name = kwargs.get('branch', 'master')
+        
+        self.project_name = self.git_url.split('/')[-1].split('.git')[0]
+        self.file_path = os.path.join(config.project_path, self.project_name)
+        
+        # 2. 构造基线数据库路径
+        baseline_db_path = self.sqlite.get_baseline_db_path(
+            self.username, self.project_name, self.commit_or_branch_old
+        )
+        
+        # 3. 判断是否为首次运行
+        is_first_run = not os.path.exists(baseline_db_path)
+        
+        if is_first_run:
+            # === 场景 A: 首次运行(基线初始化) ===
+            logging.info('First run detected, initializing baseline database')
+            
+            # 3.1 创建新的 SqliteHelper 实例指向基线数据库
+            baseline_sqlite = SqliteHelper(baseline_db_path)
+            self.sqlite = baseline_sqlite
+            
+            # 3.2 克隆项目(如果不存在)
+            if not os.path.exists(self.file_path):
+                logging.info(f'Cloning project: {self.git_url}')
+                os.system(f'git clone -b {self.branch_name} {self.git_url} {self.file_path}')
+            
+            # 3.3 占住项目
+            self._occupy_project()
+            
+            # 3.4 全量解析 commit_old → project_id = 0
+            logging.info(f'Full parsing baseline commit: {self.commit_or_branch_old}')
+            os.system(f'cd {self.file_path} && git reset --hard {self.commit_or_branch_old}')
+            time.sleep(2)
+            
+            file_path_list = self._get_project_files(self.file_path)
+            java_parse = JavaParse(self.sqlite.db_path, project_id=0)
+            java_parse.parse_java_file_list(file_path_list, self.commit_or_branch_old)
+            
+            # 3.5 记录基线分析到 project 表
+            baseline_project_id = self.sqlite.add_project(
+                self.project_name, self.git_url, self.branch_name,
+                self.commit_or_branch_old, self.commit_or_branch_old,
+                project_id=0
+            )
+            
+            # 3.6 计算差异并增量解析 commit_new → project_id = 1
+            logging.info(f'Incremental parsing new commit: {self.commit_or_branch_new}')
+            self.diff_parse_map = self._get_diff_parse_map(
+                self.file_path, self.branch_name, 
+                self.commit_or_branch_new, self.commit_or_branch_old
+            )
+            
+            # 切换到新提交
+            os.system(f'cd {self.file_path} && git reset --hard {self.commit_or_branch_new}')
+            time.sleep(2)
+            
+            # 只解析差异文件
+            diff_files = list(self.diff_parse_map.keys())
+            matched_java_files = [f for f in file_path_list 
+                                 if any(f.endswith(diff_path) for diff_path in diff_files)]
+            
+            java_parse_new = JavaParse(self.sqlite.db_path, project_id=1)
+            java_parse_new.parse_java_file_list(matched_java_files, self.commit_or_branch_new)
+            
+            # 3.7 记录增量分析到 project 表
+            self.project_id = self.sqlite.add_project(
+                self.project_name, self.git_url, self.branch_name,
+                self.commit_or_branch_new, self.commit_or_branch_old,
+                project_id=1
+            )
+            
+            # 3.8 解析 XML 文件
+            diff_xml_files = [f for f in matched_java_files if f.endswith('.xml')]
+            self.xml_parse_results_new = self._parse_xml_file(diff_xml_files)
+            self.xml_parse_results_old = {}
+            
+        else:
+            # === 场景 B/C: 数据库已存在 ===
+            logging.info('Baseline database exists, checking for duplicate analysis')
+            
+            # 切换到基线数据库
+            baseline_sqlite = SqliteHelper(baseline_db_path)
+            self.sqlite = baseline_sqlite
+            
+            # 检查是否为重复运行(场景 B)
+            is_duplicate = self.sqlite.check_duplicate_analysis(
+                self.project_name, self.git_url, self.branch_name,
+                self.commit_or_branch_new, self.commit_or_branch_old
+            )
+            
+            if is_duplicate:
+                logging.info('Duplicate analysis detected, skipping')
+                sys.exit(0)
+            
+            # === 场景 C: 相同基线,不同新提交 ===
+            logging.info('New incremental analysis with existing baseline')
+            
+            # 获取下一个 project_id
+            next_project_id = self.sqlite.get_next_project_id()
+            self.project_id = next_project_id
+            
+            # 克隆/更新项目
+            if not os.path.exists(self.file_path):
+                logging.info(f'Cloning project: {self.git_url}')
+                os.system(f'git clone -b {self.branch_name} {self.git_url} {self.file_path}')
+            
+            self._occupy_project()
+            
+            # 计算差异(相对于基线 commit_old)
+            self.diff_parse_map = self._get_diff_parse_map(
+                self.file_path, self.branch_name,
+                self.commit_or_branch_new, self.commit_or_branch_old
+            )
+            
+            # 切换到新提交
+            os.system(f'cd {self.file_path} && git reset --hard {self.commit_or_branch_new}')
+            time.sleep(2)
+            
+            # 获取当前项目文件列表
+            file_path_list = self._get_project_files(self.file_path)
+            
+            # 只解析差异文件
+            diff_files = list(self.diff_parse_map.keys())
+            matched_java_files = [f for f in file_path_list 
+                                 if any(f.endswith(diff_path) for diff_path in diff_files)]
+            
+            java_parse = JavaParse(self.sqlite.db_path, project_id=next_project_id)
+            java_parse.parse_java_file_list(matched_java_files, self.commit_or_branch_new)
+            
+            # 解析 XML 文件
+            diff_xml_files = [f for f in matched_java_files if f.endswith('.xml')]
+            self.xml_parse_results_new = self._parse_xml_file(diff_xml_files)
+            self.xml_parse_results_old = {}
+            
+            # 记录分析到 project 表
+            self.sqlite.add_project(
+                self.project_name, self.git_url, self.branch_name,
+                self.commit_or_branch_new, self.commit_or_branch_old,
+                project_id=next_project_id
+            )
+        
+        # 4. 依赖项目处理
+        dependents: list[dict] = kwargs.get('dependents', [])
+        self._clone_dependents_project(dependents)
+        
+        # 5. 设置 CCI 文件路径（虽然不输出，但需要设置）
+        self.cci_filepath = os.path.join(
+            self.file_path, 
+            f'{self.commit_or_branch_old}..{self.commit_or_branch_new}_incremental.cci'
+        )
+        
+        # 6. 开始差异和影响分析（不输出 CCI 文件）
+        result = self._start_analysis_diff_and_impact(write_file=False)
+        
+        return result

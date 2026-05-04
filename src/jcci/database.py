@@ -34,7 +34,7 @@ class SqliteHelper(object):
             conn = sqlite3.connect(self.db_path)
         return conn
 
-    def add_project(self, project_name, git_url, branch, commit_or_branch_new, commit_or_branch_old):
+    def add_project(self, project_name, git_url, branch, commit_or_branch_new, commit_or_branch_old, project_id=None):
         try:
             projects = self.select_data(f'SELECT * FROM project where project_name="{project_name}" and git_url="{git_url}" '
                                         f'and branch="{branch}" AND commit_or_branch_new="{commit_or_branch_new}" and commit_or_branch_old="{commit_or_branch_old}"')
@@ -42,15 +42,45 @@ class SqliteHelper(object):
                 return projects[0]['project_id']
             conn = self.connect()
             c = conn.cursor()
-            c.execute(f'INSERT INTO project '
-                      f'(project_name, git_url, branch, commit_or_branch_new, commit_or_branch_old) '
-                      f'VALUES("{project_name}", "{git_url}", "{branch}", "{commit_or_branch_new}", "{commit_or_branch_old}")')
-            project_id = c.lastrowid
+            
+            # 如果指定了 project_id，使用指定的值；否则使用自增ID
+            if project_id is not None:
+                c.execute(f'INSERT INTO project (project_id, project_name, git_url, branch, commit_or_branch_new, commit_or_branch_old) '
+                          f'VALUES({project_id}, "{project_name}", "{git_url}", "{branch}", "{commit_or_branch_new}", "{commit_or_branch_old}")')
+            else:
+                c.execute(f'INSERT INTO project '
+                          f'(project_name, git_url, branch, commit_or_branch_new, commit_or_branch_old) '
+                          f'VALUES("{project_name}", "{git_url}", "{branch}", "{commit_or_branch_new}", "{commit_or_branch_old}")')
+            
+            project_id_result = c.lastrowid
             conn.commit()
             conn.close()
-            return project_id
+            return project_id_result
         except Exception as e:
             logging.error(f'add_project fail')
+
+    def get_baseline_db_path(self, username, project_name, commit_old):
+        """构造基线数据库文件路径"""
+        commit_short = commit_old[0:7] if len(commit_old) > 7 else commit_old
+        db_filename = f"{username}_{project_name}_baseline_{commit_short}.db"
+        return os.path.join(os.path.dirname(self.db_path), db_filename)
+
+    def check_duplicate_analysis(self, project_name, git_url, branch, commit_new, commit_old):
+        """检查是否已经进行过相同的分析"""
+        projects = self.select_data(
+            f'SELECT * FROM project WHERE project_name="{project_name}" '
+            f'AND git_url="{git_url}" AND branch="{branch}" '
+            f'AND commit_or_branch_new="{commit_new}" '
+            f'AND commit_or_branch_old="{commit_old}"'
+        )
+        return len(projects) > 0
+
+    def get_next_project_id(self):
+        """获取下一个可用的 project_id (用于增量分析)"""
+        result = self.select_data('SELECT MAX(project_id) as max_id FROM project')
+        if result and result[0]['max_id'] is not None:
+            return result[0]['max_id'] + 1
+        return 1
 
     def add_class(self, filepath, access_modifier, class_type, class_name, package_name, extends_class, project_id, implements, annotations, documentation, is_controller, controller_base_url, commit_or_branch):
         try:
