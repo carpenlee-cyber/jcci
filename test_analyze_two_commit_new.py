@@ -23,50 +23,23 @@ def demo_analyze_two_commit_incremental():
     # 创建JCCI实例
     commit_analyze = JCCI('https://github.com/carpenlee-cyber/mall.git', 'carpenlee-cyber')
     
-    # 第一次分析：解析基线commit1 + 目标commit2
-    print("\n【第1次分析】分析 commit2 vs commit1（需要解析基线）")
-    print("-" * 60)
-    try:
-        result1 = commit_analyze.analyze_two_commit_incremental(
-            'f2ace8377d2767195bbbf2ffa5c092eddc307895',  # commit_new
-            '83abb8e12940519121e74d372e47a4df30e216dc'   # commit_old (基线)
-        )
-        print("✓ 分析完成！")
-        print(f"  - CCI文件: {result1['cci_file_path']}")
-        print(f"  - 影响API数: {len(result1['impacted_api_list'])}")
-        print(f"  - 方法变更数: {len(result1['method_changes'])}")
-        
-        # 显示方法变更详情
-        if result1['method_changes']:
-            print("\n  方法变更详情:")
-            for i, change in enumerate(result1['method_changes'][:5], 1):  # 只显示前5个
-                print(f"    {i}. [{change['change_type']}] {change['method_signature']}")
-                if change['change_type'] == 'MODIFIED':
-                    print(f"       - 旧版本行号: {change['old_start_line']}")
-                    print(f"       - 新版本行号: {change['new_start_line']}")
-        
-    except Exception as e:
-        print(f"✗ 分析过程中发生错误: {e}")
-        import traceback
-        traceback.print_exc()
-    
-    # # 第二次分析：复用基线commit1，仅解析commit3
-    # print("\n【第2次分析】分析 commit3 vs commit1（应复用基线，速度更快）")
+    # # 第一次分析：解析基线commit1 + 目标commit2
+    # print("\n【第1次分析】分析 commit2 vs commit1（需要解析基线）")
     # print("-" * 60)
     # try:
-    #     result2 = commit_analyze.analyze_two_commit_incremental(
-    #         '248196a1106deddd7fc5c4e8bfacdfb22d4808fa',  # commit_new (示例)
-    #         '83abb8e12940519121e74d372e47a4df30e216dc'   # commit_old (同一基线，应复用)
+    #     result1 = commit_analyze.analyze_two_commit_incremental(
+    #         'f2ace8377d2767195bbbf2ffa5c092eddc307895',  # commit_new
+    #         '83abb8e12940519121e74d372e47a4df30e216dc'   # commit_old (基线)
     #     )
     #     print("✓ 分析完成！")
-    #     print(f"  - CCI文件: {result2['cci_file_path']}")
-    #     print(f"  - 影响API数: {len(result2['impacted_api_list'])}")
-    #     print(f"  - 方法变更数: {len(result2['method_changes'])}")
+    #     print(f"  - CCI文件: {result1['cci_file_path']}")
+    #     print(f"  - 影响API数: {len(result1['impacted_api_list'])}")
+    #     print(f"  - 方法变更数: {len(result1['method_changes'])}")
         
     #     # 显示方法变更详情
     #     if result1['method_changes']:
     #         print("\n  方法变更详情:")
-    #         for i, change in enumerate(result2['method_changes'][:5], 1):  # 只显示前5个
+    #         for i, change in enumerate(result1['method_changes'][:5], 1):  # 只显示前5个
     #             print(f"    {i}. [{change['change_type']}] {change['method_signature']}")
     #             if change['change_type'] == 'MODIFIED':
     #                 print(f"       - 旧版本行号: {change['old_start_line']}")
@@ -74,6 +47,33 @@ def demo_analyze_two_commit_incremental():
         
     # except Exception as e:
     #     print(f"✗ 分析过程中发生错误: {e}")
+    #     import traceback
+    #     traceback.print_exc()
+    
+    # 第二次分析：复用基线commit1，仅解析commit3
+    print("\n【第2次分析】分析 commit3 vs commit1（应复用基线，速度更快）")
+    print("-" * 60)
+    try:
+        result2 = commit_analyze.analyze_two_commit_incremental(
+            'd9501e9',  # commit_new (示例)
+            'c824eac'   # commit_old (同一基线，应复用)
+        )
+        print("✓ 分析完成！")
+        print(f"  - CCI文件: {result2['cci_file_path']}")
+        print(f"  - 影响API数: {len(result2['impacted_api_list'])}")
+        print(f"  - 方法变更数: {len(result2['method_changes'])}")
+        
+        # 显示方法变更详情
+        if result2['method_changes']:
+            print("\n  方法变更详情:")
+            for i, change in enumerate(result2['method_changes'], 1):
+                print(f"    {i}. [{change['change_type']}] {change['method_signature']}")
+                if change['change_type'] == 'MODIFIED':
+                    print(f"       - 旧版本行号: {change['old_start_line']}")
+                    print(f"       - 新版本行号: {change['new_start_line']}")
+        
+    except Exception as e:
+        print(f"✗ 分析过程中发生错误: {e}")
     
     # # 第三次分析：基线变更为commit2，创建新数据库
     # print("\n【第3次分析】分析 commit3 vs commit2（基线变更，创建新数据库）")
@@ -88,7 +88,7 @@ def demo_analyze_two_commit_incremental():
     #     print(f"  - 影响API数: {len(result3['impacted_api_list'])}")
     #     print(f"  - 方法变更数: {len(result3['method_changes'])}")
         
-    #     # 显示方法变更详情
+    #     # 显示方法变更详情3
     #     if result3['method_changes']:
     #         print("\n  方法变更详情:")
     #         for i, change in enumerate(result3['method_changes'][:5], 1):  # 只显示前5个
