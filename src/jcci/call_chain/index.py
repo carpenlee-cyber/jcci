@@ -268,3 +268,17 @@ class UnifiedMethodIndex:
             param_types.append(current.strip())
         
         return param_types
+    
+    def get_db_connection(self):
+        """
+        获取数据库连接（供外部组件使用，如 DaoAnalyzer）
+        
+        Returns:
+            数据库连接对象
+        """
+        # 如果是测试模式（Mock），直接返回
+        if hasattr(self.db, 'call_count'):
+            return self.db
+        
+        # 正常模式：返回 SqliteHelper 实例
+        return self.db

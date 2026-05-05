@@ -3,11 +3,12 @@
 
 负责基于统一索引和解析器，构建完整的调用链路树。
 使用 DFS 递归算法展开调用关系。
+v4.0 新增：支持可选注入 DaoAnalyzer，透传 change_type 和 dao_info
 """
 
 import logging
-from typing import Set
-from .models import CallChainNode
+from typing import Set, Optional
+from .models import CallChainNode, ChangeType
 from .parser import InvocationPointParser
 
 logger = logging.getLogger(__name__)
@@ -29,16 +30,19 @@ class CallChainBuilder:
         max_depth: 最大深度限制（默认 10）
     """
     
-    def __init__(self, unified_index, max_depth: int = 10):
+    def __init__(self, unified_index, max_depth: int = 10,
+                 dao_analyzer=None):
         """
         初始化调用链构建器
         
         Args:
             unified_index: UnifiedMethodIndex 实例
             max_depth: 最大递归深度
+            dao_analyzer: 可选的 DaoAnalyzer 实例（v4.0 新增）
         """
         self.unified_index = unified_index
         self.max_depth = max_depth
+        self.dao_analyzer = dao_analyzer  # v4.0: 可选注入，非强制依赖
     
     def build(self, package_class: str, method_signature: str) -> CallChainNode:
         """
@@ -56,13 +60,13 @@ class CallChainBuilder:
         class_name = package_class.split('.')[-1]
         node_id = f"0|{package_class}|{method_signature}"
         
-        root = CallChainNode(
-            node_id=node_id,
-            package_class=package_class,
-            method_signature=method_signature,
-            method_name=method_name,
-            class_name=class_name,
-            depth=0
+        # 查询根方法的 method_data（用于 change_type 和 DAO 分析）
+        root_method_data = self.unified_index.query_method(package_class, method_signature)
+        
+        root = self._create_node(
+            point={'package_class': package_class, 'signature': method_signature, 'lines': []},
+            depth=0,
+            method_data=root_method_data
         )
         
         # 开始 DFS 展开
@@ -127,8 +131,11 @@ class CallChainBuilder:
                 logger.debug(f"Cycle detected: {child_key}")
                 continue
             
-            # 6.2 创建子节点
-            child = self._create_node(point, current_depth + 1)
+            # 6.2 创建子节点（传入 method_data 用于 change_type 和 DAO 分析）
+            child_method_data = self.unified_index.query_method(
+                point['package_class'], point['signature']
+            )
+            child = self._create_node(point, current_depth + 1, child_method_data)
             node.children.append(child)
             
             # 6.3 递归下探
@@ -140,13 +147,15 @@ class CallChainBuilder:
         if not node.children:
             node.is_leaf = True
     
-    def _create_node(self, point: dict, depth: int) -> CallChainNode:
+    def _create_node(self, point: dict, depth: int, 
+                     method_data: Optional[dict] = None) -> CallChainNode:
         """
-        创建调用链节点
+        创建调用链节点，注入 change_type 和 DAO 信息
         
         Args:
             point: 调用点信息 {'package_class', 'signature', 'lines'}
             depth: 节点深度
+            method_data: 可选的方法数据（用于 change_type 和 DAO 分析）
         
         Returns:
             CallChainNode: 新创建的节点
@@ -159,7 +168,7 @@ class CallChainBuilder:
         class_name = package_class.split('.')[-1]
         node_id = f"{depth}|{package_class}|{signature}"
         
-        return CallChainNode(
+        node = CallChainNode(
             node_id=node_id,
             package_class=package_class,
             method_signature=signature,
@@ -168,3 +177,18 @@ class CallChainBuilder:
             depth=depth,
             invocation_lines=lines
         )
+        
+        if method_data:
+            # v4.0: 显式枚举转换，永不为 null
+            raw_change_type = method_data.get('change_type')
+            node.change_type = ChangeType.from_raw(raw_change_type).value
+            
+            node.db_method_id = method_data.get('method_id')
+            
+            # v4.0: DAO 分析（仅在注入 analyzer 且存在 method_id 时）
+            if self.dao_analyzer and node.db_method_id:
+                node.dao_info = self.dao_analyzer.analyze(
+                    package_class, signature, node.db_method_id
+                )
+        
+        return node
