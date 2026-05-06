@@ -1194,6 +1194,18 @@ class JCCI(object):
             logging.info('开始执行变更类型分析...')
             try:
                 analyzer = ChangeTypeAnalyzer(self.sqlite.db_path)
+                
+                # 6.1 先处理基线中的 DELETED 方法（project_id=0）
+                if not is_first_run:
+                    logging.info('处理基线中被删除的方法 (project_id=0)...')
+                    analyzer.analyze_and_mark_changes(
+                        diff_parse_map=self.diff_parse_map,
+                        commit_new=self.commit_or_branch_new,
+                        commit_old=self.commit_or_branch_old,
+                        project_id=0  # 基线 project_id
+                    )
+                
+                # 6.2 再处理增量中的 ADDED/MODIFIED 方法
                 analyzer.analyze_and_mark_changes(
                     diff_parse_map=self.diff_parse_map,
                     commit_new=self.commit_or_branch_new,
@@ -1201,7 +1213,7 @@ class JCCI(object):
                     project_id=self.project_id
                 )
                 
-                # 获取变更摘要
+                # 获取变更摘要（从增量中获取）
                 changed_classes = analyzer.get_changed_classes(self.project_id)
                 changed_methods = analyzer.get_changed_methods(self.project_id)
                 
