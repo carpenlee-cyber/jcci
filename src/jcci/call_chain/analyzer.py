@@ -466,7 +466,7 @@ def build_upwards_call_chains(
         method_name = method_info.get('method_name', '')
         parameters_json = method_info.get('parameters', '')
         
-        logger.info(f"\n  方法 [{idx}/{len(changed_methods)}] 向上分析: {class_name}.{method_name}")
+        logger.info(f"方法 [{idx}/{len(changed_methods)}] 向上分析: {class_name}.{method_name}")
         
         try:
             package_class = _resolve_package_class(
@@ -520,7 +520,7 @@ def build_upwards_call_chains(
     
     commit_old_short = commit_old[:7] if len(commit_old) > 7 else commit_old
     commit_new_short = commit_new[:7] if len(commit_new) > 7 else commit_new
-    output_filename = f"{commit_old_short}..{commit_new_short}_upwards_call_chains.json"
+    output_filename = f"{username}_{project_name}_{commit_old_short}..{commit_new_short}_upwards_call_chains.json"
     output_filepath = os.path.join(output_dir, output_filename)
     
     result = {
@@ -621,7 +621,7 @@ def build_downwards_call_chains(
         method_name = method_info.get('method_name', '')
         parameters_json = method_info.get('parameters', '')
         
-        logger.info(f"\n  方法 [{idx}/{len(changed_methods)}] 向下分析: {class_name}.{method_name}")
+        logger.info(f"方法 [{idx}/{len(changed_methods)}] 向下分析: {class_name}.{method_name}")
         
         try:
             package_class = _resolve_package_class(
@@ -656,7 +656,7 @@ def build_downwards_call_chains(
     
     commit_old_short = commit_old[:7] if len(commit_old) > 7 else commit_old
     commit_new_short = commit_new[:7] if len(commit_new) > 7 else commit_new
-    output_filename = f"{commit_old_short}..{commit_new_short}_downwards_call_chains.json"
+    output_filename = f"{username}_{project_name}_{commit_old_short}..{commit_new_short}_downwards_call_chains.json"
     output_filepath = os.path.join(output_dir, output_filename)
     
     result = {
@@ -712,9 +712,7 @@ def build_call_chains_for_changes(
     Returns:
         dict: 包含向上和向下分析结果的组合结果
     """
-    logger.info("=" * 80)
     logger.info("开始双向调用链分析（向上影响面 + 向下功能风险）")
-    logger.info("=" * 80)
     
     upwards_result = build_upwards_call_chains(
         username=username,
@@ -753,13 +751,11 @@ def build_call_chains_for_changes(
         "downwards": downwards_result
     }
     
-    logger.info("=" * 80)
     logger.info("双向调用链分析完成！")
     logger.info(f"向上分析: {upwards_result['metadata']['successful_chains']} 成功, "
                f"{upwards_result['metadata']['failed_chains']} 失败")
     logger.info(f"向下分析: {downwards_result['metadata']['successful_chains']} 成功, "
                f"{downwards_result['metadata']['failed_chains']} 失败")
-    logger.info("=" * 80)
     
     return combined_result
 
