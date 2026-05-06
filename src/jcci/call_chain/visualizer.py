@@ -1,0 +1,233 @@
+"""
+调用链可视化显示工具
+
+将调用链分析结果转换为易读的文本格式进行展示。
+支持向上和向下两个方向的调用链展示。
+"""
+
+import logging
+from typing import List, Dict, Any
+from .models import CallChainNode
+
+logger = logging.getLogger(__name__)
+
+
+class CallChainVisualizer:
+    """
+    调用链可视化显示工具
+    
+    将复杂的调用链树结构转换为简洁的文本格式，便于用户快速理解。
+    """
+    
+    @staticmethod
+    def format_upwards_chains(upwards_result: Dict[str, Any]) -> str:
+        """
+        格式化向上调用链（影响面分析）
+        
+        Args:
+            upwards_result: 向上分析的结果字典
+        
+        Returns:
+            str: 格式化后的文本
+        """
+        lines = []
+        lines.append("=" * 80)
+        lines.append("向上调用链分析（影响面：谁调用了变更方法？）")
+        lines.append("=" * 80)
+        lines.append("")
+        
+        impact_chains = upwards_result.get('impact_chains', [])
+        
+        for idx, chain_data in enumerate(impact_chains, 1):
+            method_info = chain_data.get('method_info', {})
+            class_name = method_info.get('class_name', '')
+            method_name = method_info.get('method_name', '')
+            change_type = method_info.get('change_type', 'UNKNOWN')
+            
+            # 翻译变更类型
+            change_type_cn = CallChainVisualizer._translate_change_type(change_type)
+            
+            lines.append(f"调用链 {idx}：{change_type_cn}方法 {class_name}.{method_name}")
+            
+            # 获取调用链树
+            chain_tree = chain_data.get('chain', {})
+            entry_points = chain_data.get('entry_points', [])
+            
+            # 递归展示调用链
+            CallChainVisualizer._format_chain_node(
+                chain_tree, 
+                lines, 
+                depth=0, 
+                is_root=True,
+                direction='upwards'
+            )
+            
+            lines.append("")
+        
+        return "\n".join(lines)
+    
+    @staticmethod
+    def format_downwards_chains(downwards_result: Dict[str, Any]) -> str:
+        """
+        格式化向下调用链（功能风险分析）
+        
+        Args:
+            downwards_result: 向下分析的结果字典
+        
+        Returns:
+            str: 格式化后的文本
+        """
+        lines = []
+        lines.append("=" * 80)
+        lines.append("向下调用链分析（功能风险：变更方法调用了谁？）")
+        lines.append("=" * 80)
+        lines.append("")
+        
+        call_chains = downwards_result.get('call_chains', [])
+        
+        for idx, chain_data in enumerate(call_chains, 1):
+            method_info = chain_data.get('method_info', {})
+            class_name = method_info.get('class_name', '')
+            method_name = method_info.get('method_name', '')
+            change_type = method_info.get('change_type', 'UNKNOWN')
+            
+            # 翻译变更类型
+            change_type_cn = CallChainVisualizer._translate_change_type(change_type)
+            
+            lines.append(f"调用链 {idx}：{change_type_cn}方法 {class_name}.{method_name}")
+            
+            # 获取调用链树
+            chain_tree = chain_data.get('chain', {})
+            
+            # 递归展示调用链
+            CallChainVisualizer._format_chain_node(
+                chain_tree, 
+                lines, 
+                depth=0, 
+                is_root=True,
+                direction='downwards'
+            )
+            
+            lines.append("")
+        
+        return "\n".join(lines)
+    
+    @staticmethod
+    def _format_chain_node(node: Dict[str, Any], lines: List[str], 
+                          depth: int, is_root: bool, direction: str):
+        """
+        递归格式化调用链节点
+        
+        Args:
+            node: 调用链节点字典
+            lines: 输出行列表
+            depth: 当前深度
+            is_root: 是否为根节点
+            direction: 方向 ('upwards' 或 'downwards')
+        """
+        if not node:
+            return
+        
+        class_name = node.get('class_name', '')
+        method_name = node.get('method_name', '')
+        method_signature = node.get('method_signature', '')
+        change_type = node.get('change_type', 'UNKNOWN')
+        root_type = node.get('root_type', 'UNKNOWN')
+        invocation_lines = node.get('invocation_lines', [])
+        children = node.get('children', [])
+        
+        # 构建节点标签
+        change_type_cn = CallChainVisualizer._translate_change_type(change_type)
+        
+        # 判断是否为入口点
+        is_entry = root_type in ['HTTP_API', 'SCHEDULED_TASK', 'EVENT_LISTENER',
+                                  'MESSAGE_CONSUMER', 'CONTROLLER_BY_CONVENTION']
+        entry_tag = "(入口)" if is_entry else ""
+        
+        # 构建缩进前缀
+        indent = "\t" * depth
+        
+        if is_root:
+            # 根节点特殊格式
+            lines.append(f"{indent}{class_name}.{method_name} ({change_type_cn}){entry_tag}")
+        else:
+            # 非根节点：显示调用关系
+            if invocation_lines:
+                lines_str = ",".join([str(line) for line in invocation_lines[:3]])  # 最多显示3个行号
+                if len(invocation_lines) > 3:
+                    lines_str += f"...(+{len(invocation_lines)-3})"
+                arrow = f"\n{indent}--行号{lines_str}-->"
+                lines.append(f"{arrow}")
+            
+            lines.append(f"{indent}{class_name}.{method_name} ({change_type_cn}){entry_tag}")
+        
+        # 递归处理子节点
+        for child in children:
+            CallChainVisualizer._format_chain_node(
+                child, 
+                lines, 
+                depth + 1, 
+                is_root=False,
+                direction=direction
+            )
+    
+    @staticmethod
+    def _translate_change_type(change_type: str) -> str:
+        """
+        翻译变更类型为中文
+        
+        Args:
+            change_type: 变更类型枚举值
+        
+        Returns:
+            str: 中文描述
+        """
+        type_map = {
+            'ADDED': '新增点',
+            'MODIFIED': '修改点',
+            'DELETED': '删除点',
+            'UNCHANGED': '未变更',
+            'UNKNOWN': '未知'
+        }
+        return type_map.get(change_type, change_type)
+    
+    @staticmethod
+    def print_bidirectional_summary(bidirectional_result: Dict[str, Any]):
+        """
+        打印双向分析摘要
+        
+        Args:
+            bidirectional_result: 双向分析的完整结果
+        """
+        upwards = bidirectional_result.get('upwards', {})
+        downwards = bidirectional_result.get('downwards', {})
+        
+        logger.info("\n" + "=" * 80)
+        logger.info("📈 双向调用链分析摘要")
+        logger.info("=" * 80)
+        
+        # 向上分析摘要
+        upwards_meta = upwards.get('metadata', {})
+        logger.info(f"\n【向上分析 - 影响面】")
+        logger.info(f"  ✓ 成功: {upwards_meta.get('successful_chains', 0)}")
+        logger.info(f"  ✗ 失败: {upwards_meta.get('failed_chains', 0)}")
+        
+        coverage_stats = upwards_meta.get('coverage_stats', {})
+        logger.info(f"  🎯 覆盖率: {coverage_stats.get('coverage_rate_percent', 0)}%")
+        logger.info(f"  🔍 入口点: {coverage_stats.get('entry_points_found', 0)}")
+        logger.info(f"  🔗 CHA解析: {coverage_stats.get('cha_resolved_calls', 0)}")
+        
+        # 向下分析摘要
+        downwards_meta = downwards.get('metadata', {})
+        logger.info(f"\n【向下分析 - 功能风险】")
+        logger.info(f"  ✓ 成功: {downwards_meta.get('successful_chains', 0)}")
+        logger.info(f"  ✗ 失败: {downwards_meta.get('failed_chains', 0)}")
+        
+        # 建议
+        recommendations = upwards.get('recommendations', [])
+        if recommendations:
+            logger.info(f"\n💡 建议:")
+            for rec in recommendations:
+                logger.info(f"  • {rec}")
+        
+        logger.info("=" * 80)

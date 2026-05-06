@@ -11,6 +11,7 @@ from .parser import InvocationPointParser
 from .builder import CallChainBuilder
 from .upwards_builder import ReverseCallerIndex, UpwardsCallChainBuilder
 from .downwards_builder import DownwardsCallChainBuilder
+from .visualizer import CallChainVisualizer
 from .analyzer import (
     build_upwards_call_chains,
     build_downwards_call_chains,
@@ -25,6 +26,7 @@ __all__ = [
     'ReverseCallerIndex',
     'UpwardsCallChainBuilder',
     'DownwardsCallChainBuilder',
+    'CallChainVisualizer',
     'build_upwards_call_chains',
     'build_downwards_call_chains',
     'build_call_chains_for_changes',

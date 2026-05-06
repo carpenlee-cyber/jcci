@@ -62,7 +62,7 @@ def workflow1():
     if not changed_methods:
         print("⚠️ 没有变更的方法，跳过调用链路分析")
     else:
-        print(f"\n📊 发现 {len(changed_methods)} 个变更方法，开始双向分析...\n")
+        print(f"\n发现 {len(changed_methods)} 个变更方法，开始双向分析...\n")
         
         # 执行双向分析
         bidirectional_result = build_call_chains_for_changes(
@@ -79,27 +79,46 @@ def workflow1():
         downwards_meta = bidirectional_result['downwards']['metadata']
         
         print("\n" + "=" * 80)
-        print("📈 分析结果摘要")
+        print("分析结果摘要")
         print("=" * 80)
         
         print(f"\n【向上分析 - 影响面】")
-        print(f"  ✓ 成功: {upwards_meta['successful_chains']}")
-        print(f"  ✗ 失败: {upwards_meta['failed_chains']}")
-        print(f"  🎯 覆盖率: {upwards_meta['coverage_stats']['coverage_rate_percent']}%")
-        print(f"  🔍 入口点: {upwards_meta['coverage_stats']['entry_points_found']}")
-        print(f"  🔗 CHA解析: {upwards_meta['coverage_stats']['cha_resolved_calls']}")
+        print(f"  [成功] {upwards_meta['successful_chains']}")
+        print(f"  [失败] {upwards_meta['failed_chains']}")
+        print(f"  覆盖率: {upwards_meta['coverage_stats']['coverage_rate_percent']}%")
+        print(f"  入口点: {upwards_meta['coverage_stats']['entry_points_found']}")
+        print(f"  CHA解析: {upwards_meta['coverage_stats']['cha_resolved_calls']}")
         
         print(f"\n【向下分析 - 功能风险】")
-        print(f"  ✓ 成功: {downwards_meta['successful_chains']}")
-        print(f"  ✗ 失败: {downwards_meta['failed_chains']}")
+        print(f"  [成功] {downwards_meta['successful_chains']}")
+        print(f"  [失败] {downwards_meta['failed_chains']}")
         
-        print(f"\n💡 建议:")
+        print(f"\n建议:")
         for rec in bidirectional_result['upwards'].get('recommendations', []):
-            print(f"  • {rec}")
+            print(f"  - {rec}")
         
         print("\n" + "=" * 80)
-        print("✅ 双向分析完成！")
+        print("[完成] 双向分析完成！")
         print("=" * 80)
+        
+        # 步骤4：可视化展示调用链
+        print("\n" + "=" * 80)
+        print("步骤4：调用链可视化展示")
+        print("=" * 80)
+        
+        from src.jcci.call_chain.visualizer import CallChainVisualizer
+        
+        # 打印向上调用链
+        upwards_text = CallChainVisualizer.format_upwards_chains(
+            bidirectional_result['upwards']
+        )
+        print(upwards_text)
+        
+        # 打印向下调用链
+        downwards_text = CallChainVisualizer.format_downwards_chains(
+            bidirectional_result['downwards']
+        )
+        print(downwards_text)
         
 
 if __name__ == "__main__":
