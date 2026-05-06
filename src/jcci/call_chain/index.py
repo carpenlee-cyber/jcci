@@ -49,7 +49,7 @@ class UnifiedMethodIndex:
         if db_connection:
             self.db = db_connection
         else:
-            from jcci.database import SqliteHelper
+            from src.jcci.database import SqliteHelper
             self.db = SqliteHelper(db_path)
         
         # 自动查询增量 project_id

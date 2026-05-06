@@ -1,13 +1,15 @@
+
 import sys
 import os
 
-# 添加 src 目录到 Python 路径
+# 添加项目根目录到 Python 路径（jcci/）
 # 当前文件: jcci/src/jcci/workflow/workflow1.py
-# 需要添加到路径: jcci/src/
-sys.path.insert(0, str(os.path.join(os.path.dirname(__file__), "..", "..")))
+# 需要添加到路径: jcci/
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
 
-from jcci import JCCI
-
+from src.jcci import JCCI
 
 def workflow1():
     # 步骤1：配置参数
@@ -18,8 +20,9 @@ def workflow1():
     # 配置参数
     git_url = 'https://github.com/carpenlee-cyber/mall.git'
     username = 'carpenlee-cyber'
-    commit_old = '83abb8e12940519121e74d372e47a4df30e216dc'
-    commit_new = 'f2ace8377d2767195bbbf2ffa5c092eddc307895'
+    commit_old = '83fe3e707b99d135deb9de071ce87fe4b07c563f'  # Commits on Jun 9, 2025
+    commit_new = 'f9add0f8f9668f4669c9fad6817acc428734e876'  # Commits on Jan 11, 2026
+
 
     print(f"  - git_url: {git_url}")
     print(f"  - username: {username}")
@@ -39,9 +42,9 @@ def workflow1():
     )
 
     if result1.get('is_duplicate', False):
-        print("⚠️ 检测到重复调用，将使用缓存结果")
+        print("[WARNING] 检测到重复调用，将使用缓存结果")
     else:
-        print("✅ 首次调用完成，结果已缓存")
+        print("[SUCCESS] 首次调用完成，结果已缓存")
 
 
     # 步骤3：调用链路分析
@@ -49,7 +52,7 @@ def workflow1():
     print("步骤3：调用链路分析，开始构建变更方法的调用链路")
     print("=" * 80)
 
-    from jcci.call_chain.analyzer import build_call_chains_for_changes
+    from src.jcci.call_chain.analyzer import build_call_chains_for_changes
 
     # 获取变更方法列表
     changed_methods = result1.get('change_summary', {}).get('methods', [])

@@ -98,7 +98,7 @@ class CallChainBuilder:
         
         if not method_data:
             node.is_leaf = True
-            logger.debug(f"Method not found: {node.package_class}.{node.method_signature}")
+            # logger.debug(f"Method not found: {node.package_class}.{node.method_signature}")
             return
         
         # 3. 更新节点信息

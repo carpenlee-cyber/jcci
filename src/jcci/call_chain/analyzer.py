@@ -27,7 +27,7 @@ def _get_baseline_db_path(username: str, project_name: str, commit_old: str) -> 
     Returns:
         str: 基线数据库完整路径
     """
-    from jcci import config
+    from src.jcci import config
     
     commit_short = commit_old[:7] if len(commit_old) > 7 else commit_old
     db_filename = f"{username}_{project_name}_baseline_{commit_short}.db"
@@ -207,7 +207,7 @@ def build_call_chains_for_changes(
         parameters_json = method_info.get('parameters', '')
         change_type = method_info.get('change_type', 'UNKNOWN')
         
-        logger.info(f"\n  [{idx}/{len(changed_methods)}] 处理: {class_name}.{method_name} ({change_type})")
+        logger.info(f"\n  方法 [{idx}/{len(changed_methods)}] 处理: {class_name}.{method_name} ({change_type})")
         
         try:
             # 4.1 解析完整的 package_class

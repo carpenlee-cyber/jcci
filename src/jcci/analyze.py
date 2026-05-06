@@ -522,7 +522,7 @@ class JCCI(object):
         if len(json_extract_sql_list) > 1000:
             json_extract_sql_list = json_extract_sql_list[0: 995]
         sql = f'SELECT method_id, class_id, method_name, parameters, return_type, is_api, api_path, documentation, body FROM methods WHERE project_id = {self.project_id} AND (' + ' OR '.join(json_extract_sql_list) + ')'
-        logging.info(f'{package_class} {method_param} invocation sql: {sql}')
+        # logging.info(f'{package_class} {method_param} invocation sql: {sql}')
         methods = self.sqlite.select_data(sql)
         class_ids = [str(method['class_id']) for method in methods]
         class_sql = f'SELECT class_id FROM class WHERE class_id in ({", ".join(class_ids)}) and commit_or_branch ="{commit_or_branch}"'
@@ -1120,8 +1120,17 @@ class JCCI(object):
             )
             
             if is_duplicate:
-                logging.info('Duplicate analysis detected, skipping')
-                sys.exit(0)
+                logging.info('Duplicate analysis detected, trying to load from JSON cache')
+                
+                # 尝试从 JSON 缓存加载完整结果
+                cached_result = self._load_analysis_cache()
+                if cached_result:
+                    logging.info('Successfully loaded complete result from JSON cache')
+                    cached_result['is_duplicate'] = True
+                    cached_result['message'] = 'Retrieved from JSON cache (full result with nodes/links/categories)'
+                    return cached_result
+                else:
+                    logging.warning('JSON cache not found, will re-analyze')
             
             # === 场景 C: 相同基线,不同新提交 ===
             logging.info('New incremental analysis with existing baseline')
@@ -1226,4 +1235,70 @@ class JCCI(object):
                     'methods': []
                 }
         
+        # 9. 保存分析结果到 JSON 缓存（用于幂等性）
+        result['is_duplicate'] = False
+        result['message'] = 'New analysis completed (full result cached to JSON)'
+        self._save_analysis_cache(result)
+        
         return result
+    
+    def _get_cache_file_path(self) -> str:
+        """
+        获取缓存文件路径
+        
+        Returns:
+            str: 缓存文件的完整路径
+        """
+        import os
+        from src.jcci import config
+        
+        cache_dir = os.path.join(os.path.dirname(__file__), 'analyze_result')
+        os.makedirs(cache_dir, exist_ok=True)
+        
+        commit_old_short = self.commit_or_branch_old[:7] if len(self.commit_or_branch_old) > 7 else self.commit_or_branch_old
+        commit_new_short = self.commit_or_branch_new[:7] if len(self.commit_or_branch_new) > 7 else self.commit_or_branch_new
+        
+        filename = f"{self.username}_{self.project_name}_{commit_old_short}..{commit_new_short}.json"
+        return os.path.join(cache_dir, filename)
+    
+    def _save_analysis_cache(self, result: dict):
+        """
+        保存分析结果到 JSON 缓存
+        
+        Args:
+            result: 分析结果字典
+        """
+        import json
+        
+        cache_file = self._get_cache_file_path()
+        try:
+            with open(cache_file, 'w', encoding='utf-8') as f:
+                json.dump(result, f, indent=2, ensure_ascii=False)
+            logging.info(f'Analysis result saved to cache: {cache_file}')
+        except Exception as e:
+            logging.error(f'Failed to save analysis cache: {e}')
+    
+    def _load_analysis_cache(self) -> dict:
+        """
+        从 JSON 缓存加载分析结果
+        
+        Returns:
+            dict: 分析结果，如果加载失败返回 None
+        """
+        import json
+        import os
+        
+        cache_file = self._get_cache_file_path()
+        
+        if not os.path.exists(cache_file):
+            logging.warning(f'Cache file not found: {cache_file}')
+            return None
+        
+        try:
+            with open(cache_file, 'r', encoding='utf-8') as f:
+                result = json.load(f)
+            logging.info(f'Analysis result loaded from cache: {cache_file}')
+            return result
+        except Exception as e:
+            logging.error(f'Failed to load analysis cache: {e}')
+            return None
