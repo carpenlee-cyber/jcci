@@ -44,10 +44,10 @@ class CallChainVisualizer:
             method_name = method_info.get('method_name', '')
             change_type = method_info.get('change_type', 'UNKNOWN')
             
-            # 翻译变更类型
-            change_type_cn = CallChainVisualizer._translate_change_type(change_type)
+            # 使用原始英文变更类型（用于标题）
+            change_type_display = change_type if change_type else 'UNKNOWN'
             
-            lines.append(f"调用链 {idx}：{change_type_cn}方法 {class_name}.{method_name}")
+            lines.append(f"调用链 {idx}：{change_type_display}方法 {class_name}.{method_name}")
             
             # 获取调用链树
             chain_tree = chain_data.get('chain', {})
@@ -91,10 +91,10 @@ class CallChainVisualizer:
             method_name = method_info.get('method_name', '')
             change_type = method_info.get('change_type', 'UNKNOWN')
             
-            # 翻译变更类型
-            change_type_cn = CallChainVisualizer._translate_change_type(change_type)
+            # 使用原始英文变更类型（用于标题）
+            change_type_display = change_type if change_type else 'UNKNOWN'
             
-            lines.append(f"调用链 {idx}：{change_type_cn}方法 {class_name}.{method_name}")
+            lines.append(f"调用链 {idx}：{change_type_display}方法 {class_name}.{method_name}")
             
             # 获取调用链树
             chain_tree = chain_data.get('chain', {})
@@ -137,7 +137,8 @@ class CallChainVisualizer:
         children = node.get('children', [])
         
         # 构建节点标签
-        change_type_cn = CallChainVisualizer._translate_change_type(change_type)
+        # 使用原始英文变更类型
+        change_type_tag = change_type if change_type else 'UNKNOWN'
         
         # 判断是否为入口点
         is_entry = root_type in ['HTTP_API', 'SCHEDULED_TASK', 'EVENT_LISTENER',
@@ -149,7 +150,7 @@ class CallChainVisualizer:
         
         if is_root:
             # 根节点特殊格式
-            lines.append(f"{indent}{class_name}.{method_name} ({change_type_cn}){entry_tag}")
+            lines.append(f"{indent}{class_name}.{method_name} ({change_type_tag}){entry_tag}")
         else:
             # 非根节点：显示调用关系
             if invocation_lines:
@@ -159,7 +160,7 @@ class CallChainVisualizer:
                 arrow = f"\n{indent}--行号{lines_str}-->"
                 lines.append(f"{arrow}")
             
-            lines.append(f"{indent}{class_name}.{method_name} ({change_type_cn}){entry_tag}")
+            lines.append(f"{indent}{class_name}.{method_name} ({change_type_tag}){entry_tag}")
         
         # 递归处理子节点
         for child in children:
