@@ -7,7 +7,7 @@
 
 import json
 import logging
-from typing import Dict, List, Optional, Tuple, Any
+from typing import Dict, List, Optional, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -31,43 +31,68 @@ class UnifiedMethodIndex:
         _unified_index: 统一索引 {(package_class, method_name): [methods]}
     """
     
-    def __init__(self, db_path: str, project_id: int, commit_old: str, 
-                 commit_new: str, db_connection=None):
+    def __init__(self, db_path: str, commit_old: str, commit_new: str, db_connection=None):
         """
         初始化统一方法索引
         
         Args:
-            db_path: SQLite数据库路径
-            project_id: 项目ID
+            db_path: SQLite数据库路径（基线数据库）
             commit_old: 旧版本commit hash
             commit_new: 新版本commit hash
             db_connection: 可选的数据库连接（用于测试）
         """
         self.db_path = db_path
-        self.project_id = project_id
-        self.commit_old = commit_old
-        self.commit_new = commit_new
-        
-        self.baseline_index: Dict[Tuple[str, str], List[dict]] = {}
-        self.incremental_index: Dict[Tuple[str, str], List[dict]] = {}
-        self._unified_index: Dict[Tuple[str, str], List[dict]] = {}
+        self.commit_old = commit_old[:7] if len(commit_old) > 7 else commit_old
+        self.commit_new = commit_new[:7] if len(commit_new) > 7 else commit_new
         
         # 如果提供了数据库连接，使用它；否则创建新连接
         if db_connection:
             self.db = db_connection
         else:
-            from src.jcci.database import SqliteHelper
+            from jcci.database import SqliteHelper
             self.db = SqliteHelper(db_path)
+        
+        # 自动查询增量 project_id
+        self._query_project_id()
+        
+        self.baseline_index: Dict[Tuple[str, str], List[dict]] = {}
+        self.incremental_index: Dict[Tuple[str, str], List[dict]] = {}
+        self._unified_index: Dict[Tuple[str, str], List[dict]] = {}
         
         # 构建索引
         self._load_and_build_index()
+    
+    def _query_project_id(self):
+        """从 project 表查询增量 project_id"""
+        # 使用字符串格式化，因为 SqliteHelper.select_data 不支持参数化查询
+        sql = f'''
+            SELECT project_id FROM project 
+            WHERE commit_or_branch_new = "{self.commit_new}" 
+              AND commit_or_branch_old = "{self.commit_old}"
+            ORDER BY project_id DESC 
+            LIMIT 1
+        '''
+        
+        result = self.db.select_data(sql)
+        row = result[0] if result else None
+        
+        if not row:
+            raise ValueError(
+                f"No project found for commit range {self.commit_old}..{self.commit_new}"
+            )
+        
+        self.project_id = row['project_id'] if isinstance(row, dict) else row[0]
+        logger.info(f"Found incremental project_id={self.project_id} for {self.commit_old}..{self.commit_new}")
+        
+        # 基线 project_id 固定为 0
+        self.baseline_project_id = 0
     
     def _load_and_build_index(self):
         """加载数据并构建统一索引"""
         logger.info("Building unified method index...")
         
         # Step 1: 加载基线数据（project_id=0）
-        self._load_project_methods(project_id=0, commit=self.commit_old, is_baseline=True)
+        self._load_project_methods(project_id=self.baseline_project_id, commit=self.commit_old, is_baseline=True)
         
         # Step 2: 加载增量数据（project_id > 0）
         if self.project_id > 0:
@@ -140,7 +165,7 @@ class UnifiedMethodIndex:
         if not hasattr(self.db, 'call_count'):  # 不是 MockDatabase
             try:
                 conn.close()
-            except:
+            except Exception:
                 pass
         
         logger.info(f"Loaded {len(rows)} methods for project_id={project_id}")
@@ -213,10 +238,10 @@ class UnifiedMethodIndex:
                 continue
         
         # 无精确匹配，返回第一个
-        logger.warning(
-            f"No exact overload match for {method_signature}, "
-            f"using first candidate (method_id={candidates[0]['method_id']})"
-        )
+        # logger.warning(
+        #     f"No exact overload match for {method_signature}, "
+        #     f"using first candidate (method_id={candidates[0]['method_id']})"
+        # )
         return candidates[0]
     
     def _extract_param_types(self, method_signature: str) -> List[str]:
