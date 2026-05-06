@@ -9,7 +9,7 @@ project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
-from src.jcci import JCCI
+from src.jcci import JCCI  # noqa: E402
 
 def workflow1():
     # 步骤1：配置参数
@@ -20,8 +20,8 @@ def workflow1():
     # 配置参数
     git_url = 'https://github.com/carpenlee-cyber/mall.git'
     username = 'carpenlee-cyber'
-    commit_old = '83fe3e707b99d135deb9de071ce87fe4b07c563f'  # Commits on Jun 9, 2025
-    commit_new = 'f9add0f8f9668f4669c9fad6817acc428734e876'  # Commits on Jan 11, 2026
+    commit_old = 'd9501e9'  # Update README.md
+    commit_new = '78e3a22'  # test: 添加双向调用链分析测试方法
 
 
     print(f"  - git_url: {git_url}")
@@ -47,9 +47,11 @@ def workflow1():
         print("[SUCCESS] 首次调用完成，结果已缓存")
 
 
-    # 步骤3：调用链路分析
+    # 步骤3：双向调用链路分析
     print("\n" + "=" * 80)
-    print("步骤3：调用链路分析，开始构建变更方法的调用链路")
+    print("步骤3：双向调用链路分析")
+    print("  - 向上分析（影响面）：谁调用了变更方法？→ 寻找受影响的入口 API")
+    print("  - 向下分析（功能风险）：变更方法调用了谁？→ 评估功能风险")
     print("=" * 80)
 
     from src.jcci.call_chain.analyzer import build_call_chains_for_changes
@@ -60,8 +62,10 @@ def workflow1():
     if not changed_methods:
         print("⚠️ 没有变更的方法，跳过调用链路分析")
     else:
-        # 构建调用链
-        call_chain_result = build_call_chains_for_changes(
+        print(f"\n📊 发现 {len(changed_methods)} 个变更方法，开始双向分析...\n")
+        
+        # 执行双向分析
+        bidirectional_result = build_call_chains_for_changes(
             username=username,
             git_url=git_url,
             commit_old=commit_old,
@@ -69,6 +73,33 @@ def workflow1():
             changed_methods=changed_methods,
             max_depth=5
         )
+        
+        # 打印摘要
+        upwards_meta = bidirectional_result['upwards']['metadata']
+        downwards_meta = bidirectional_result['downwards']['metadata']
+        
+        print("\n" + "=" * 80)
+        print("📈 分析结果摘要")
+        print("=" * 80)
+        
+        print(f"\n【向上分析 - 影响面】")
+        print(f"  ✓ 成功: {upwards_meta['successful_chains']}")
+        print(f"  ✗ 失败: {upwards_meta['failed_chains']}")
+        print(f"  🎯 覆盖率: {upwards_meta['coverage_stats']['coverage_rate_percent']}%")
+        print(f"  🔍 入口点: {upwards_meta['coverage_stats']['entry_points_found']}")
+        print(f"  🔗 CHA解析: {upwards_meta['coverage_stats']['cha_resolved_calls']}")
+        
+        print(f"\n【向下分析 - 功能风险】")
+        print(f"  ✓ 成功: {downwards_meta['successful_chains']}")
+        print(f"  ✗ 失败: {downwards_meta['failed_chains']}")
+        
+        print(f"\n💡 建议:")
+        for rec in bidirectional_result['upwards'].get('recommendations', []):
+            print(f"  • {rec}")
+        
+        print("\n" + "=" * 80)
+        print("✅ 双向分析完成！")
+        print("=" * 80)
         
 
 if __name__ == "__main__":

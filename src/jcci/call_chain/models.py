@@ -80,7 +80,7 @@ class DaoInfo:
 @dataclass
 class CallChainNode:
     """
-    调用链路节点
+    调用链路节点（v3.1 增强版）
     
     Attributes:
         node_id: 唯一标识，格式: "{depth}|{package_class}|{method_signature}"
@@ -94,6 +94,16 @@ class CallChainNode:
         is_cyclic: 是否检测到环
         is_leaf: 是否为叶子节点
         db_method_id: 数据库中的 method_id
+        
+        v3.1 新增字段：
+        root_type: 根节点类型分类（HTTP_API, SCHEDULED_TASK, NO_STATIC_CALLER等）
+        call_type: 调用类型（DIRECT / CHA_RESOLVED）
+        has_multiple_call_sites: 同一调用者内多处调用
+        entry_annotation: 入口注解（如 @RequestMapping）
+        
+        v4.0 新增字段：
+        change_type: ChangeType 枚举值字符串
+        dao_info: DAO 透视信息（非 DAO 方法为 null）
     """
     node_id: str
     package_class: str
@@ -107,18 +117,24 @@ class CallChainNode:
     is_leaf: bool = False
     db_method_id: Optional[int] = None
     
+    # v3.1 新增字段
+    root_type: str = 'UNKNOWN'
+    call_type: str = 'DIRECT'
+    has_multiple_call_sites: bool = False
+    entry_annotation: Optional[str] = None
+    
     # v4.0 新增字段
-    change_type: str = "UNKNOWN"           # ChangeType 枚举值字符串
-    dao_info: Optional[DaoInfo] = None     # DAO 透视信息（非 DAO 方法为 null）
+    change_type: str = "UNKNOWN"
+    dao_info: Optional[DaoInfo] = None
     
     def to_dict(self) -> dict:
         """
-        转换为字典（用于 JSON 序列化）
+        转换为字典（用于 JSON 序列化，v3.1 增强版）
         
         Returns:
             dict: 节点的字典表示，包含所有字段和递归的子节点
         """
-        return {
+        base = {
             "node_id": self.node_id,
             "package_class": self.package_class,
             "method_signature": self.method_signature,
@@ -129,8 +145,15 @@ class CallChainNode:
             "is_cyclic": self.is_cyclic,
             "is_leaf": self.is_leaf,
             "db_method_id": self.db_method_id,
+            # v3.1 新增
+            "root_type": self.root_type,
+            "call_type": self.call_type,
+            "has_multiple_call_sites": self.has_multiple_call_sites,
             # v4.0 新增
-            "change_type": self.change_type,   # 永不为 null，至少为 "UNKNOWN"
+            "change_type": self.change_type,
             "dao_info": self.dao_info.to_dict() if self.dao_info else None,
             "children": [child.to_dict() for child in self.children]
         }
+        if self.entry_annotation:
+            base["entry_annotation"] = self.entry_annotation
+        return base
