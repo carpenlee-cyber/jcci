@@ -31,9 +31,7 @@ class CallChainVisualizer:
             str: 格式化后的文本
         """
         lines = []
-        lines.append("=" * 80)
-        lines.append("向上调用链分析（影响面：谁调用了变更方法？）")
-        lines.append("=" * 80)
+        lines.append("\n\n向上调用链分析（影响面：谁调用了变更方法？）")
         lines.append("")
         
         impact_chains = upwards_result.get('impact_chains', [])
@@ -78,9 +76,7 @@ class CallChainVisualizer:
             str: 格式化后的文本
         """
         lines = []
-        lines.append("=" * 80)
-        lines.append("向下调用链分析（功能风险：变更方法调用了谁？）")
-        lines.append("=" * 80)
+        lines.append("\n\n向下调用链分析（功能风险：变更方法调用了谁？）")
         lines.append("")
         
         call_chains = downwards_result.get('call_chains', [])
@@ -157,7 +153,7 @@ class CallChainVisualizer:
                 lines_str = ",".join([str(line) for line in invocation_lines[:3]])  # 最多显示3个行号
                 if len(invocation_lines) > 3:
                     lines_str += f"...(+{len(invocation_lines)-3})"
-                arrow = f"\n{indent}--行号{lines_str}-->"
+                arrow = f"{indent}--行号{lines_str}-->"
                 lines.append(f"{arrow}")
             
             lines.append(f"{indent}{class_name}.{method_name} ({change_type_tag}){entry_tag}")
@@ -171,27 +167,6 @@ class CallChainVisualizer:
                 is_root=False,
                 direction=direction
             )
-    
-    @staticmethod
-    def _translate_change_type(change_type: str) -> str:
-        """
-        翻译变更类型为中文
-        
-        Args:
-            change_type: 变更类型枚举值
-        
-        Returns:
-            str: 中文描述
-        """
-        type_map = {
-            'ADDED': '新增点',
-            'MODIFIED': '修改点',
-            'DELETED': '删除点',
-            'UNCHANGED': '未变更',
-            'UNKNOWN': '未知'
-        }
-        return type_map.get(change_type, change_type)
-    
     @staticmethod
     def print_bidirectional_summary(bidirectional_result: Dict[str, Any]):
         """
