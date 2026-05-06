@@ -22,7 +22,7 @@ from src.jcci import JCCI  # noqa: E402
 
 def workflow1():
     # 步骤1：配置参数
-    logger.info("\n" + "=" * 80)
+    logger.info("\n")
     logger.info("步骤1：开始配置参数")
     logger.info("=" * 80)
 
@@ -40,9 +40,8 @@ def workflow1():
 
         
     # 步骤2：调用analyze_two_commit_incremental
-    logger.info("\n" + "=" * 80)
+    logger.info("\n")
     logger.info("步骤2：调用JCI新方法, 第一次调用（预期为首次分析，将创建 JSON 缓存）, 重复调用将使用缓存")
-    logger.info("=" * 80)
     
     jcci1 = JCCI(git_url, username)
     result1 = jcci1.analyze_two_commit_incremental(
@@ -57,11 +56,10 @@ def workflow1():
 
 
     # 步骤3：双向调用链路分析
-    logger.info("\n" + "=" * 80)
+    logger.info("\n")
     logger.info("步骤3：双向调用链路分析")
     logger.info("  - 向上分析（影响面）：谁调用了变更方法？→ 寻找受影响的入口 API")
     logger.info("  - 向下分析（功能风险）：变更方法调用了谁？→ 评估功能风险")
-    logger.info("=" * 80)
 
     from src.jcci.call_chain.analyzer import build_call_chains_for_changes
 
@@ -82,9 +80,7 @@ def workflow1():
         )
         
         # 步骤4：可视化展示调用链
-        logger.info("\n" + "=" * 80)
         logger.info("步骤4：调用链可视化展示")
-        logger.info("=" * 80)
         
         from src.jcci.call_chain.visualizer import CallChainVisualizer
         
@@ -99,6 +95,25 @@ def workflow1():
             bidirectional_result['downwards']
         )
         logger.info(downwards_text)
+        
+        # 将结果写入文件
+        output_dir = os.path.join(project_root, "src", "jcci", "analyze_result")
+        os.makedirs(output_dir, exist_ok=True)
+        
+        # 生成文件名（基于commit范围）
+        filename_prefix = f"{username}_mall_{commit_old}..{commit_new}"
+        
+        # 写入向上调用链
+        upwards_file = os.path.join(output_dir, f"{filename_prefix}_upwards.txt")
+        with open(upwards_file, 'w', encoding='utf-8') as f:
+            f.write(upwards_text)
+        logger.info(f"向上调用链已保存到: {upwards_file}")
+        
+        # 写入向下调用链
+        downwards_file = os.path.join(output_dir, f"{filename_prefix}_downwards.txt")
+        with open(downwards_file, 'w', encoding='utf-8') as f:
+            f.write(downwards_text)
+        logger.info(f"向下调用链已保存到: {downwards_file}")
         
 
 if __name__ == "__main__":
