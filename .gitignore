@@ -4,3 +4,9 @@ src/jcci.egg-info
 .idea
 src/jcci/__pycache__/
 test/
+
+# Database files
+src/jcci/*.db
+
+# Mall project (submodule)
+src/jcci/mall
