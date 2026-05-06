@@ -31,11 +31,77 @@ class CallChainVisualizer:
             str: 格式化后的文本
         """
         lines = []
-        lines.append("\n\n向上调用链分析（影响面：谁调用了变更方法？）")
+        lines.append("\n向上调用链分析（影响面：谁调用了变更方法？）")
         lines.append("")
         
         impact_chains = upwards_result.get('impact_chains', [])
         
+        # 收集所有入口点
+        all_entry_points = []
+        for chain_data in impact_chains:
+            entry_points = chain_data.get('entry_points', [])
+            for entry in entry_points:
+                # entry结构: package_class, method_signature, root_type
+                package_class = entry.get('package_class', '')
+                method_signature = entry.get('method_signature', '')
+                
+                # 从package_class中提取类名
+                class_name = package_class.split('.')[-1] if package_class else ''
+                
+                # 从method_signature中提取方法名（去掉参数部分）
+                method_name = method_signature.split('(')[0] if method_signature else ''
+                
+                entry_key = f"{class_name}.{method_name}"
+                if entry_key not in [e['key'] for e in all_entry_points]:
+                    all_entry_points.append({
+                        'key': entry_key,
+                        'class_name': class_name,
+                        'method_name': method_name,
+                        'package_class': package_class,
+                        'method_signature': method_signature,
+                        'root_type': entry.get('root_type', 'UNKNOWN'),
+                        'depth_from_change': entry.get('depth_from_change', 0)
+                    })
+        
+        # 展示所有入口点汇总
+        if all_entry_points:
+            lines.append("=" * 80)
+            lines.append(f"🎯 发现的入口点 ({len(all_entry_points)}个):")
+            lines.append("=" * 80)
+            for idx, entry in enumerate(all_entry_points, 1):
+                entry_tag = "(入口)" if entry['root_type'] in ['HTTP_API', 'SCHEDULED_TASK', 'EVENT_LISTENER',
+                                                                  'MESSAGE_CONSUMER', 'CONTROLLER_BY_CONVENTION'] else ""
+                lines.append(f"  {idx}. {entry['key']}{entry_tag} [{entry['root_type']}]")
+                
+                # 展示该入口点关联的调用链
+                related_chains = []
+                for chain_idx, chain_data in enumerate(impact_chains, 1):
+                    method_info = chain_data.get('method_info', {})
+                    change_type = method_info.get('change_type', 'UNKNOWN')
+                    change_type_display = change_type if change_type else 'UNKNOWN'
+                    
+                    # 检查调用链中是否包含此入口点
+                    chain_tree = chain_data.get('chain', {})
+                    if CallChainVisualizer._contains_entry_point(chain_tree, entry['class_name'], entry['method_name']):
+                        related_chains.append({
+                            'chain_idx': chain_idx,
+                            'method_info': method_info
+                        })
+                
+                if related_chains:
+                    lines.append(f"     关联的调用链:")
+                    for rc in related_chains:
+                        method_info = rc['method_info']
+                        class_name = method_info.get('class_name', '')
+                        method_name = method_info.get('method_name', '')
+                        change_type = method_info.get('change_type', 'UNKNOWN')
+                        change_type_display = change_type if change_type else 'UNKNOWN'
+                        lines.append(f"       - 调用链 {rc['chain_idx']}: {change_type_display}方法 {class_name}.{method_name}")
+            lines.append("")
+            lines.append("=" * 80)
+            lines.append("")
+        
+        # 展示详细的调用链
         for idx, chain_data in enumerate(impact_chains, 1):
             method_info = chain_data.get('method_info', {})
             class_name = method_info.get('class_name', '')
@@ -76,7 +142,7 @@ class CallChainVisualizer:
             str: 格式化后的文本
         """
         lines = []
-        lines.append("\n\n向下调用链分析（功能风险：变更方法调用了谁？）")
+        lines.append("\n向下调用链分析（功能风险：变更方法调用了谁？）")
         lines.append("")
         
         call_chains = downwards_result.get('call_chains', [])
@@ -107,6 +173,34 @@ class CallChainVisualizer:
             lines.append("")
         
         return "\n".join(lines)
+    
+    @staticmethod
+    def _contains_entry_point(node: Dict[str, Any], class_name: str, method_name: str) -> bool:
+        """
+        递归检查调用链节点中是否包含指定的入口点
+        
+        Args:
+            node: 调用链节点字典
+            class_name: 类名
+            method_name: 方法名
+        
+        Returns:
+            bool: 是否包含该入口点
+        """
+        if not node:
+            return False
+        
+        # 检查当前节点
+        if node.get('class_name') == class_name and node.get('method_name') == method_name:
+            return True
+        
+        # 递归检查子节点
+        children = node.get('children', [])
+        for child in children:
+            if CallChainVisualizer._contains_entry_point(child, class_name, method_name):
+                return True
+        
+        return False
     
     @staticmethod
     def _format_chain_node(node: Dict[str, Any], lines: List[str], 
