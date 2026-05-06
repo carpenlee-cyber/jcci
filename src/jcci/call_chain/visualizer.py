@@ -31,6 +31,48 @@ class CallChainVisualizer:
             str: 格式化后的文本
         """
         lines = []
+        
+        # 添加metadata信息
+        metadata = upwards_result.get('metadata', {})
+        lines.append("=" * 80)
+        lines.append("向上调用链分析 - 元数据信息")
+        lines.append("=" * 80)
+        lines.append(f"项目: {metadata.get('project_name', 'N/A')}")
+        lines.append(f"用户名: {metadata.get('username', 'N/A')}")
+        lines.append(f"Git URL: {metadata.get('git_url', 'N/A')}")
+        lines.append(f"Commit范围: {metadata.get('commit_old', 'N/A')}..{metadata.get('commit_new', 'N/A')}")
+        lines.append(f"分析版本: {metadata.get('analysis_version', 'N/A')}")
+        lines.append(f"最大深度: {metadata.get('max_depth', 'N/A')}")
+        lines.append(f"总变更方法数: {metadata.get('total_methods', 0)}")
+        lines.append(f"成功分析: {metadata.get('successful_chains', 0)}")
+        lines.append(f"失败分析: {metadata.get('failed_chains', 0)}")
+        
+        # 覆盖率统计
+        coverage_stats = metadata.get('coverage_stats', {})
+        if coverage_stats:
+            lines.append("")
+            lines.append("覆盖率统计:")
+            lines.append(f"  - 覆盖率: {coverage_stats.get('coverage_rate_percent', 0)}%")
+            lines.append(f"  - 有调用者的方法数: {coverage_stats.get('methods_with_callers', 0)}")
+            lines.append(f"  - 无调用者的方法数: {coverage_stats.get('methods_without_callers', 0)}")
+            lines.append(f"  - 发现的入口点: {coverage_stats.get('entry_points_found', 0)}")
+            lines.append(f"  - 直接调用: {coverage_stats.get('direct_calls', 0)}")
+            lines.append(f"  - CHA解析调用: {coverage_stats.get('cha_resolved_calls', 0)}")
+            lines.append(f"  - 循环路径: {coverage_stats.get('cyclic_paths', 0)}")
+            lines.append(f"  - 深度限制路径: {coverage_stats.get('depth_limited_paths', 0)}")
+        
+        # 功能启用状态
+        features = metadata.get('features_enabled', {})
+        if features:
+            lines.append("")
+            lines.append("功能启用状态:")
+            lines.append(f"  - 类层次分析 (CHA): {'是' if features.get('class_hierarchy_analysis') else '否'}")
+            lines.append(f"  - 入口检测: {'是' if features.get('entry_detection') else '否'}")
+        
+        lines.append("")
+        lines.append("=" * 80)
+        lines.append("")
+        
         lines.append("\n向上调用链分析（影响面：谁调用了变更方法？）")
         lines.append("")
         
@@ -142,6 +184,26 @@ class CallChainVisualizer:
             str: 格式化后的文本
         """
         lines = []
+        
+        # 添加metadata信息
+        metadata = downwards_result.get('metadata', {})
+        lines.append("=" * 80)
+        lines.append("向下调用链分析 - 元数据信息")
+        lines.append("=" * 80)
+        lines.append(f"项目: {metadata.get('project_name', 'N/A')}")
+        lines.append(f"用户名: {metadata.get('username', 'N/A')}")
+        lines.append(f"Git URL: {metadata.get('git_url', 'N/A')}")
+        lines.append(f"Commit范围: {metadata.get('commit_old', 'N/A')}..{metadata.get('commit_new', 'N/A')}")
+        lines.append(f"分析版本: {metadata.get('analysis_version', 'N/A')}")
+        lines.append(f"最大深度: {metadata.get('max_depth', 'N/A')}")
+        lines.append(f"总变更方法数: {metadata.get('total_methods', 0)}")
+        lines.append(f"成功分析: {metadata.get('successful_chains', 0)}")
+        lines.append(f"失败分析: {metadata.get('failed_chains', 0)}")
+        
+        lines.append("")
+        lines.append("=" * 80)
+        lines.append("")
+        
         lines.append("\n向下调用链分析（功能风险：变更方法调用了谁？）")
         lines.append("")
         
