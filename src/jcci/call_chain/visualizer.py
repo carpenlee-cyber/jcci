@@ -47,20 +47,6 @@ class CallChainVisualizer:
         lines.append(f"成功分析: {metadata.get('successful_chains', 0)}")
         lines.append(f"失败分析: {metadata.get('failed_chains', 0)}")
         
-        # 覆盖率统计
-        coverage_stats = metadata.get('coverage_stats', {})
-        if coverage_stats:
-            lines.append("")
-            lines.append("覆盖率统计:")
-            lines.append(f"  - 覆盖率: {coverage_stats.get('coverage_rate_percent', 0)}%")
-            lines.append(f"  - 有调用者的方法数: {coverage_stats.get('methods_with_callers', 0)}")
-            lines.append(f"  - 无调用者的方法数: {coverage_stats.get('methods_without_callers', 0)}")
-            lines.append(f"  - 发现的入口点: {coverage_stats.get('entry_points_found', 0)}")
-            lines.append(f"  - 直接调用: {coverage_stats.get('direct_calls', 0)}")
-            lines.append(f"  - CHA解析调用: {coverage_stats.get('cha_resolved_calls', 0)}")
-            lines.append(f"  - 循环路径: {coverage_stats.get('cyclic_paths', 0)}")
-            lines.append(f"  - 深度限制路径: {coverage_stats.get('depth_limited_paths', 0)}")
-        
         # 功能启用状态
         features = metadata.get('features_enabled', {})
         if features:

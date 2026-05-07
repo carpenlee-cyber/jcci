@@ -53,8 +53,19 @@ class ChangeTypeAnalyzer:
                     modified_files.append(filepath)
             
             logging.info(f"  新增文件: {len(added_files)} 个")
+            if added_files:
+                for f in added_files:
+                    logging.info(f"    - {f}")
+            
             logging.info(f"  删除文件: {len(deleted_files)} 个")
+            if deleted_files:
+                for f in deleted_files:
+                    logging.info(f"    - {f}")
+            
             logging.info(f"  修改文件: {len(modified_files)} 个")
+            if modified_files:
+                for f in modified_files:
+                    logging.info(f"    - {f}")
             
             # 2. 标记 Class 的变更类型
             self._mark_class_changes(added_files, deleted_files, modified_files, project_id, commit_new, commit_old)
@@ -287,8 +298,12 @@ class ChangeTypeAnalyzer:
         ''', (project_id,))
         
         print("\nClass 表变更类型分布:")
-        for change_type, count in self.cursor.fetchall():
-            print(f"  {change_type}: {count} 个")
+        class_stats = self.cursor.fetchall()
+        if not class_stats:
+            print("  (无变更记录)")
+        else:
+            for change_type, count in class_stats:
+                print(f"  {change_type}: {count} 个")
         
         # Method 统计
         self.cursor.execute('''
@@ -300,8 +315,32 @@ class ChangeTypeAnalyzer:
         ''', (project_id,))
         
         print("\nMethods 表变更类型分布:")
-        for change_type, count in self.cursor.fetchall():
-            print(f"  {change_type}: {count} 个")
+        method_stats = self.cursor.fetchall()
+        if not method_stats:
+            print("  (无变更记录)")
+        else:
+            for change_type, count in method_stats:
+                print(f"  {change_type}: {count} 个")
+        
+        # 详细列出变更的类
+        changed_classes = self.get_changed_classes(project_id)
+        if changed_classes:
+            print(f"\n变更的类详情 ({len(changed_classes)} 个):")
+            for cls in changed_classes[:20]:  # 最多显示20个
+                print(f"  [{cls['change_type']}] {cls['package_name']}.{cls['class_name']}")
+            if len(changed_classes) > 20:
+                print(f"  ... 还有 {len(changed_classes) - 20} 个类")
+        
+        # 详细列出变更的方法
+        changed_methods = self.get_changed_methods(project_id)
+        if changed_methods:
+            print(f"\n变更的方法详情 ({len(changed_methods)} 个):")
+            for method in changed_methods[:30]:  # 最多显示30个
+                params = json.loads(method['parameters']) if method['parameters'] else []
+                param_str = ', '.join([p.get('parameter_type', '') for p in params])
+                print(f"  [{method['change_type']}] {method['class_name']}.{method['method_name']}({param_str}) -> {method['return_type']}")
+            if len(changed_methods) > 30:
+                print(f"  ... 还有 {len(changed_methods) - 30} 个方法")
         
         print("=" * 80)
     

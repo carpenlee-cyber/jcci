@@ -18,23 +18,55 @@ from .downwards_builder import DownwardsCallChainBuilder
 logger = logging.getLogger(__name__)
 
 
-def _get_baseline_db_path(username: str, project_name: str, commit_old: str) -> str:
+def _normalize_commit_or_tag(identifier: str) -> str:
+    """
+    标准化commit hash或tag标识符
+    
+    规则：
+    - 如果是长tag（长度>11），取最后11个字符作为短标识符
+    - 如果是短tag或commit hash（长度<=11），保持不变
+    
+    例如：
+    - MIX_LJ01.BUP_BUP3_UAT_UAT_00.00.01_SUMMER_20260403_01 -> 20260403_01
+    - d9501e9 -> d9501e9 (保持不变)
+    
+    Args:
+        identifier: commit hash或tag字符串
+        
+    Returns:
+        标准化后的标识符
+    """
+    if len(identifier) > 11:
+        return identifier[-11:]
+    else:
+        return identifier
+
+
+def _get_baseline_db_path(username: str, project_name: str, commit_old: str, output_dir: Optional[str] = None) -> str:
     """
     构造基线数据库路径
     
     Args:
-        username: Git 用户名
+        username: Git 用户名（保留参数以兼容调用方）
         project_name: 项目名称
-        commit_old: 旧版本 commit hash
+        commit_old: 旧版本 commit hash或tag
+        output_dir: 输出目录（可选，默认为jcci根目录）
     
     Returns:
         str: 基线数据库完整路径
     """
     from src.jcci import config
     
-    commit_short = commit_old[:7] if len(commit_old) > 7 else commit_old
-    db_filename = f"{username}_{project_name}_baseline_{commit_short}.db"
-    return os.path.join(config.db_path, db_filename)
+    # 使用标准化后的短标识符
+    commit_short = _normalize_commit_or_tag(commit_old)
+    db_filename = f"{project_name}_baseline_{commit_short}.db"
+    
+    if output_dir:
+        # 如果指定了输出目录，保存到该目录
+        return os.path.join(output_dir, db_filename)
+    else:
+        # 否则保存到jcci根目录（向后兼容）
+        return os.path.join(config.db_path, db_filename)
 
 
 def _extract_method_signature(method_name: str, parameters_json: str) -> str:
@@ -164,18 +196,19 @@ def build_call_chains_for_changes(
     # 提取项目名称
     project_name = git_url.split('/')[-1].split('.git')[0]
     
-    # 构造基线数据库路径
-    baseline_db_path = _get_baseline_db_path(username, project_name, commit_old)
+    # 设置默认输出目录（创建以commit范围命名的子目录）
+    if output_dir is None:
+        base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'analyze_result')
+        output_dir = os.path.join(base_dir, f"{project_name}_{commit_old}..{commit_new}")
+    
+    os.makedirs(output_dir, exist_ok=True)
+    
+    # 构造基线数据库路径（保存到output_dir）
+    baseline_db_path = _get_baseline_db_path(username, project_name, commit_old, output_dir)
     logger.info(f"基线数据库路径: {baseline_db_path}")
     
     if not os.path.exists(baseline_db_path):
         raise FileNotFoundError(f"基线数据库不存在: {baseline_db_path}")
-    
-    # 设置默认输出目录
-    if output_dir is None:
-        output_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'analyze_result')
-    
-    os.makedirs(output_dir, exist_ok=True)
     
     # === 步骤2: 构建统一索引（一次性，复用）===
     logger.info("\n[1/4] 构建统一方法索引...")
@@ -368,16 +401,18 @@ def build_upwards_call_chains(
         dict: 包含元数据和所有向上调用链的结果
     """
     project_name = git_url.split('/')[-1].split('.git')[0]
-    baseline_db_path = _get_baseline_db_path(username, project_name, commit_old)
+    
+    if output_dir is None:
+        base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'analyze_result')
+        output_dir = os.path.join(base_dir, f"{project_name}_{commit_old}..{commit_new}")
+    
+    os.makedirs(output_dir, exist_ok=True)
+    
+    baseline_db_path = _get_baseline_db_path(username, project_name, commit_old, output_dir)
     logger.info(f"基线数据库路径: {baseline_db_path}")
     
     if not os.path.exists(baseline_db_path):
         raise FileNotFoundError(f"基线数据库不存在: {baseline_db_path}")
-    
-    if output_dir is None:
-        output_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'analyze_result')
-    
-    os.makedirs(output_dir, exist_ok=True)
     
     logger.info("\n[1/5] 构建统一方法索引...")
     try:
@@ -518,9 +553,9 @@ def build_upwards_call_chains(
         coverage_rate = (global_coverage['methods_with_callers'] / 
                         global_coverage['total_methods'] * 100)
     
-    commit_old_short = commit_old[:7] if len(commit_old) > 7 else commit_old
-    commit_new_short = commit_new[:7] if len(commit_new) > 7 else commit_new
-    output_filename = f"{username}_{project_name}_{commit_old_short}..{commit_new_short}_upwards_call_chains.json"
+    # 使用传入的已标准化短标识符（不再截取），去掉用户名
+    # 由于已经在以commit范围命名的子目录中，文件名可以简化
+    output_filename = f"upwards_call_chains.json"
     output_filepath = os.path.join(output_dir, output_filename)
     
     result = {
@@ -589,16 +624,18 @@ def build_downwards_call_chains(
         dict: 包含元数据和所有向下调用链的结果
     """
     project_name = git_url.split('/')[-1].split('.git')[0]
-    baseline_db_path = _get_baseline_db_path(username, project_name, commit_old)
+    
+    if output_dir is None:
+        base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'analyze_result')
+        output_dir = os.path.join(base_dir, f"{project_name}_{commit_old}..{commit_new}")
+    
+    os.makedirs(output_dir, exist_ok=True)
+    
+    baseline_db_path = _get_baseline_db_path(username, project_name, commit_old, output_dir)
     logger.info(f"基线数据库路径: {baseline_db_path}")
     
     if not os.path.exists(baseline_db_path):
         raise FileNotFoundError(f"基线数据库不存在: {baseline_db_path}")
-    
-    if output_dir is None:
-        output_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'analyze_result')
-    
-    os.makedirs(output_dir, exist_ok=True)
     
     logger.info("\n[1/3] 构建统一方法索引...")
     index = UnifiedMethodIndex(
@@ -654,9 +691,9 @@ def build_downwards_call_chains(
                 "error": str(e)
             })
     
-    commit_old_short = commit_old[:7] if len(commit_old) > 7 else commit_old
-    commit_new_short = commit_new[:7] if len(commit_new) > 7 else commit_new
-    output_filename = f"{username}_{project_name}_{commit_old_short}..{commit_new_short}_downwards_call_chains.json"
+    # 使用传入的已标准化短标识符（不再截取），去掉用户名
+    # 由于已经在以commit范围命名的子目录中，文件名可以简化
+    output_filename = f"downwards_call_chains.json"
     output_filepath = os.path.join(output_dir, output_filename)
     
     result = {

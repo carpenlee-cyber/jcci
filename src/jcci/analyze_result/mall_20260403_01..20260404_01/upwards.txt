@@ -1,0 +1,47 @@
+================================================================================
+向上调用链分析 - 元数据信息
+================================================================================
+项目: mall
+用户名: carpenlee-cyber
+Git URL: https://github.com/carpenlee-cyber/mall.git
+Commit范围: 20260403_01..20260404_01
+分析版本: 3.1
+最大深度: 5
+总变更方法数: 3
+成功分析: 3
+失败分析: 0
+
+功能启用状态:
+  - 类层次分析 (CHA): 否
+  - 入口检测: 是
+
+================================================================================
+
+
+向上调用链分析（影响面：谁调用了变更方法？）
+
+================================================================================
+🎯 发现的入口点 (1个):
+================================================================================
+  1. UmsMenuController.batchUpdateHidden(入口) [CONTROLLER_BY_CONVENTION]
+     关联的调用链:
+       - 调用链 1: ADDED方法 UmsMenuController.batchUpdateHidden
+       - 调用链 2: ADDED方法 UmsMenuServiceImpl.batchUpdateHidden
+       - 调用链 3: MODIFIED方法 UmsMenuServiceImpl.updateHidden
+
+================================================================================
+
+调用链 1：ADDED方法 UmsMenuController.batchUpdateHidden
+UmsMenuController.batchUpdateHidden (UNKNOWN)(入口)
+
+调用链 2：ADDED方法 UmsMenuServiceImpl.batchUpdateHidden
+UmsMenuServiceImpl.batchUpdateHidden (UNKNOWN)
+	--行号112-->
+	UmsMenuController.batchUpdateHidden (UNKNOWN)(入口)
+
+调用链 3：MODIFIED方法 UmsMenuServiceImpl.updateHidden
+UmsMenuServiceImpl.updateHidden (UNKNOWN)
+	--行号102-->
+	UmsMenuServiceImpl.batchUpdateHidden (UNKNOWN)
+		--行号112-->
+		UmsMenuController.batchUpdateHidden (UNKNOWN)(入口)

@@ -31,19 +31,44 @@ class UnifiedMethodIndex:
         _unified_index: 统一索引 {(package_class, method_name): [methods]}
     """
     
+    @staticmethod
+    def _normalize_commit_or_tag(identifier: str) -> str:
+        """
+        标准化commit hash或tag标识符
+        
+        规则：
+        - 如果是长tag（长度>11），取最后11个字符作为短标识符
+        - 如果是短tag或commit hash（长度<=11），保持不变
+        
+        例如：
+        - MIX_LJ01.BUP_BUP3_UAT_UAT_00.00.01_SUMMER_20260403_01 -> 20260403_01
+        - d9501e9 -> d9501e9 (保持不变)
+        
+        Args:
+            identifier: commit hash或tag字符串
+            
+        Returns:
+            标准化后的标识符
+        """
+        if len(identifier) > 11:
+            return identifier[-11:]
+        else:
+            return identifier
+    
     def __init__(self, db_path: str, commit_old: str, commit_new: str, db_connection=None):
         """
         初始化统一方法索引
         
         Args:
             db_path: SQLite数据库路径（基线数据库）
-            commit_old: 旧版本commit hash
-            commit_new: 新版本commit hash
+            commit_old: 旧版本commit hash或tag
+            commit_new: 新版本commit hash或tag
             db_connection: 可选的数据库连接（用于测试）
         """
         self.db_path = db_path
-        self.commit_old = commit_old[:7] if len(commit_old) > 7 else commit_old
-        self.commit_new = commit_new[:7] if len(commit_new) > 7 else commit_new
+        # 使用标准化后的短标识符
+        self.commit_old = self._normalize_commit_or_tag(commit_old)
+        self.commit_new = self._normalize_commit_or_tag(commit_new)
         
         # 如果提供了数据库连接，使用它；否则创建新连接
         if db_connection:
