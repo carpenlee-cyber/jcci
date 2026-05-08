@@ -874,6 +874,58 @@ def main():
     
     st.title("🔗 JCCI 调用链分析与LLM智能分析平台")
     
+    # 从URL参数获取baseline（如果存在）
+    query_params = st.query_params
+    baseline_param = query_params.get("baseline", None)
+    
+    # 如果没有提供baseline参数，显示访问规则提示
+    if not baseline_param:
+        st.warning("⚠️ **访问方式不正确**")
+        st.markdown("""
+        ### 📋 正确的访问方式
+        
+        本系统需要通过 **URL参数** 指定基线才能访问。请使用以下格式：
+        
+        ```
+        http://0.0.0.0:8501/?baseline={基线标识符}
+        ```
+        
+        ### 📝 示例
+        
+        - 使用Git Tag: `http://0.0.0.0:8501/?baseline=baseline_20260508_01`
+        - 使用Commit Hash: `http://0.0.0.0:8501/?baseline=mall_dd6569c3`
+        
+        ### 🔍 如何获取基线标识符？
+        
+        1. **查看analyze_result目录**: 在 `jcci/src/jcci/analyze_result/` 目录下查看所有可用的基线文件夹
+        2. **基线命名规则**: 
+           - Commit Hash (40位): 截取前8位，如 `dd6569c3`
+           - Git Tag (长度>11): 截取后11位，如 `20260508_01`
+           - 短标识符 (长度≤11): 保持不变，如 `d9501e9`
+        
+        ### 💡 提示
+        
+        - 基线标识符对应 `analyze_result` 目录下的文件夹名称
+        - 每个基线下可以有多个版本子目录用于对比分析
+        - 请确保指定的基线数据库文件已生成
+        """)
+        
+        # 列出可用的基线（如果存在）
+        if os.path.exists(RESULT_DIR):
+            baselines = [d for d in os.listdir(RESULT_DIR) 
+                        if os.path.isdir(os.path.join(RESULT_DIR, d)) and not d.startswith('.')]
+            
+            if baselines:
+                st.success(f"✅ 发现 {len(baselines)} 个可用基线:")
+                cols = st.columns(2)
+                for idx, baseline in enumerate(sorted(baselines)):
+                    col_idx = idx % 2
+                    with cols[col_idx]:
+                        share_url = f"http://0.0.0.0:{STREAMLIT_PORT}/?baseline={baseline}"
+                        st.markdown(f"- [{baseline}]({share_url})")
+        
+        return
+    
     # 显示用户信息和分享链接
     col1, col2 = st.columns([3, 1])
     with col1:
@@ -890,13 +942,6 @@ def main():
         st.info(f"分享链接: `{share_url}`")
     except Exception:
         pass
-    
-    # 从URL参数获取baseline（如果存在）
-    query_params = st.query_params
-    baseline_param = query_params.get("baseline", None)
-    
-    if baseline_param:
-        st.sidebar.success(f"✅ 基线隔离已启用: {baseline_param}")
     
     # 侧边栏
     file_paths = render_sidebar(baseline_param)
