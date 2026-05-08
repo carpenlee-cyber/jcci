@@ -122,6 +122,7 @@ class CallChainNode:
     call_type: str = 'DIRECT'
     has_multiple_call_sites: bool = False
     entry_annotation: Optional[str] = None
+    api_paths: List[str] = field(default_factory=list)  # API路径列表，如 ["[POST]/coupon/delete/{id}"]
     
     # v4.0 新增字段
     change_type: str = "UNKNOWN"
@@ -149,6 +150,7 @@ class CallChainNode:
             "root_type": self.root_type,
             "call_type": self.call_type,
             "has_multiple_call_sites": self.has_multiple_call_sites,
+            "api_paths": self.api_paths,  # API路径列表
             # v4.0 新增
             "change_type": self.change_type,
             "dao_info": self.dao_info.to_dict() if self.dao_info else None,

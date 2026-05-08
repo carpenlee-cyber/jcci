@@ -47,10 +47,9 @@ class AnnotationAwareEntryDetector:
     
     def _load_annotations(self, db_connection, project_ids: List[int]):
         """
-        从数据库加载方法注解信息
+        从数据库加载方法注解信息和API路径
         
-        假设有 method_annotation 表或通过其他方式存储注解信息
-        如果数据库中没有注解表，则跳过此步骤
+        从methods表中读取is_api和api_path字段
         """
         try:
             cursor = db_connection.cursor()
@@ -58,10 +57,11 @@ class AnnotationAwareEntryDetector:
             
             query = f"""
                 SELECT m.method_id, c.package_name, c.class_name, 
-                       m.method_name, m.parameters
+                       m.method_name, m.parameters, m.is_api, m.api_path
                 FROM methods m
                 JOIN class c ON m.class_id = c.class_id
                 WHERE c.project_id IN ({placeholders})
+                  AND (m.is_api = 1 OR c.class_name LIKE '%Controller')
             """
             
             cursor.execute(query, project_ids)
@@ -74,27 +74,47 @@ class AnnotationAwareEntryDetector:
                     class_name = row['class_name']
                     method_name = row['method_name']
                     parameters = row['parameters']
+                    is_api = row['is_api']
+                    api_path = row['api_path']
                 else:
-                    method_id, package_name, class_name, method_name, parameters = row
+                    method_id, package_name, class_name, method_name, parameters, is_api, api_path = row
                 
                 package_class = f"{package_name}.{class_name}"
                 sig = self._build_signature(method_name, parameters)
                 method_key = f"{package_class}|{sig}"
                 
-                class_name_only = package_class.split('.')[-1]
+                # 解析API路径（可能是JSON数组字符串）
+                api_paths = []
+                if api_path:
+                    try:
+                        import json
+                        if isinstance(api_path, str):
+                            api_paths = json.loads(api_path)
+                        elif isinstance(api_path, list):
+                            api_paths = api_path
+                    except:
+                        api_paths = [api_path] if isinstance(api_path, str) else []
                 
-                if class_name_only.endswith('Controller'):
-                    self._entry_methods[method_key] = {
-                        'method_id': method_id,
-                        'package_class': package_class,
-                        'method_signature': sig,
-                        'entry_type': 'CONTROLLER_BY_CONVENTION',
-                        'annotation': None,
-                        'annotation_params': None
-                    }
+                # 判断入口类型
+                if is_api == 1 or api_paths:
+                    entry_type = 'HTTP_API'
+                elif class_name.endswith('Controller'):
+                    entry_type = 'CONTROLLER_BY_CONVENTION'
+                else:
+                    continue
+                
+                self._entry_methods[method_key] = {
+                    'method_id': method_id,
+                    'package_class': package_class,
+                    'method_signature': sig,
+                    'entry_type': entry_type,
+                    'annotation': None,
+                    'annotation_params': None,
+                    'api_paths': api_paths  # 保存API路径列表
+                }
         
         except Exception as e:
-            logger.warning(f"Failed to load annotations (this is OK if no annotation table exists): {e}")
+            logger.warning(f"Failed to load annotations and API paths: {e}")
     
     def is_entry_method(self, package_class: str, method_signature: str) -> Optional[dict]:
         """判断一个方法是否为入口方法"""

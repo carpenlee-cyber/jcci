@@ -37,11 +37,13 @@ class UnifiedMethodIndex:
         标准化commit hash或tag标识符
         
         规则：
-        - 如果是长tag（长度>11），取最后11个字符作为短标识符
-        - 如果是短tag或commit hash（长度<=11），保持不变
+        - 如果是commit hash（40位十六进制字符串），截取前8位
+        - 如果是长tag（长度>11且不是40位十六进制），取最后11个字符作为短标识符
+        - 如果是短tag或短commit（长度<=11），保持不变
         
         例如：
-        - MIX_LJ01.BUP_BUP3_UAT_UAT_00.00.01_SUMMER_20260403_01 -> 20260403_01
+        - dd6569c3558f79af5b21aad601349e0f029b9a6d -> dd6569c3 (commit hash，前8位)
+        - MIX_LJ01.BUP_BUP3_UAT_UAT_00.00.01_SUMMER_20260403_01 -> 20260403_01 (tag，后11位)
         - d9501e9 -> d9501e9 (保持不变)
         
         Args:
@@ -50,9 +52,17 @@ class UnifiedMethodIndex:
         Returns:
             标准化后的标识符
         """
-        if len(identifier) > 11:
+        import re
+        
+        # 判断是否为40位commit hash（十六进制字符串）
+        if len(identifier) == 40 and re.match(r'^[0-9a-f]{40}$', identifier, re.IGNORECASE):
+            # Commit hash：截取前8位
+            return identifier[:8]
+        elif len(identifier) > 11:
+            # 长tag：取最后11个字符
             return identifier[-11:]
         else:
+            # 短标识符：保持不变
             return identifier
     
     def __init__(self, db_path: str, commit_old: str, commit_new: str, db_connection=None):

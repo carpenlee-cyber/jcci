@@ -88,7 +88,8 @@ class CallChainVisualizer:
                         'package_class': package_class,
                         'method_signature': method_signature,
                         'root_type': entry.get('root_type', 'UNKNOWN'),
-                        'depth_from_change': entry.get('depth_from_change', 0)
+                        'depth_from_change': entry.get('depth_from_change', 0),
+                        'api_paths': entry.get('api_paths', [])  # 添加API路径
                     })
         
         # 展示所有入口点汇总
@@ -99,7 +100,18 @@ class CallChainVisualizer:
             for idx, entry in enumerate(all_entry_points, 1):
                 entry_tag = "(入口)" if entry['root_type'] in ['HTTP_API', 'SCHEDULED_TASK', 'EVENT_LISTENER',
                                                                   'MESSAGE_CONSUMER', 'CONTROLLER_BY_CONVENTION'] else ""
-                lines.append(f"  {idx}. {entry['key']}{entry_tag} [{entry['root_type']}]")
+                
+                # 构建显示文本
+                display_text = f"  {idx}. {entry['key']}{entry_tag} [{entry['root_type']}]"
+                
+                # 如果有API路径，添加到显示中
+                api_paths = entry.get('api_paths', [])
+                if api_paths:
+                    # 格式化API路径，例如: [POST]/coupon/delete/{id}
+                    api_path_str = ', '.join(api_paths)
+                    display_text += f" - {api_path_str}"
+                
+                lines.append(display_text)
                 
                 # 展示该入口点关联的调用链
                 related_chains = []

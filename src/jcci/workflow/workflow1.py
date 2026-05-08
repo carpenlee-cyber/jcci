@@ -50,11 +50,13 @@ def workflow1():
     git_url = 'https://github.com/carpenlee-cyber/mall.git'
     username = 'carpenlee-cyber'
     
-    # 方式1：使用commit hash（用于开发测试）
-    tag_old = 'dd6569c3558f79af5b21aad601349e0f029b9a6d'
-    tag_new = '521d31d04647a13b2db320f1ea60e699608dae02'    
+    # # 方式1：使用commit hash（用于开发测试）
+    # tag_old = 'dd6569c3558f79af5b21aad601349e0f029b9a6d'
+    # tag_new = '0db78d7f79c48b7349346c1380408f60ba0c3c54'    
     
     # 方式2：使用长tag名称（生产环境示例）
+    tag_old = 'baseline_20260508_01'
+    tag_new = 'baseline_fix1_20260508_02'
     # tag_old = 'MIX_LJ01.BUP_BUP3_UAT_UAT_00.00.01_SUMMER_20260403_01'
     # tag_new = 'MIX_LJ01.BUP_BUP3_UAT_UAT_00.00.01_SUMMER_20260403_02'
     

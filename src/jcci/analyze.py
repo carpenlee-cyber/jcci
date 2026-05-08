@@ -51,14 +51,14 @@ class JCCI(object):
         标准化commit hash或tag标识符
         
         规则：
-        - 如果是长tag（长度>11），取最后11个字符作为短标识符
-        - 如果是短tag或commit hash（长度<=11），保持不变
-        - 如果长度>7且<=11，保持原样（兼容旧的commit hash截断逻辑）
+        - 如果是commit hash（40位十六进制字符串），截取前8位
+        - 如果是长tag（长度>11且不是40位十六进制），取最后11个字符作为短标识符
+        - 如果是短tag或短commit（长度<=11），保持不变
         
         例如：
-        - MIX_LJ01.BUP_BUP3_UAT_UAT_00.00.01_SUMMER_20260403_01 -> 20260403_01
+        - dd6569c3558f79af5b21aad601349e0f029b9a6d -> dd6569c3 (commit hash，前8位)
+        - MIX_LJ01.BUP_BUP3_UAT_UAT_00.00.01_SUMMER_20260403_01 -> 20260403_01 (tag，后11位)
         - d9501e9 -> d9501e9 (保持不变)
-        - 78e3a22 -> 78e3a22 (保持不变)
         
         Args:
             identifier: commit hash或tag字符串
@@ -66,11 +66,17 @@ class JCCI(object):
         Returns:
             标准化后的标识符
         """
-        if len(identifier) > 11:
-            # 长tag，取最后11个字符
+        import re
+        
+        # 判断是否为40位commit hash（十六进制字符串）
+        if len(identifier) == 40 and re.match(r'^[0-9a-f]{40}$', identifier, re.IGNORECASE):
+            # Commit hash：截取前8位
+            return identifier[:8]
+        elif len(identifier) > 11:
+            # 长tag：取最后11个字符
             return identifier[-11:]
         else:
-            # 短tag或commit hash，保持不变
+            # 短标识符：保持不变
             return identifier
 
     # Step 1.1
@@ -1178,9 +1184,10 @@ class JCCI(object):
         import os
         from src.jcci import config
         
-        # 创建以commit范围命名的子目录
-        cache_dir = os.path.join(os.path.dirname(__file__), 'analyze_result', 
-                                f"{self.project_name}_{self.commit_short_old}..{self.commit_short_new}")
+        # 创建基线目录和版本子目录
+        base_dir = os.path.join(os.path.dirname(__file__), 'analyze_result', 
+                                f"{self.project_name}_{self.commit_short_old}")
+        cache_dir = os.path.join(base_dir, self.commit_short_new)
         os.makedirs(cache_dir, exist_ok=True)
         
         # JSON文件名不再包含项目名和commit范围（因为已经在目录名中）
