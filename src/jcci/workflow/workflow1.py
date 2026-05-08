@@ -24,20 +24,36 @@ from src.jcci import JCCI  # noqa: E402
 
 def extract_short_tag(tag: str) -> str:
     """
-    从长tag中提取短标识符（最后11个字符）
+    从tag或commit hash中提取短标识符
+    
+    规则：
+    - Commit Hash (40位十六进制): 截取前8位
+    - Git Tag (长度>11): 截取后11位
+    - 短标识符 (长度<=11): 保持不变
     
     例如：
-    MIX_LJ01.BUP_BUP3_UAT_UAT_00.00.01_SUMMER_20260403_01 -> 20260403_01
+    - dd6569c3558f79af5b21aad601349e0f029b9a6d -> dd6569c3 (commit hash)
+    - MIX_LJ01.BUP_BUP3_UAT_UAT_00.00.01_SUMMER_20260403_01 -> 20260403_01 (tag)
+    - d9501e9 -> d9501e9 (短标识符)
     
     Args:
-        tag: 完整的tag字符串
+        tag: 完整的tag或commit hash字符串
         
     Returns:
-        短标识符（最后11个字符）
+        短标识符
     """
-    if len(tag) <= 11:
+    import re
+    
+    # 判断是否为40位commit hash（十六进制字符串）
+    if len(tag) == 40 and re.match(r'^[0-9a-f]{40}$', tag, re.IGNORECASE):
+        # Commit hash：截取前8位
+        return tag[:8]
+    elif len(tag) > 11:
+        # 长tag：取最后11个字符
+        return tag[-11:]
+    else:
+        # 短标识符：保持不变
         return tag
-    return tag[-11:]
 
 
 def workflow1():
@@ -51,12 +67,12 @@ def workflow1():
     username = 'carpenlee-cyber'
     
     # # 方式1：使用commit hash（用于开发测试）
-    # tag_old = 'dd6569c3558f79af5b21aad601349e0f029b9a6d'
-    # tag_new = '0db78d7f79c48b7349346c1380408f60ba0c3c54'    
+    tag_old = 'dd6569c3558f79af5b21aad601349e0f029b9a6d'
+    tag_new = '0db78d7f79c48b7349346c1380408f60ba0c3c54'    
     
     # 方式2：使用长tag名称（生产环境示例）
-    tag_old = 'baseline_20260508_01'
-    tag_new = 'baseline_fix1_20260508_02'
+    # tag_old = 'baseline_20260508_01'
+    # tag_new = 'baseline_fix1_20260508_02'
     # tag_old = 'MIX_LJ01.BUP_BUP3_UAT_UAT_00.00.01_SUMMER_20260403_01'
     # tag_new = 'MIX_LJ01.BUP_BUP3_UAT_UAT_00.00.01_SUMMER_20260403_02'
     
