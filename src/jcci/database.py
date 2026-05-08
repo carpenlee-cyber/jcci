@@ -72,7 +72,7 @@ class SqliteHelper(object):
         Returns:
             str: 基线数据库完整路径
         """
-        db_filename = f"{project_name}_baseline_{commit_short}.db"
+        db_filename = f"{project_name}_{commit_short}_baseline.db"
         
         if output_dir:
             # 如果指定了输出目录，保存到该目录

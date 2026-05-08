@@ -943,9 +943,9 @@ class JCCI(object):
         self.project_name = self.git_url.split('/')[-1].split('.git')[0]
         self.file_path = os.path.join(config.project_path, self.project_name)
         
-        # 2. 构造输出目录（以commit范围命名的子目录）
+        # 2. 构造输出目录（基线目录）
         output_dir = os.path.join(os.path.dirname(__file__), 'analyze_result', 
-                                 f"{self.project_name}_{self.commit_short_old}..{self.commit_short_new}")
+                                 f"{self.project_name}_{self.commit_short_old}")
         os.makedirs(output_dir, exist_ok=True)
         
         # 3. 构造基线数据库路径（使用短标识符，保存到output_dir）

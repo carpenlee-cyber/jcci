@@ -1,0 +1,81 @@
+================================================================================
+向上调用链分析 - 元数据信息
+================================================================================
+项目: mall
+用户名: carpenlee-cyber
+Git URL: https://github.com/carpenlee-cyber/mall.git
+Commit范围: N/A..N/A
+分析版本: 3.1
+最大深度: 5
+总变更方法数: 9
+成功分析: 9
+失败分析: 0
+
+功能启用状态:
+  - 类层次分析 (CHA): 否
+  - 入口检测: 是
+
+================================================================================
+
+
+向上调用链分析（影响面：谁调用了变更方法？）
+
+================================================================================
+🎯 发现的入口点 (9个):
+================================================================================
+  1. SmsCouponController.delete(入口) [CONTROLLER_BY_CONVENTION]
+     关联的调用链:
+       - 调用链 1: MODIFIED方法 SmsCouponController.delete
+  2. SmsFlashPromotionController.getItem(入口) [CONTROLLER_BY_CONVENTION]
+     关联的调用链:
+       - 调用链 2: MODIFIED方法 SmsFlashPromotionController.getItem
+  3. SmsFlashPromotionController.update(入口) [CONTROLLER_BY_CONVENTION]
+     关联的调用链:
+       - 调用链 3: MODIFIED方法 SmsFlashPromotionController.update
+  4. SmsFlashPromotionProductRelationController.delete(入口) [CONTROLLER_BY_CONVENTION]
+     关联的调用链:
+       - 调用链 4: MODIFIED方法 SmsFlashPromotionProductRelationController.delete
+  5. SmsFlashPromotionProductRelationController.update(入口) [CONTROLLER_BY_CONVENTION]
+     关联的调用链:
+       - 调用链 5: MODIFIED方法 SmsFlashPromotionProductRelationController.update
+  6. SmsFlashPromotionSessionController.updateStatus(入口) [CONTROLLER_BY_CONVENTION]
+     关联的调用链:
+       - 调用链 6: MODIFIED方法 SmsFlashPromotionSessionController.updateStatus
+  7. UmsMenuController.list(入口) [CONTROLLER_BY_CONVENTION]
+     关联的调用链:
+       - 调用链 7: MODIFIED方法 UmsMenuController.list
+  8. UmsMenuController.updateHidden(入口) [CONTROLLER_BY_CONVENTION]
+     关联的调用链:
+       - 调用链 8: MODIFIED方法 UmsMenuController.updateHidden
+  9. UmsRoleController.listMenu(入口) [CONTROLLER_BY_CONVENTION]
+     关联的调用链:
+       - 调用链 9: MODIFIED方法 UmsRoleController.listMenu
+
+================================================================================
+
+调用链 1：MODIFIED方法 SmsCouponController.delete
+SmsCouponController.delete (UNKNOWN)(入口)
+
+调用链 2：MODIFIED方法 SmsFlashPromotionController.getItem
+SmsFlashPromotionController.getItem (UNKNOWN)(入口)
+
+调用链 3：MODIFIED方法 SmsFlashPromotionController.update
+SmsFlashPromotionController.update (UNKNOWN)(入口)
+
+调用链 4：MODIFIED方法 SmsFlashPromotionProductRelationController.delete
+SmsFlashPromotionProductRelationController.delete (UNKNOWN)(入口)
+
+调用链 5：MODIFIED方法 SmsFlashPromotionProductRelationController.update
+SmsFlashPromotionProductRelationController.update (UNKNOWN)(入口)
+
+调用链 6：MODIFIED方法 SmsFlashPromotionSessionController.updateStatus
+SmsFlashPromotionSessionController.updateStatus (UNKNOWN)(入口)
+
+调用链 7：MODIFIED方法 UmsMenuController.list
+UmsMenuController.list (UNKNOWN)(入口)
+
+调用链 8：MODIFIED方法 UmsMenuController.updateHidden
+UmsMenuController.updateHidden (UNKNOWN)(入口)
+
+调用链 9：MODIFIED方法 UmsRoleController.listMenu
+UmsRoleController.listMenu (UNKNOWN)(入口)

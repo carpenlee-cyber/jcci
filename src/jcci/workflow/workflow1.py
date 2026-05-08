@@ -50,15 +50,11 @@ def workflow1():
     git_url = 'https://github.com/carpenlee-cyber/mall.git'
     username = 'carpenlee-cyber'
     
-    # 方式1：使用Git Tag（测试tag分析功能）- 符合生产规范
-    tag_old = 'TEST_BASELINE_20260403_01'      # 测试基线版本 - 2026年4月3日 v01
-    tag_new = 'TEST_V1.2_20260404_01'          # 测试版本v1.2 - 混合变更场景 - 2026年4月4日 v01
+    # 方式1：使用commit hash（用于开发测试）
+    tag_old = 'dd6569c3558f79af5b21aad601349e0f029b9a6d'
+    tag_new = '521d31d04647a13b2db320f1ea60e699608dae02'    
     
-    # 方式2：使用commit hash（用于开发测试）
-    # tag_old = 'd9501e9'  # Update README.md
-    # tag_new = '41e323e'  # test: 第二次测试
-    
-    # 方式3：使用长tag名称（生产环境示例）
+    # 方式2：使用长tag名称（生产环境示例）
     # tag_old = 'MIX_LJ01.BUP_BUP3_UAT_UAT_00.00.01_SUMMER_20260403_01'
     # tag_new = 'MIX_LJ01.BUP_BUP3_UAT_UAT_00.00.01_SUMMER_20260403_02'
     
@@ -133,19 +129,19 @@ def workflow1():
         )
         logger.info(downwards_text)
         
-        # 将结果写入文件（创建以commit范围命名的子目录）
-        output_dir = os.path.join(project_root, "src", "jcci", "analyze_result", 
-                                 f"mall_{commit_old}..{commit_new}")
-        os.makedirs(output_dir, exist_ok=True)
+        # 将结果写入文件（使用新的目录结构：基线目录/版本子目录）
+        baseline_dir = os.path.join(project_root, "src", "jcci", "analyze_result", f"mall_{commit_old}")
+        version_subdir = os.path.join(baseline_dir, commit_new)
+        os.makedirs(version_subdir, exist_ok=True)
         
-        # 写入向上调用链（文件名简化，因为已经在子目录中）
-        upwards_file = os.path.join(output_dir, "upwards.txt")
+        # 写入向上调用链
+        upwards_file = os.path.join(version_subdir, "upwards.txt")
         with open(upwards_file, 'w', encoding='utf-8') as f:
             f.write(upwards_text)
         logger.info(f"向上调用链已保存到: {upwards_file}")
         
         # 写入向下调用链
-        downwards_file = os.path.join(output_dir, "downwards.txt")
+        downwards_file = os.path.join(version_subdir, "downwards.txt")
         with open(downwards_file, 'w', encoding='utf-8') as f:
             f.write(downwards_text)
         logger.info(f"向下调用链已保存到: {downwards_file}")
@@ -203,7 +199,8 @@ def workflow1():
             # 延迟2秒后自动打开浏览器
             def open_browser():
                 time.sleep(2)
-                webbrowser.open(f"http://localhost:{STREAMLIT_PORT}")
+                # 使用baseline参数实现基线隔离
+                webbrowser.open(f"http://localhost:{STREAMLIT_PORT}/?baseline=mall_{commit_old}")
             
             # 启动浏览器打开线程
             browser_thread = threading.Thread(target=open_browser, daemon=True)

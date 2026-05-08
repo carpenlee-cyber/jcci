@@ -13,11 +13,10 @@ import streamlit as st
 import json
 import os
 import sqlite3
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Optional
 import requests
 import time
 import uuid
-import hashlib
 
 # 导入配置
 try:
@@ -52,6 +51,47 @@ def get_user_session_id():
     return st.session_state.user_session_id
 
 
+def get_session_db_path(commit_range: str = None) -> str:
+    """
+    获取当前会话的数据库路径
+    
+    Args:
+        commit_range: commit范围标识符（格式：baseline..version），用于确定基线数据库
+        
+    Returns:
+        str: 会话专用的数据库路径
+    """
+    if 'session_db_path' not in st.session_state or commit_range:
+        # 根据commit范围确定基线数据库
+        if commit_range:
+            # 从commit范围提取基线标识符（格式：mall_20260403_01..20260404_01）
+            if '..' in commit_range:
+                baseline_name = commit_range.split('..')[0]
+            else:
+                baseline_name = commit_range
+            
+            # 构造基线数据库文件名
+            db_filename = f"{baseline_name}_baseline.db"
+            
+            # 首先尝试在analyze_result的基线目录中查找
+            baseline_dir = os.path.join(RESULT_DIR, baseline_name)
+            db_path = os.path.join(baseline_dir, db_filename)
+            
+            # 验证数据库文件是否存在
+            if not os.path.exists(db_path):
+                st.error(f"❌ 基线数据库不存在: {db_path}")
+                st.error("💡 提示：请确保已运行workflow1.py生成基线数据库")
+                st.stop()
+            
+            st.session_state.session_db_path = db_path
+            st.session_state.current_commit_range = commit_range
+        else:
+            # 默认使用配置中的数据库路径
+            st.session_state.session_db_path = DB_PATH
+    
+    return st.session_state.session_db_path
+
+
 # 页面配置
 st.set_page_config(
     page_title="JCCI 调用链分析平台",
@@ -81,12 +121,15 @@ def load_text_file(filepath: str) -> str:
 
 
 @st.cache_data(ttl=3600)
-def query_database(query: str, params: tuple = ()) -> List[Dict]:
+def query_database(query: str, params: tuple = (), db_path: str = None) -> List[Dict]:
     """查询数据库（带缓存）"""
-    if not os.path.exists(DB_PATH):
+    if db_path is None:
+        db_path = get_session_db_path()
+    
+    if not os.path.exists(db_path):
         return []
     
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
     
@@ -161,7 +204,8 @@ def save_to_llm_cache(analysis_type: str, direction: str, class_name: str,
                       total_tokens: int = 0, analysis_duration: float = 0.0,
                       session_id: str = "") -> bool:
     """保存LLM分析结果到缓存表"""
-    conn = sqlite3.connect(DB_PATH)
+    db_path = get_session_db_path()
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     
     try:
@@ -194,7 +238,8 @@ def get_from_llm_cache(analysis_type: str, direction: str, class_name: str,
                        method_name: str, change_type: str,
                        chain_index: Optional[int] = None) -> Optional[str]:
     """从缓存表获取LLM分析结果"""
-    conn = sqlite3.connect(DB_PATH)
+    db_path = get_session_db_path()
+    conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
     
@@ -340,7 +385,7 @@ def analyze_single_method(method_info: Dict, db_info: Dict, direction: str = 'up
         # 如果有方法体，添加方法体信息
         body = db_info.get('body')
         if body and isinstance(body, list):
-            prompt += f"\n【方法实现】\n```java\n" + "\n".join(body) + "\n```\n"
+            prompt += "\n【方法实现】\n```java\n" + "\n".join(body) + "\n```\n"
     
     prompt += """
 【分析要求】
@@ -369,7 +414,6 @@ def analyze_single_method(method_info: Dict, db_info: Dict, direction: str = 'up
 请按照以上结构给出详细分析。"""
     
     # 调用LLM API并计时
-    import time
     start_time = time.time()
     result = call_llm_api(prompt, system_prompt)
     duration = time.time() - start_time
@@ -415,7 +459,6 @@ def analyze_call_chain(chain_data: Dict, direction: str, force_fresh: bool = Fal
     """
     method_info = chain_data.get('method_info', {})
     entry_points = chain_data.get('entry_points', [])
-    chain = chain_data.get('chain', {})
     
     class_name = method_info.get('class_name', '')
     method_name = method_info.get('method_name', '')
@@ -502,7 +545,6 @@ def analyze_call_chain(chain_data: Dict, direction: str, force_fresh: bool = Fal
 请按照以上结构给出详细分析。"""
     
     # 调用LLM API并计时
-    import time
     start_time = time.time()
     result = call_llm_api(prompt, system_prompt)
     duration = time.time() - start_time
@@ -531,52 +573,91 @@ def analyze_call_chain(chain_data: Dict, direction: str, force_fresh: bool = Fal
 
 
 # ==================== UI渲染函数 ====================
-def render_sidebar():
-    """渲染侧边栏"""
+def render_sidebar(baseline_param: str = None):
+    """渲染侧边栏
+    
+    Args:
+        baseline_param: 从URL参数传入的基线名称（可选）
+    """
     st.sidebar.title("📊 JCCI 分析平台")
     
     st.sidebar.markdown("---")
     st.sidebar.subheader("📁 选择分析结果")
     
-    # 列出所有可用的分析结果子目录
-    subdirs = [d for d in os.listdir(RESULT_DIR) 
-               if os.path.isdir(os.path.join(RESULT_DIR, d)) and not d.startswith('.')]
+    # 列出所有可用的基线目录
+    baseline_dirs = [d for d in os.listdir(RESULT_DIR) 
+                     if os.path.isdir(os.path.join(RESULT_DIR, d)) and not d.startswith('.')]
     
-    if not subdirs:
+    if not baseline_dirs:
         st.sidebar.warning("未找到分析结果目录")
         return None
     
-    # 提取commit范围（从子目录名）
-    commit_ranges = sorted(subdirs, reverse=True)
+    # 如果有baseline参数，优先使用该基线
+    if baseline_param and baseline_param in baseline_dirs:
+        selected_baseline = baseline_param
+        st.sidebar.info(f"🎯 已从URL加载基线: {selected_baseline}")
+    else:
+        # 否则让用户选择
+        baseline_dirs_sorted = sorted(baseline_dirs, reverse=True)
+        selected_baseline = st.sidebar.selectbox(
+            "基线版本",
+            options=baseline_dirs_sorted,
+            format_func=lambda x: x.replace('_', ' ')
+        )
     
-    selected_range = st.sidebar.selectbox(
-        "Commit范围",
-        options=commit_ranges,
+    if not selected_baseline:
+        return None
+    
+    # 获取基线目录路径
+    baseline_dir = os.path.join(RESULT_DIR, selected_baseline)
+    
+    # 列出该基线下的所有版本子目录
+    version_subdirs = [d for d in os.listdir(baseline_dir) 
+                       if os.path.isdir(os.path.join(baseline_dir, d)) and not d.startswith('.')]
+    
+    if not version_subdirs:
+        st.sidebar.warning(f"基线 {selected_baseline} 下没有版本数据")
+        return None
+    
+    # 让用户选择版本
+    version_subdirs_sorted = sorted(version_subdirs, reverse=True)
+    selected_version = st.sidebar.selectbox(
+        "目标版本",
+        options=version_subdirs_sorted,
         format_func=lambda x: x.replace('_', ' ')
     )
     
-    if not selected_range:
+    if not selected_version:
         return None
     
-    # 构建文件路径（在子目录中查找）
-    subdir_path = os.path.join(RESULT_DIR, selected_range)
-    upwards_json = os.path.join(subdir_path, "upwards_call_chains.json")
-    downwards_json = os.path.join(subdir_path, "downwards_call_chains.json")
-    upwards_txt = os.path.join(subdir_path, "upwards.txt")
-    downwards_txt = os.path.join(subdir_path, "downwards.txt")
+    # 设置当前会话的数据库路径（使用基线目录）
+    get_session_db_path(selected_baseline)
+    
+    # 构建文件路径（在版本子目录中查找）
+    version_dir = os.path.join(baseline_dir, selected_version)
+    upwards_json = os.path.join(version_dir, "upwards_call_chains.json")
+    downwards_json = os.path.join(version_dir, "downwards_call_chains.json")
+    upwards_txt = os.path.join(version_dir, "upwards.txt")
+    downwards_txt = os.path.join(version_dir, "downwards.txt")
     
     # 检查文件是否存在
     if not all(os.path.exists(f) for f in [upwards_json, downwards_json, upwards_txt, downwards_txt]):
-        st.sidebar.error(f"子目录 {selected_range} 中的文件不完整")
+        st.sidebar.error(f"版本目录 {selected_version} 中的文件不完整")
         return None
+    
+    # commit_range用于显示，格式为 baseline..version
+    commit_range = f"{selected_baseline}..{selected_version}"
     
     return {
         'upwards_json': upwards_json,
         'downwards_json': downwards_json,
         'upwards_txt': upwards_txt,
         'downwards_txt': downwards_txt,
-        'commit_range': selected_range,
-        'subdir_path': subdir_path
+        'commit_range': commit_range,
+        'baseline_dir': baseline_dir,
+        'version_dir': version_dir,
+        'selected_baseline': selected_baseline,
+        'selected_version': selected_version
     }
 
 
@@ -807,15 +888,27 @@ def main():
         local_ip = socket.gethostbyname(hostname)
         share_url = f"http://{local_ip}:{STREAMLIT_PORT}/?session={user_session_id}"
         st.info(f"分享链接: `{share_url}`")
-    except:
+    except Exception:
         pass
     
+    # 从URL参数获取baseline（如果存在）
+    query_params = st.query_params
+    baseline_param = query_params.get("baseline", None)
+    
+    if baseline_param:
+        st.sidebar.success(f"✅ 基线隔离已启用: {baseline_param}")
+    
     # 侧边栏
-    file_paths = render_sidebar()
+    file_paths = render_sidebar(baseline_param)
     
     if not file_paths:
         st.warning("请先在侧边栏选择一个分析结果")
         return
+    
+    # 显示当前使用的数据库信息
+    current_db_path = get_session_db_path(file_paths['commit_range'])
+    st.sidebar.success("✅ 数据库隔离已启用")
+    st.sidebar.info(f"📁 基线数据库: {os.path.basename(current_db_path)}")
     
     # 加载数据
     with st.spinner("正在加载数据..."):

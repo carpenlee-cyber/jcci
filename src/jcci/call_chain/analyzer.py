@@ -50,7 +50,7 @@ def _get_baseline_db_path(username: str, project_name: str, commit_old: str, out
         username: Git 用户名（保留参数以兼容调用方）
         project_name: 项目名称
         commit_old: 旧版本 commit hash或tag
-        output_dir: 输出目录（可选，默认为jcci根目录）
+        output_dir: 输出目录（可选，默认为analyze_result/{project_name}_{commit_old}）
     
     Returns:
         str: 基线数据库完整路径
@@ -59,14 +59,17 @@ def _get_baseline_db_path(username: str, project_name: str, commit_old: str, out
     
     # 使用标准化后的短标识符
     commit_short = _normalize_commit_or_tag(commit_old)
-    db_filename = f"{project_name}_baseline_{commit_short}.db"
+    db_filename = f"{project_name}_{commit_short}_baseline.db"
     
     if output_dir:
-        # 如果指定了输出目录，保存到该目录
+        # 如果指定了输出目录，保存到该目录（output_dir现在是基线目录）
         return os.path.join(output_dir, db_filename)
     else:
-        # 否则保存到jcci根目录（向后兼容）
-        return os.path.join(config.db_path, db_filename)
+        # 否则保存到analyze_result/{project_name}_{commit_old}目录
+        base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'analyze_result')
+        baseline_dir = os.path.join(base_dir, f"{project_name}_{commit_short}")
+        os.makedirs(baseline_dir, exist_ok=True)
+        return os.path.join(baseline_dir, db_filename)
 
 
 def _extract_method_signature(method_name: str, parameters_json: str) -> str:
@@ -196,14 +199,18 @@ def build_call_chains_for_changes(
     # 提取项目名称
     project_name = git_url.split('/')[-1].split('.git')[0]
     
-    # 设置默认输出目录（创建以commit范围命名的子目录）
+    # 标准化commit标识符
+    commit_old_short = _normalize_commit_or_tag(commit_old)
+    commit_new_short = _normalize_commit_or_tag(commit_new)
+    
+    # 设置默认输出目录（基线目录）
     if output_dir is None:
         base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'analyze_result')
-        output_dir = os.path.join(base_dir, f"{project_name}_{commit_old}..{commit_new}")
+        output_dir = os.path.join(base_dir, f"{project_name}_{commit_old_short}")
     
     os.makedirs(output_dir, exist_ok=True)
     
-    # 构造基线数据库路径（保存到output_dir）
+    # 构造基线数据库路径（保存到基线目录）
     baseline_db_path = _get_baseline_db_path(username, project_name, commit_old, output_dir)
     logger.info(f"基线数据库路径: {baseline_db_path}")
     
@@ -286,11 +293,13 @@ def build_call_chains_for_changes(
     # === 步骤5: 结果组织与保存 ===
     logger.info("\n[4/4] 整理结果并保存...")
     
+    # 构造版本子目录（用于存放调用链分析结果）
+    version_subdir = os.path.join(output_dir, commit_new_short)
+    os.makedirs(version_subdir, exist_ok=True)
+    
     # 构造输出文件名
-    commit_old_short = commit_old[:7] if len(commit_old) > 7 else commit_old
-    commit_new_short = commit_new[:7] if len(commit_new) > 7 else commit_new
-    output_filename = f"{commit_old_short}..{commit_new_short}_call_chains.json"
-    output_filepath = os.path.join(output_dir, output_filename)
+    output_filename = f"call_chains.json"
+    output_filepath = os.path.join(version_subdir, output_filename)
     
     # 组织结果
     result = {
@@ -298,8 +307,8 @@ def build_call_chains_for_changes(
             "username": username,
             "git_url": git_url,
             "project_name": project_name,
-            "commit_old": commit_old,
-            "commit_new": commit_new,
+            "baseline_commit": commit_old,
+            "target_commit": commit_new,
             "total_methods": len(changed_methods),
             "successful_chains": len(call_chains),
             "failed_chains": len(failed_methods),
@@ -402,9 +411,13 @@ def build_upwards_call_chains(
     """
     project_name = git_url.split('/')[-1].split('.git')[0]
     
+    # 标准化commit标识符
+    commit_old_short = _normalize_commit_or_tag(commit_old)
+    commit_new_short = _normalize_commit_or_tag(commit_new)
+    
     if output_dir is None:
         base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'analyze_result')
-        output_dir = os.path.join(base_dir, f"{project_name}_{commit_old}..{commit_new}")
+        output_dir = os.path.join(base_dir, f"{project_name}_{commit_old_short}")
     
     os.makedirs(output_dir, exist_ok=True)
     
@@ -553,10 +566,13 @@ def build_upwards_call_chains(
         coverage_rate = (global_coverage['methods_with_callers'] / 
                         global_coverage['total_methods'] * 100)
     
-    # 使用传入的已标准化短标识符（不再截取），去掉用户名
+    # 构造版本子目录（用于存放调用链分析结果）
+    version_subdir = os.path.join(output_dir, commit_new_short)
+    os.makedirs(version_subdir, exist_ok=True)
+    
     # 由于已经在以commit范围命名的子目录中，文件名可以简化
     output_filename = f"upwards_call_chains.json"
-    output_filepath = os.path.join(output_dir, output_filename)
+    output_filepath = os.path.join(version_subdir, output_filename)
     
     result = {
         "metadata": {
@@ -565,8 +581,8 @@ def build_upwards_call_chains(
             "username": username,
             "git_url": git_url,
             "project_name": project_name,
-            "commit_old": commit_old,
-            "commit_new": commit_new,
+            "baseline_commit": commit_old,
+            "target_commit": commit_new,
             "total_methods": len(changed_methods),
             "successful_chains": len(results),
             "failed_chains": len(failed),
@@ -625,9 +641,13 @@ def build_downwards_call_chains(
     """
     project_name = git_url.split('/')[-1].split('.git')[0]
     
+    # 标准化commit标识符
+    commit_old_short = _normalize_commit_or_tag(commit_old)
+    commit_new_short = _normalize_commit_or_tag(commit_new)
+    
     if output_dir is None:
         base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'analyze_result')
-        output_dir = os.path.join(base_dir, f"{project_name}_{commit_old}..{commit_new}")
+        output_dir = os.path.join(base_dir, f"{project_name}_{commit_old_short}")
     
     os.makedirs(output_dir, exist_ok=True)
     
@@ -691,10 +711,13 @@ def build_downwards_call_chains(
                 "error": str(e)
             })
     
-    # 使用传入的已标准化短标识符（不再截取），去掉用户名
+    # 构造版本子目录（用于存放调用链分析结果）
+    version_subdir = os.path.join(output_dir, commit_new_short)
+    os.makedirs(version_subdir, exist_ok=True)
+    
     # 由于已经在以commit范围命名的子目录中，文件名可以简化
     output_filename = f"downwards_call_chains.json"
-    output_filepath = os.path.join(output_dir, output_filename)
+    output_filepath = os.path.join(version_subdir, output_filename)
     
     result = {
         "metadata": {
@@ -703,8 +726,8 @@ def build_downwards_call_chains(
             "username": username,
             "git_url": git_url,
             "project_name": project_name,
-            "commit_old": commit_old,
-            "commit_new": commit_new,
+            "baseline_commit": commit_old,
+            "target_commit": commit_new,
             "total_methods": len(changed_methods),
             "successful_chains": len(results),
             "failed_chains": len(failed),
