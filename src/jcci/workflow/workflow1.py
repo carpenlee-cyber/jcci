@@ -48,8 +48,8 @@ def extract_short_tag(tag: str) -> str:
     if len(tag) == 40 and re.match(r'^[0-9a-f]{40}$', tag, re.IGNORECASE):
         # Commit hash：截取前8位
         return tag[:8]
-    elif len(tag) > 11:
-        # 长tag：取最后11个字符
+    elif '_' in tag or len(tag) > 11:
+        # Git Tag（包含下划线或长度>11）：取最后11个字符
         return tag[-11:]
     else:
         # 短标识符：保持不变
