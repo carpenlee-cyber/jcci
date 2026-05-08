@@ -1,0 +1,509 @@
+================================================================================
+向下调用链分析 - 元数据信息
+================================================================================
+项目: mall
+用户名: carpenlee-cyber
+Git URL: https://github.com/carpenlee-cyber/mall.git
+Commit范围: N/A..N/A
+分析版本: 3.1
+最大深度: 5
+总变更方法数: 16
+成功分析: 16
+失败分析: 0
+
+================================================================================
+
+
+向下调用链分析（功能风险：变更方法调用了谁？）
+
+调用链 1：MODIFIED方法 SmsCouponController.delete
+SmsCouponController.delete (MODIFIED)
+	--行号43-->
+	SmsCouponService.delete (UNCHANGED)
+	--行号45-->
+	CommonResult.success (UNCHANGED)
+		--行号36,36-->
+		SUCCESS.getCode (UNKNOWN)
+		--行号36,36-->
+		SUCCESS.getMessage (UNKNOWN)
+	--行号45-->
+	CommonResult.success (UNCHANGED)
+		--行号36,36-->
+		SUCCESS.getCode (UNKNOWN)
+		--行号36,36-->
+		SUCCESS.getMessage (UNKNOWN)
+	--行号47-->
+	CommonResult.failed (UNCHANGED)
+		--行号78-->
+		CommonResult.failed (UNCHANGED)
+			--行号54,54-->
+			IErrorCode.getCode (UNCHANGED)
+			--行号54,54-->
+			IErrorCode.getMessage (UNCHANGED)
+
+调用链 2：MODIFIED方法 SmsCouponController.update
+SmsCouponController.update (MODIFIED)
+	--行号54-->
+	SmsCouponService.update (UNCHANGED)
+	--行号56-->
+	CommonResult.success (UNCHANGED)
+		--行号36,36-->
+		SUCCESS.getCode (UNKNOWN)
+		--行号36,36-->
+		SUCCESS.getMessage (UNKNOWN)
+	--行号56-->
+	CommonResult.success (UNCHANGED)
+		--行号36,36-->
+		SUCCESS.getCode (UNKNOWN)
+		--行号36,36-->
+		SUCCESS.getMessage (UNKNOWN)
+	--行号58-->
+	CommonResult.failed (UNCHANGED)
+		--行号78-->
+		CommonResult.failed (UNCHANGED)
+			--行号54,54-->
+			IErrorCode.getCode (UNCHANGED)
+			--行号54,54-->
+			IErrorCode.getMessage (UNCHANGED)
+
+调用链 3：MODIFIED方法 SmsFlashPromotionController.getItem
+SmsFlashPromotionController.getItem (MODIFIED)
+	--行号86-->
+	SmsFlashPromotionService.list (UNCHANGED)
+	--行号87,87-->
+	CommonPage.restPage (UNCHANGED)
+		--行号40-->
+		CommonPage<T>.setTotalPage (UNKNOWN)
+		--行号40,40-->
+		PageInfo<T>.getPages (UNKNOWN)
+		--行号41-->
+		CommonPage<T>.setPageNum (UNKNOWN)
+		--行号41,41-->
+		PageInfo<T>.getPageNum (UNKNOWN)
+		--行号42-->
+		CommonPage<T>.setPageSize (UNKNOWN)
+		--行号42,42-->
+		PageInfo<T>.getPageSize (UNKNOWN)
+		--行号43-->
+		CommonPage<T>.setTotal (UNKNOWN)
+		--行号43,43-->
+		PageInfo<T>.getTotal (UNKNOWN)
+		--行号44-->
+		CommonPage<T>.setList (UNKNOWN)
+		--行号44,44-->
+		PageInfo<T>.getList (UNKNOWN)
+	--行号87,87-->
+	CommonPage.restPage (UNCHANGED)
+		--行号40-->
+		CommonPage<T>.setTotalPage (UNKNOWN)
+		--行号40,40-->
+		PageInfo<T>.getPages (UNKNOWN)
+		--行号41-->
+		CommonPage<T>.setPageNum (UNKNOWN)
+		--行号41,41-->
+		PageInfo<T>.getPageNum (UNKNOWN)
+		--行号42-->
+		CommonPage<T>.setPageSize (UNKNOWN)
+		--行号42,42-->
+		PageInfo<T>.getPageSize (UNKNOWN)
+		--行号43-->
+		CommonPage<T>.setTotal (UNKNOWN)
+		--行号43,43-->
+		PageInfo<T>.getTotal (UNKNOWN)
+		--行号44-->
+		CommonPage<T>.setList (UNKNOWN)
+		--行号44,44-->
+		PageInfo<T>.getList (UNKNOWN)
+	--行号87-->
+	CommonResult.success (UNCHANGED)
+		--行号36,36-->
+		SUCCESS.getCode (UNKNOWN)
+		--行号36,36-->
+		SUCCESS.getMessage (UNKNOWN)
+	--行号87-->
+	CommonResult.success (UNCHANGED)
+		--行号36,36-->
+		SUCCESS.getCode (UNKNOWN)
+		--行号36,36-->
+		SUCCESS.getMessage (UNKNOWN)
+
+调用链 4：MODIFIED方法 SmsFlashPromotionController.update
+SmsFlashPromotionController.update (MODIFIED)
+	--行号65-->
+	SmsFlashPromotionService.updateStatus (UNCHANGED)
+	--行号67-->
+	CommonResult.success (UNCHANGED)
+		--行号36,36-->
+		SUCCESS.getCode (UNKNOWN)
+		--行号36,36-->
+		SUCCESS.getMessage (UNKNOWN)
+	--行号67-->
+	CommonResult.success (UNCHANGED)
+		--行号36,36-->
+		SUCCESS.getCode (UNKNOWN)
+		--行号36,36-->
+		SUCCESS.getMessage (UNKNOWN)
+	--行号69-->
+	CommonResult.failed (UNCHANGED)
+		--行号78-->
+		CommonResult.failed (UNCHANGED)
+			--行号54,54-->
+			IErrorCode.getCode (UNCHANGED)
+			--行号54,54-->
+			IErrorCode.getMessage (UNCHANGED)
+
+调用链 5：MODIFIED方法 SmsFlashPromotionProductRelationController.delete
+SmsFlashPromotionProductRelationController.delete (MODIFIED)
+	--行号55-->
+	SmsFlashPromotionProductRelationService.delete (UNCHANGED)
+	--行号57-->
+	CommonResult.success (UNCHANGED)
+		--行号36,36-->
+		SUCCESS.getCode (UNKNOWN)
+		--行号36,36-->
+		SUCCESS.getMessage (UNKNOWN)
+	--行号57-->
+	CommonResult.success (UNCHANGED)
+		--行号36,36-->
+		SUCCESS.getCode (UNKNOWN)
+		--行号36,36-->
+		SUCCESS.getMessage (UNKNOWN)
+	--行号59-->
+	CommonResult.failed (UNCHANGED)
+		--行号78-->
+		CommonResult.failed (UNCHANGED)
+			--行号54,54-->
+			IErrorCode.getCode (UNCHANGED)
+			--行号54,54-->
+			IErrorCode.getMessage (UNCHANGED)
+
+调用链 6：MODIFIED方法 SmsFlashPromotionProductRelationController.update
+SmsFlashPromotionProductRelationController.update (MODIFIED)
+	--行号44-->
+	SmsFlashPromotionProductRelationService.update (UNCHANGED)
+	--行号46-->
+	CommonResult.success (UNCHANGED)
+		--行号36,36-->
+		SUCCESS.getCode (UNKNOWN)
+		--行号36,36-->
+		SUCCESS.getMessage (UNKNOWN)
+	--行号46-->
+	CommonResult.success (UNCHANGED)
+		--行号36,36-->
+		SUCCESS.getCode (UNKNOWN)
+		--行号36,36-->
+		SUCCESS.getMessage (UNKNOWN)
+	--行号48-->
+	CommonResult.failed (UNCHANGED)
+		--行号78-->
+		CommonResult.failed (UNCHANGED)
+			--行号54,54-->
+			IErrorCode.getCode (UNCHANGED)
+			--行号54,54-->
+			IErrorCode.getMessage (UNCHANGED)
+
+调用链 7：MODIFIED方法 SmsFlashPromotionSessionController.updateStatus
+SmsFlashPromotionSessionController.updateStatus (MODIFIED)
+	--行号54-->
+	SmsFlashPromotionSessionService.updateStatus (UNCHANGED)
+	--行号56-->
+	CommonResult.success (UNCHANGED)
+		--行号36,36-->
+		SUCCESS.getCode (UNKNOWN)
+		--行号36,36-->
+		SUCCESS.getMessage (UNKNOWN)
+	--行号56-->
+	CommonResult.success (UNCHANGED)
+		--行号36,36-->
+		SUCCESS.getCode (UNKNOWN)
+		--行号36,36-->
+		SUCCESS.getMessage (UNKNOWN)
+	--行号58-->
+	CommonResult.failed (UNCHANGED)
+		--行号78-->
+		CommonResult.failed (UNCHANGED)
+			--行号54,54-->
+			IErrorCode.getCode (UNCHANGED)
+			--行号54,54-->
+			IErrorCode.getMessage (UNCHANGED)
+
+调用链 8：MODIFIED方法 SmsHomeAdvertiseController.delete
+SmsHomeAdvertiseController.delete (MODIFIED)
+	--行号42-->
+	SmsHomeAdvertiseService.delete (UNCHANGED)
+	--行号44-->
+	CommonResult.success (UNCHANGED)
+		--行号36,36-->
+		SUCCESS.getCode (UNKNOWN)
+		--行号36,36-->
+		SUCCESS.getMessage (UNKNOWN)
+	--行号44-->
+	CommonResult.success (UNCHANGED)
+		--行号36,36-->
+		SUCCESS.getCode (UNKNOWN)
+		--行号36,36-->
+		SUCCESS.getMessage (UNKNOWN)
+	--行号45-->
+	CommonResult.failed (UNCHANGED)
+		--行号78-->
+		CommonResult.failed (UNCHANGED)
+			--行号54,54-->
+			IErrorCode.getCode (UNCHANGED)
+			--行号54,54-->
+			IErrorCode.getMessage (UNCHANGED)
+
+调用链 9：MODIFIED方法 SmsHomeAdvertiseController.getItem
+SmsHomeAdvertiseController.getItem (MODIFIED)
+	--行号62-->
+	SmsHomeAdvertiseService.getItem (UNCHANGED)
+	--行号63-->
+	CommonResult.success (UNCHANGED)
+		--行号36,36-->
+		SUCCESS.getCode (UNKNOWN)
+		--行号36,36-->
+		SUCCESS.getMessage (UNKNOWN)
+	--行号63-->
+	CommonResult.success (UNCHANGED)
+		--行号36,36-->
+		SUCCESS.getCode (UNKNOWN)
+		--行号36,36-->
+		SUCCESS.getMessage (UNKNOWN)
+
+调用链 10：MODIFIED方法 SmsHomeAdvertiseController.list
+SmsHomeAdvertiseController.list (MODIFIED)
+	--行号84-->
+	SmsHomeAdvertiseService.list (UNCHANGED)
+	--行号85,85-->
+	CommonPage.restPage (UNCHANGED)
+		--行号40-->
+		CommonPage<T>.setTotalPage (UNKNOWN)
+		--行号40,40-->
+		PageInfo<T>.getPages (UNKNOWN)
+		--行号41-->
+		CommonPage<T>.setPageNum (UNKNOWN)
+		--行号41,41-->
+		PageInfo<T>.getPageNum (UNKNOWN)
+		--行号42-->
+		CommonPage<T>.setPageSize (UNKNOWN)
+		--行号42,42-->
+		PageInfo<T>.getPageSize (UNKNOWN)
+		--行号43-->
+		CommonPage<T>.setTotal (UNKNOWN)
+		--行号43,43-->
+		PageInfo<T>.getTotal (UNKNOWN)
+		--行号44-->
+		CommonPage<T>.setList (UNKNOWN)
+		--行号44,44-->
+		PageInfo<T>.getList (UNKNOWN)
+	--行号85,85-->
+	CommonPage.restPage (UNCHANGED)
+		--行号40-->
+		CommonPage<T>.setTotalPage (UNKNOWN)
+		--行号40,40-->
+		PageInfo<T>.getPages (UNKNOWN)
+		--行号41-->
+		CommonPage<T>.setPageNum (UNKNOWN)
+		--行号41,41-->
+		PageInfo<T>.getPageNum (UNKNOWN)
+		--行号42-->
+		CommonPage<T>.setPageSize (UNKNOWN)
+		--行号42,42-->
+		PageInfo<T>.getPageSize (UNKNOWN)
+		--行号43-->
+		CommonPage<T>.setTotal (UNKNOWN)
+		--行号43,43-->
+		PageInfo<T>.getTotal (UNKNOWN)
+		--行号44-->
+		CommonPage<T>.setList (UNKNOWN)
+		--行号44,44-->
+		PageInfo<T>.getList (UNKNOWN)
+	--行号85-->
+	CommonResult.success (UNCHANGED)
+		--行号36,36-->
+		SUCCESS.getCode (UNKNOWN)
+		--行号36,36-->
+		SUCCESS.getMessage (UNKNOWN)
+	--行号85-->
+	CommonResult.success (UNCHANGED)
+		--行号36,36-->
+		SUCCESS.getCode (UNKNOWN)
+		--行号36,36-->
+		SUCCESS.getMessage (UNKNOWN)
+
+调用链 11：MODIFIED方法 SmsHomeAdvertiseController.update
+SmsHomeAdvertiseController.update (MODIFIED)
+	--行号70-->
+	SmsHomeAdvertiseService.update (UNCHANGED)
+	--行号72-->
+	CommonResult.success (UNCHANGED)
+		--行号36,36-->
+		SUCCESS.getCode (UNKNOWN)
+		--行号36,36-->
+		SUCCESS.getMessage (UNKNOWN)
+	--行号72-->
+	CommonResult.success (UNCHANGED)
+		--行号36,36-->
+		SUCCESS.getCode (UNKNOWN)
+		--行号36,36-->
+		SUCCESS.getMessage (UNKNOWN)
+	--行号73-->
+	CommonResult.failed (UNCHANGED)
+		--行号78-->
+		CommonResult.failed (UNCHANGED)
+			--行号54,54-->
+			IErrorCode.getCode (UNCHANGED)
+			--行号54,54-->
+			IErrorCode.getMessage (UNCHANGED)
+
+调用链 12：MODIFIED方法 SmsHomeNewProductController.create
+SmsHomeNewProductController.create (MODIFIED)
+	--行号32-->
+	SmsHomeNewProductService.create (UNCHANGED)
+	--行号34-->
+	CommonResult.success (UNCHANGED)
+		--行号36,36-->
+		SUCCESS.getCode (UNKNOWN)
+		--行号36,36-->
+		SUCCESS.getMessage (UNKNOWN)
+	--行号34-->
+	CommonResult.success (UNCHANGED)
+		--行号36,36-->
+		SUCCESS.getCode (UNKNOWN)
+		--行号36,36-->
+		SUCCESS.getMessage (UNKNOWN)
+	--行号36-->
+	CommonResult.failed (UNCHANGED)
+		--行号78-->
+		CommonResult.failed (UNCHANGED)
+			--行号54,54-->
+			IErrorCode.getCode (UNCHANGED)
+			--行号54,54-->
+			IErrorCode.getMessage (UNCHANGED)
+
+调用链 13：MODIFIED方法 SmsHomeRecommendSubjectController.create
+SmsHomeRecommendSubjectController.create (MODIFIED)
+	--行号32-->
+	SmsHomeRecommendSubjectService.create (UNCHANGED)
+	--行号34-->
+	CommonResult.success (UNCHANGED)
+		--行号36,36-->
+		SUCCESS.getCode (UNKNOWN)
+		--行号36,36-->
+		SUCCESS.getMessage (UNKNOWN)
+	--行号34-->
+	CommonResult.success (UNCHANGED)
+		--行号36,36-->
+		SUCCESS.getCode (UNKNOWN)
+		--行号36,36-->
+		SUCCESS.getMessage (UNKNOWN)
+	--行号36-->
+	CommonResult.failed (UNCHANGED)
+		--行号78-->
+		CommonResult.failed (UNCHANGED)
+			--行号54,54-->
+			IErrorCode.getCode (UNCHANGED)
+			--行号54,54-->
+			IErrorCode.getMessage (UNCHANGED)
+
+调用链 14：MODIFIED方法 UmsMenuController.list
+UmsMenuController.list (MODIFIED)
+	--行号81-->
+	UmsMenuService.list (UNCHANGED)
+	--行号82,82-->
+	CommonPage.restPage (UNCHANGED)
+		--行号40-->
+		CommonPage<T>.setTotalPage (UNKNOWN)
+		--行号40,40-->
+		PageInfo<T>.getPages (UNKNOWN)
+		--行号41-->
+		CommonPage<T>.setPageNum (UNKNOWN)
+		--行号41,41-->
+		PageInfo<T>.getPageNum (UNKNOWN)
+		--行号42-->
+		CommonPage<T>.setPageSize (UNKNOWN)
+		--行号42,42-->
+		PageInfo<T>.getPageSize (UNKNOWN)
+		--行号43-->
+		CommonPage<T>.setTotal (UNKNOWN)
+		--行号43,43-->
+		PageInfo<T>.getTotal (UNKNOWN)
+		--行号44-->
+		CommonPage<T>.setList (UNKNOWN)
+		--行号44,44-->
+		PageInfo<T>.getList (UNKNOWN)
+	--行号82,82-->
+	CommonPage.restPage (UNCHANGED)
+		--行号40-->
+		CommonPage<T>.setTotalPage (UNKNOWN)
+		--行号40,40-->
+		PageInfo<T>.getPages (UNKNOWN)
+		--行号41-->
+		CommonPage<T>.setPageNum (UNKNOWN)
+		--行号41,41-->
+		PageInfo<T>.getPageNum (UNKNOWN)
+		--行号42-->
+		CommonPage<T>.setPageSize (UNKNOWN)
+		--行号42,42-->
+		PageInfo<T>.getPageSize (UNKNOWN)
+		--行号43-->
+		CommonPage<T>.setTotal (UNKNOWN)
+		--行号43,43-->
+		PageInfo<T>.getTotal (UNKNOWN)
+		--行号44-->
+		CommonPage<T>.setList (UNKNOWN)
+		--行号44,44-->
+		PageInfo<T>.getList (UNKNOWN)
+	--行号82-->
+	CommonResult.success (UNCHANGED)
+		--行号36,36-->
+		SUCCESS.getCode (UNKNOWN)
+		--行号36,36-->
+		SUCCESS.getMessage (UNKNOWN)
+	--行号82-->
+	CommonResult.success (UNCHANGED)
+		--行号36,36-->
+		SUCCESS.getCode (UNKNOWN)
+		--行号36,36-->
+		SUCCESS.getMessage (UNKNOWN)
+
+调用链 15：MODIFIED方法 UmsMenuController.updateHidden
+UmsMenuController.updateHidden (MODIFIED)
+	--行号97-->
+	UmsMenuService.updateHidden (UNCHANGED)
+	--行号99-->
+	CommonResult.success (UNCHANGED)
+		--行号36,36-->
+		SUCCESS.getCode (UNKNOWN)
+		--行号36,36-->
+		SUCCESS.getMessage (UNKNOWN)
+	--行号99-->
+	CommonResult.success (UNCHANGED)
+		--行号36,36-->
+		SUCCESS.getCode (UNKNOWN)
+		--行号36,36-->
+		SUCCESS.getMessage (UNKNOWN)
+	--行号101-->
+	CommonResult.failed (UNCHANGED)
+		--行号78-->
+		CommonResult.failed (UNCHANGED)
+			--行号54,54-->
+			IErrorCode.getCode (UNCHANGED)
+			--行号54,54-->
+			IErrorCode.getMessage (UNCHANGED)
+
+调用链 16：MODIFIED方法 UmsRoleController.listMenu
+UmsRoleController.listMenu (MODIFIED)
+	--行号96-->
+	UmsRoleService.listMenu (UNCHANGED)
+	--行号97-->
+	CommonResult.success (UNCHANGED)
+		--行号36,36-->
+		SUCCESS.getCode (UNKNOWN)
+		--行号36,36-->
+		SUCCESS.getMessage (UNKNOWN)
+	--行号97-->
+	CommonResult.success (UNCHANGED)
+		--行号36,36-->
+		SUCCESS.getCode (UNKNOWN)
+		--行号36,36-->
+		SUCCESS.getMessage (UNKNOWN)

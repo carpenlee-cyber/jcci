@@ -1,0 +1,1972 @@
+{
+  "metadata": {
+    "direction": "downwards",
+    "analysis_version": "3.1",
+    "username": "carpenlee-cyber",
+    "git_url": "https://github.com/carpenlee-cyber/mall.git",
+    "project_name": "mall",
+    "baseline_commit": "dd6569c3",
+    "target_commit": "dd94f3b4",
+    "total_methods": 6,
+    "successful_chains": 6,
+    "failed_chains": 0,
+    "output_file": "c:\\Users\\carpe\\VisualStudioProject\\TestPlatform\\jcci\\src\\jcci\\call_chain\\..\\analyze_result\\mall_dd6569c3\\dd94f3b4\\downwards_call_chains.json",
+    "max_depth": 5
+  },
+  "call_chains": [
+    {
+      "direction": "downwards",
+      "method_info": {
+        "class_name": "SmsFlashPromotionController",
+        "method_name": "getItem",
+        "parameters": "[{\"parameter_type\": \"String\", \"parameter_name\": \"keyword\", \"parameter_varargs\": false}, {\"parameter_type\": \"Integer\", \"parameter_name\": \"pageSize\", \"parameter_varargs\": false}, {\"parameter_type\": \"Integer\", \"parameter_name\": \"pageNum\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult<com.macro.mall.common.api.CommonPage>",
+        "change_type": "MODIFIED"
+      },
+      "package_class": "com.macro.mall.controller.SmsFlashPromotionController",
+      "method_signature": "getItem(String,Integer,Integer)",
+      "chain": {
+        "node_id": "0|com.macro.mall.controller.SmsFlashPromotionController|getItem(String,Integer,Integer)",
+        "package_class": "com.macro.mall.controller.SmsFlashPromotionController",
+        "method_signature": "getItem(String,Integer,Integer)",
+        "method_name": "getItem",
+        "class_name": "SmsFlashPromotionController",
+        "depth": 0,
+        "invocation_lines": [],
+        "is_cyclic": false,
+        "is_leaf": false,
+        "db_method_id": 14291,
+        "root_type": "UNKNOWN",
+        "call_type": "DIRECT",
+        "has_multiple_call_sites": false,
+        "api_paths": [],
+        "change_type": "MODIFIED",
+        "dao_info": null,
+        "children": [
+          {
+            "node_id": "1|com.macro.mall.service.SmsFlashPromotionService|list(String,Integer,Integer)",
+            "package_class": "com.macro.mall.service.SmsFlashPromotionService",
+            "method_signature": "list(String,Integer,Integer)",
+            "method_name": "list",
+            "class_name": "SmsFlashPromotionService",
+            "depth": 1,
+            "invocation_lines": [
+              86
+            ],
+            "is_cyclic": false,
+            "is_leaf": true,
+            "db_method_id": 14171,
+            "root_type": "UNKNOWN",
+            "call_type": "DIRECT",
+            "has_multiple_call_sites": false,
+            "api_paths": [],
+            "change_type": "UNCHANGED",
+            "dao_info": null,
+            "children": []
+          },
+          {
+            "node_id": "1|com.macro.mall.common.api.CommonPage|restPage(List<com.macro.mall.model.SmsFlashPromotion>)",
+            "package_class": "com.macro.mall.common.api.CommonPage",
+            "method_signature": "restPage(List<com.macro.mall.model.SmsFlashPromotion>)",
+            "method_name": "restPage",
+            "class_name": "CommonPage",
+            "depth": 1,
+            "invocation_lines": [
+              87,
+              87
+            ],
+            "is_cyclic": false,
+            "is_leaf": false,
+            "db_method_id": 14111,
+            "root_type": "UNKNOWN",
+            "call_type": "DIRECT",
+            "has_multiple_call_sites": false,
+            "api_paths": [],
+            "change_type": "UNCHANGED",
+            "dao_info": null,
+            "children": [
+              {
+                "node_id": "2|com.macro.mall.common.api.CommonPage<T>|setTotalPage(com.github.pagehelper.PageInfo<T>)",
+                "package_class": "com.macro.mall.common.api.CommonPage<T>",
+                "method_signature": "setTotalPage(com.github.pagehelper.PageInfo<T>)",
+                "method_name": "setTotalPage",
+                "class_name": "CommonPage<T>",
+                "depth": 2,
+                "invocation_lines": [
+                  40
+                ],
+                "is_cyclic": false,
+                "is_leaf": true,
+                "db_method_id": null,
+                "root_type": "UNKNOWN",
+                "call_type": "DIRECT",
+                "has_multiple_call_sites": false,
+                "api_paths": [],
+                "change_type": "UNKNOWN",
+                "dao_info": null,
+                "children": []
+              },
+              {
+                "node_id": "2|com.github.pagehelper.PageInfo<T>|getPages()",
+                "package_class": "com.github.pagehelper.PageInfo<T>",
+                "method_signature": "getPages()",
+                "method_name": "getPages",
+                "class_name": "PageInfo<T>",
+                "depth": 2,
+                "invocation_lines": [
+                  40,
+                  40
+                ],
+                "is_cyclic": false,
+                "is_leaf": true,
+                "db_method_id": null,
+                "root_type": "UNKNOWN",
+                "call_type": "DIRECT",
+                "has_multiple_call_sites": false,
+                "api_paths": [],
+                "change_type": "UNKNOWN",
+                "dao_info": null,
+                "children": []
+              },
+              {
+                "node_id": "2|com.macro.mall.common.api.CommonPage<T>|setPageNum(com.github.pagehelper.PageInfo<T>)",
+                "package_class": "com.macro.mall.common.api.CommonPage<T>",
+                "method_signature": "setPageNum(com.github.pagehelper.PageInfo<T>)",
+                "method_name": "setPageNum",
+                "class_name": "CommonPage<T>",
+                "depth": 2,
+                "invocation_lines": [
+                  41
+                ],
+                "is_cyclic": false,
+                "is_leaf": true,
+                "db_method_id": null,
+                "root_type": "UNKNOWN",
+                "call_type": "DIRECT",
+                "has_multiple_call_sites": false,
+                "api_paths": [],
+                "change_type": "UNKNOWN",
+                "dao_info": null,
+                "children": []
+              },
+              {
+                "node_id": "2|com.github.pagehelper.PageInfo<T>|getPageNum()",
+                "package_class": "com.github.pagehelper.PageInfo<T>",
+                "method_signature": "getPageNum()",
+                "method_name": "getPageNum",
+                "class_name": "PageInfo<T>",
+                "depth": 2,
+                "invocation_lines": [
+                  41,
+                  41
+                ],
+                "is_cyclic": false,
+                "is_leaf": true,
+                "db_method_id": null,
+                "root_type": "UNKNOWN",
+                "call_type": "DIRECT",
+                "has_multiple_call_sites": false,
+                "api_paths": [],
+                "change_type": "UNKNOWN",
+                "dao_info": null,
+                "children": []
+              },
+              {
+                "node_id": "2|com.macro.mall.common.api.CommonPage<T>|setPageSize(com.github.pagehelper.PageInfo<T>)",
+                "package_class": "com.macro.mall.common.api.CommonPage<T>",
+                "method_signature": "setPageSize(com.github.pagehelper.PageInfo<T>)",
+                "method_name": "setPageSize",
+                "class_name": "CommonPage<T>",
+                "depth": 2,
+                "invocation_lines": [
+                  42
+                ],
+                "is_cyclic": false,
+                "is_leaf": true,
+                "db_method_id": null,
+                "root_type": "UNKNOWN",
+                "call_type": "DIRECT",
+                "has_multiple_call_sites": false,
+                "api_paths": [],
+                "change_type": "UNKNOWN",
+                "dao_info": null,
+                "children": []
+              },
+              {
+                "node_id": "2|com.github.pagehelper.PageInfo<T>|getPageSize()",
+                "package_class": "com.github.pagehelper.PageInfo<T>",
+                "method_signature": "getPageSize()",
+                "method_name": "getPageSize",
+                "class_name": "PageInfo<T>",
+                "depth": 2,
+                "invocation_lines": [
+                  42,
+                  42
+                ],
+                "is_cyclic": false,
+                "is_leaf": true,
+                "db_method_id": null,
+                "root_type": "UNKNOWN",
+                "call_type": "DIRECT",
+                "has_multiple_call_sites": false,
+                "api_paths": [],
+                "change_type": "UNKNOWN",
+                "dao_info": null,
+                "children": []
+              },
+              {
+                "node_id": "2|com.macro.mall.common.api.CommonPage<T>|setTotal(com.github.pagehelper.PageInfo<T>)",
+                "package_class": "com.macro.mall.common.api.CommonPage<T>",
+                "method_signature": "setTotal(com.github.pagehelper.PageInfo<T>)",
+                "method_name": "setTotal",
+                "class_name": "CommonPage<T>",
+                "depth": 2,
+                "invocation_lines": [
+                  43
+                ],
+                "is_cyclic": false,
+                "is_leaf": true,
+                "db_method_id": null,
+                "root_type": "UNKNOWN",
+                "call_type": "DIRECT",
+                "has_multiple_call_sites": false,
+                "api_paths": [],
+                "change_type": "UNKNOWN",
+                "dao_info": null,
+                "children": []
+              },
+              {
+                "node_id": "2|com.github.pagehelper.PageInfo<T>|getTotal()",
+                "package_class": "com.github.pagehelper.PageInfo<T>",
+                "method_signature": "getTotal()",
+                "method_name": "getTotal",
+                "class_name": "PageInfo<T>",
+                "depth": 2,
+                "invocation_lines": [
+                  43,
+                  43
+                ],
+                "is_cyclic": false,
+                "is_leaf": true,
+                "db_method_id": null,
+                "root_type": "UNKNOWN",
+                "call_type": "DIRECT",
+                "has_multiple_call_sites": false,
+                "api_paths": [],
+                "change_type": "UNKNOWN",
+                "dao_info": null,
+                "children": []
+              },
+              {
+                "node_id": "2|com.macro.mall.common.api.CommonPage<T>|setList(com.github.pagehelper.PageInfo<T>)",
+                "package_class": "com.macro.mall.common.api.CommonPage<T>",
+                "method_signature": "setList(com.github.pagehelper.PageInfo<T>)",
+                "method_name": "setList",
+                "class_name": "CommonPage<T>",
+                "depth": 2,
+                "invocation_lines": [
+                  44
+                ],
+                "is_cyclic": false,
+                "is_leaf": true,
+                "db_method_id": null,
+                "root_type": "UNKNOWN",
+                "call_type": "DIRECT",
+                "has_multiple_call_sites": false,
+                "api_paths": [],
+                "change_type": "UNKNOWN",
+                "dao_info": null,
+                "children": []
+              },
+              {
+                "node_id": "2|com.github.pagehelper.PageInfo<T>|getList()",
+                "package_class": "com.github.pagehelper.PageInfo<T>",
+                "method_signature": "getList()",
+                "method_name": "getList",
+                "class_name": "PageInfo<T>",
+                "depth": 2,
+                "invocation_lines": [
+                  44,
+                  44
+                ],
+                "is_cyclic": false,
+                "is_leaf": true,
+                "db_method_id": null,
+                "root_type": "UNKNOWN",
+                "call_type": "DIRECT",
+                "has_multiple_call_sites": false,
+                "api_paths": [],
+                "change_type": "UNKNOWN",
+                "dao_info": null,
+                "children": []
+              }
+            ]
+          },
+          {
+            "node_id": "1|com.macro.mall.common.api.CommonPage|restPage(List<T>)",
+            "package_class": "com.macro.mall.common.api.CommonPage",
+            "method_signature": "restPage(List<T>)",
+            "method_name": "restPage",
+            "class_name": "CommonPage",
+            "depth": 1,
+            "invocation_lines": [
+              87,
+              87
+            ],
+            "is_cyclic": false,
+            "is_leaf": false,
+            "db_method_id": 14111,
+            "root_type": "UNKNOWN",
+            "call_type": "DIRECT",
+            "has_multiple_call_sites": false,
+            "api_paths": [],
+            "change_type": "UNCHANGED",
+            "dao_info": null,
+            "children": [
+              {
+                "node_id": "2|com.macro.mall.common.api.CommonPage<T>|setTotalPage(com.github.pagehelper.PageInfo<T>)",
+                "package_class": "com.macro.mall.common.api.CommonPage<T>",
+                "method_signature": "setTotalPage(com.github.pagehelper.PageInfo<T>)",
+                "method_name": "setTotalPage",
+                "class_name": "CommonPage<T>",
+                "depth": 2,
+                "invocation_lines": [
+                  40
+                ],
+                "is_cyclic": false,
+                "is_leaf": true,
+                "db_method_id": null,
+                "root_type": "UNKNOWN",
+                "call_type": "DIRECT",
+                "has_multiple_call_sites": false,
+                "api_paths": [],
+                "change_type": "UNKNOWN",
+                "dao_info": null,
+                "children": []
+              },
+              {
+                "node_id": "2|com.github.pagehelper.PageInfo<T>|getPages()",
+                "package_class": "com.github.pagehelper.PageInfo<T>",
+                "method_signature": "getPages()",
+                "method_name": "getPages",
+                "class_name": "PageInfo<T>",
+                "depth": 2,
+                "invocation_lines": [
+                  40,
+                  40
+                ],
+                "is_cyclic": false,
+                "is_leaf": true,
+                "db_method_id": null,
+                "root_type": "UNKNOWN",
+                "call_type": "DIRECT",
+                "has_multiple_call_sites": false,
+                "api_paths": [],
+                "change_type": "UNKNOWN",
+                "dao_info": null,
+                "children": []
+              },
+              {
+                "node_id": "2|com.macro.mall.common.api.CommonPage<T>|setPageNum(com.github.pagehelper.PageInfo<T>)",
+                "package_class": "com.macro.mall.common.api.CommonPage<T>",
+                "method_signature": "setPageNum(com.github.pagehelper.PageInfo<T>)",
+                "method_name": "setPageNum",
+                "class_name": "CommonPage<T>",
+                "depth": 2,
+                "invocation_lines": [
+                  41
+                ],
+                "is_cyclic": false,
+                "is_leaf": true,
+                "db_method_id": null,
+                "root_type": "UNKNOWN",
+                "call_type": "DIRECT",
+                "has_multiple_call_sites": false,
+                "api_paths": [],
+                "change_type": "UNKNOWN",
+                "dao_info": null,
+                "children": []
+              },
+              {
+                "node_id": "2|com.github.pagehelper.PageInfo<T>|getPageNum()",
+                "package_class": "com.github.pagehelper.PageInfo<T>",
+                "method_signature": "getPageNum()",
+                "method_name": "getPageNum",
+                "class_name": "PageInfo<T>",
+                "depth": 2,
+                "invocation_lines": [
+                  41,
+                  41
+                ],
+                "is_cyclic": false,
+                "is_leaf": true,
+                "db_method_id": null,
+                "root_type": "UNKNOWN",
+                "call_type": "DIRECT",
+                "has_multiple_call_sites": false,
+                "api_paths": [],
+                "change_type": "UNKNOWN",
+                "dao_info": null,
+                "children": []
+              },
+              {
+                "node_id": "2|com.macro.mall.common.api.CommonPage<T>|setPageSize(com.github.pagehelper.PageInfo<T>)",
+                "package_class": "com.macro.mall.common.api.CommonPage<T>",
+                "method_signature": "setPageSize(com.github.pagehelper.PageInfo<T>)",
+                "method_name": "setPageSize",
+                "class_name": "CommonPage<T>",
+                "depth": 2,
+                "invocation_lines": [
+                  42
+                ],
+                "is_cyclic": false,
+                "is_leaf": true,
+                "db_method_id": null,
+                "root_type": "UNKNOWN",
+                "call_type": "DIRECT",
+                "has_multiple_call_sites": false,
+                "api_paths": [],
+                "change_type": "UNKNOWN",
+                "dao_info": null,
+                "children": []
+              },
+              {
+                "node_id": "2|com.github.pagehelper.PageInfo<T>|getPageSize()",
+                "package_class": "com.github.pagehelper.PageInfo<T>",
+                "method_signature": "getPageSize()",
+                "method_name": "getPageSize",
+                "class_name": "PageInfo<T>",
+                "depth": 2,
+                "invocation_lines": [
+                  42,
+                  42
+                ],
+                "is_cyclic": false,
+                "is_leaf": true,
+                "db_method_id": null,
+                "root_type": "UNKNOWN",
+                "call_type": "DIRECT",
+                "has_multiple_call_sites": false,
+                "api_paths": [],
+                "change_type": "UNKNOWN",
+                "dao_info": null,
+                "children": []
+              },
+              {
+                "node_id": "2|com.macro.mall.common.api.CommonPage<T>|setTotal(com.github.pagehelper.PageInfo<T>)",
+                "package_class": "com.macro.mall.common.api.CommonPage<T>",
+                "method_signature": "setTotal(com.github.pagehelper.PageInfo<T>)",
+                "method_name": "setTotal",
+                "class_name": "CommonPage<T>",
+                "depth": 2,
+                "invocation_lines": [
+                  43
+                ],
+                "is_cyclic": false,
+                "is_leaf": true,
+                "db_method_id": null,
+                "root_type": "UNKNOWN",
+                "call_type": "DIRECT",
+                "has_multiple_call_sites": false,
+                "api_paths": [],
+                "change_type": "UNKNOWN",
+                "dao_info": null,
+                "children": []
+              },
+              {
+                "node_id": "2|com.github.pagehelper.PageInfo<T>|getTotal()",
+                "package_class": "com.github.pagehelper.PageInfo<T>",
+                "method_signature": "getTotal()",
+                "method_name": "getTotal",
+                "class_name": "PageInfo<T>",
+                "depth": 2,
+                "invocation_lines": [
+                  43,
+                  43
+                ],
+                "is_cyclic": false,
+                "is_leaf": true,
+                "db_method_id": null,
+                "root_type": "UNKNOWN",
+                "call_type": "DIRECT",
+                "has_multiple_call_sites": false,
+                "api_paths": [],
+                "change_type": "UNKNOWN",
+                "dao_info": null,
+                "children": []
+              },
+              {
+                "node_id": "2|com.macro.mall.common.api.CommonPage<T>|setList(com.github.pagehelper.PageInfo<T>)",
+                "package_class": "com.macro.mall.common.api.CommonPage<T>",
+                "method_signature": "setList(com.github.pagehelper.PageInfo<T>)",
+                "method_name": "setList",
+                "class_name": "CommonPage<T>",
+                "depth": 2,
+                "invocation_lines": [
+                  44
+                ],
+                "is_cyclic": false,
+                "is_leaf": true,
+                "db_method_id": null,
+                "root_type": "UNKNOWN",
+                "call_type": "DIRECT",
+                "has_multiple_call_sites": false,
+                "api_paths": [],
+                "change_type": "UNKNOWN",
+                "dao_info": null,
+                "children": []
+              },
+              {
+                "node_id": "2|com.github.pagehelper.PageInfo<T>|getList()",
+                "package_class": "com.github.pagehelper.PageInfo<T>",
+                "method_signature": "getList()",
+                "method_name": "getList",
+                "class_name": "PageInfo<T>",
+                "depth": 2,
+                "invocation_lines": [
+                  44,
+                  44
+                ],
+                "is_cyclic": false,
+                "is_leaf": true,
+                "db_method_id": null,
+                "root_type": "UNKNOWN",
+                "call_type": "DIRECT",
+                "has_multiple_call_sites": false,
+                "api_paths": [],
+                "change_type": "UNKNOWN",
+                "dao_info": null,
+                "children": []
+              }
+            ]
+          },
+          {
+            "node_id": "1|com.macro.mall.common.api.CommonResult|success(com.macro.mall.common.api.CommonPage<T>)",
+            "package_class": "com.macro.mall.common.api.CommonResult",
+            "method_signature": "success(com.macro.mall.common.api.CommonPage<T>)",
+            "method_name": "success",
+            "class_name": "CommonResult",
+            "depth": 1,
+            "invocation_lines": [
+              87
+            ],
+            "is_cyclic": false,
+            "is_leaf": false,
+            "db_method_id": 14172,
+            "root_type": "UNKNOWN",
+            "call_type": "DIRECT",
+            "has_multiple_call_sites": false,
+            "api_paths": [],
+            "change_type": "UNCHANGED",
+            "dao_info": null,
+            "children": [
+              {
+                "node_id": "2|ResultCode.SUCCESS|getCode()",
+                "package_class": "ResultCode.SUCCESS",
+                "method_signature": "getCode()",
+                "method_name": "getCode",
+                "class_name": "SUCCESS",
+                "depth": 2,
+                "invocation_lines": [
+                  36,
+                  36
+                ],
+                "is_cyclic": false,
+                "is_leaf": true,
+                "db_method_id": null,
+                "root_type": "UNKNOWN",
+                "call_type": "DIRECT",
+                "has_multiple_call_sites": false,
+                "api_paths": [],
+                "change_type": "UNKNOWN",
+                "dao_info": null,
+                "children": []
+              },
+              {
+                "node_id": "2|ResultCode.SUCCESS|getMessage()",
+                "package_class": "ResultCode.SUCCESS",
+                "method_signature": "getMessage()",
+                "method_name": "getMessage",
+                "class_name": "SUCCESS",
+                "depth": 2,
+                "invocation_lines": [
+                  36,
+                  36
+                ],
+                "is_cyclic": false,
+                "is_leaf": true,
+                "db_method_id": null,
+                "root_type": "UNKNOWN",
+                "call_type": "DIRECT",
+                "has_multiple_call_sites": false,
+                "api_paths": [],
+                "change_type": "UNKNOWN",
+                "dao_info": null,
+                "children": []
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "direction": "downwards",
+      "method_info": {
+        "class_name": "SmsFlashPromotionController",
+        "method_name": "update",
+        "parameters": "[{\"parameter_type\": \"Long\", \"parameter_name\": \"id\", \"parameter_varargs\": false}, {\"parameter_type\": \"Integer\", \"parameter_name\": \"status\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult",
+        "change_type": "MODIFIED"
+      },
+      "package_class": "com.macro.mall.controller.SmsFlashPromotionController",
+      "method_signature": "update(Long,Integer)",
+      "chain": {
+        "node_id": "0|com.macro.mall.controller.SmsFlashPromotionController|update(Long,Integer)",
+        "package_class": "com.macro.mall.controller.SmsFlashPromotionController",
+        "method_signature": "update(Long,Integer)",
+        "method_name": "update",
+        "class_name": "SmsFlashPromotionController",
+        "depth": 0,
+        "invocation_lines": [],
+        "is_cyclic": false,
+        "is_leaf": false,
+        "db_method_id": 14289,
+        "root_type": "UNKNOWN",
+        "call_type": "DIRECT",
+        "has_multiple_call_sites": false,
+        "api_paths": [],
+        "change_type": "MODIFIED",
+        "dao_info": null,
+        "children": [
+          {
+            "node_id": "1|com.macro.mall.service.SmsFlashPromotionService|updateStatus(Long,Integer)",
+            "package_class": "com.macro.mall.service.SmsFlashPromotionService",
+            "method_signature": "updateStatus(Long,Integer)",
+            "method_name": "updateStatus",
+            "class_name": "SmsFlashPromotionService",
+            "depth": 1,
+            "invocation_lines": [
+              65
+            ],
+            "is_cyclic": false,
+            "is_leaf": true,
+            "db_method_id": 14169,
+            "root_type": "UNKNOWN",
+            "call_type": "DIRECT",
+            "has_multiple_call_sites": false,
+            "api_paths": [],
+            "change_type": "UNCHANGED",
+            "dao_info": null,
+            "children": []
+          },
+          {
+            "node_id": "1|com.macro.mall.common.api.CommonResult|success(int)",
+            "package_class": "com.macro.mall.common.api.CommonResult",
+            "method_signature": "success(int)",
+            "method_name": "success",
+            "class_name": "CommonResult",
+            "depth": 1,
+            "invocation_lines": [
+              67
+            ],
+            "is_cyclic": false,
+            "is_leaf": false,
+            "db_method_id": 14172,
+            "root_type": "UNKNOWN",
+            "call_type": "DIRECT",
+            "has_multiple_call_sites": false,
+            "api_paths": [],
+            "change_type": "UNCHANGED",
+            "dao_info": null,
+            "children": [
+              {
+                "node_id": "2|ResultCode.SUCCESS|getCode()",
+                "package_class": "ResultCode.SUCCESS",
+                "method_signature": "getCode()",
+                "method_name": "getCode",
+                "class_name": "SUCCESS",
+                "depth": 2,
+                "invocation_lines": [
+                  36,
+                  36
+                ],
+                "is_cyclic": false,
+                "is_leaf": true,
+                "db_method_id": null,
+                "root_type": "UNKNOWN",
+                "call_type": "DIRECT",
+                "has_multiple_call_sites": false,
+                "api_paths": [],
+                "change_type": "UNKNOWN",
+                "dao_info": null,
+                "children": []
+              },
+              {
+                "node_id": "2|ResultCode.SUCCESS|getMessage()",
+                "package_class": "ResultCode.SUCCESS",
+                "method_signature": "getMessage()",
+                "method_name": "getMessage",
+                "class_name": "SUCCESS",
+                "depth": 2,
+                "invocation_lines": [
+                  36,
+                  36
+                ],
+                "is_cyclic": false,
+                "is_leaf": true,
+                "db_method_id": null,
+                "root_type": "UNKNOWN",
+                "call_type": "DIRECT",
+                "has_multiple_call_sites": false,
+                "api_paths": [],
+                "change_type": "UNKNOWN",
+                "dao_info": null,
+                "children": []
+              }
+            ]
+          },
+          {
+            "node_id": "1|com.macro.mall.common.api.CommonResult|failed()",
+            "package_class": "com.macro.mall.common.api.CommonResult",
+            "method_signature": "failed()",
+            "method_name": "failed",
+            "class_name": "CommonResult",
+            "depth": 1,
+            "invocation_lines": [
+              69
+            ],
+            "is_cyclic": false,
+            "is_leaf": false,
+            "db_method_id": 14177,
+            "root_type": "UNKNOWN",
+            "call_type": "DIRECT",
+            "has_multiple_call_sites": false,
+            "api_paths": [],
+            "change_type": "UNCHANGED",
+            "dao_info": null,
+            "children": [
+              {
+                "node_id": "2|com.macro.mall.common.api.CommonResult|failed(com.macro.mall.common.api.IErrorCode)",
+                "package_class": "com.macro.mall.common.api.CommonResult",
+                "method_signature": "failed(com.macro.mall.common.api.IErrorCode)",
+                "method_name": "failed",
+                "class_name": "CommonResult",
+                "depth": 2,
+                "invocation_lines": [
+                  78
+                ],
+                "is_cyclic": false,
+                "is_leaf": false,
+                "db_method_id": 14174,
+                "root_type": "UNKNOWN",
+                "call_type": "DIRECT",
+                "has_multiple_call_sites": false,
+                "api_paths": [],
+                "change_type": "UNCHANGED",
+                "dao_info": null,
+                "children": [
+                  {
+                    "node_id": "3|com.macro.mall.common.api.IErrorCode|getCode()",
+                    "package_class": "com.macro.mall.common.api.IErrorCode",
+                    "method_signature": "getCode()",
+                    "method_name": "getCode",
+                    "class_name": "IErrorCode",
+                    "depth": 3,
+                    "invocation_lines": [
+                      54,
+                      54
+                    ],
+                    "is_cyclic": false,
+                    "is_leaf": true,
+                    "db_method_id": 13540,
+                    "root_type": "UNKNOWN",
+                    "call_type": "DIRECT",
+                    "has_multiple_call_sites": false,
+                    "api_paths": [],
+                    "change_type": "UNCHANGED",
+                    "dao_info": null,
+                    "children": []
+                  },
+                  {
+                    "node_id": "3|com.macro.mall.common.api.IErrorCode|getMessage()",
+                    "package_class": "com.macro.mall.common.api.IErrorCode",
+                    "method_signature": "getMessage()",
+                    "method_name": "getMessage",
+                    "class_name": "IErrorCode",
+                    "depth": 3,
+                    "invocation_lines": [
+                      54,
+                      54
+                    ],
+                    "is_cyclic": false,
+                    "is_leaf": true,
+                    "db_method_id": 13541,
+                    "root_type": "UNKNOWN",
+                    "call_type": "DIRECT",
+                    "has_multiple_call_sites": false,
+                    "api_paths": [],
+                    "change_type": "UNCHANGED",
+                    "dao_info": null,
+                    "children": []
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "direction": "downwards",
+      "method_info": {
+        "class_name": "SmsFlashPromotionSessionController",
+        "method_name": "updateStatus",
+        "parameters": "[{\"parameter_type\": \"Long\", \"parameter_name\": \"id\", \"parameter_varargs\": false}, {\"parameter_type\": \"Integer\", \"parameter_name\": \"status\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult",
+        "change_type": "MODIFIED"
+      },
+      "package_class": "com.macro.mall.controller.SmsFlashPromotionSessionController",
+      "method_signature": "updateStatus(Long,Integer)",
+      "chain": {
+        "node_id": "0|com.macro.mall.controller.SmsFlashPromotionSessionController|updateStatus(Long,Integer)",
+        "package_class": "com.macro.mall.controller.SmsFlashPromotionSessionController",
+        "method_signature": "updateStatus(Long,Integer)",
+        "method_name": "updateStatus",
+        "class_name": "SmsFlashPromotionSessionController",
+        "depth": 0,
+        "invocation_lines": [],
+        "is_cyclic": false,
+        "is_leaf": false,
+        "db_method_id": 14352,
+        "root_type": "UNKNOWN",
+        "call_type": "DIRECT",
+        "has_multiple_call_sites": false,
+        "api_paths": [],
+        "change_type": "MODIFIED",
+        "dao_info": null,
+        "children": [
+          {
+            "node_id": "1|com.macro.mall.service.SmsFlashPromotionSessionService|updateStatus(Long,Integer)",
+            "package_class": "com.macro.mall.service.SmsFlashPromotionSessionService",
+            "method_signature": "updateStatus(Long,Integer)",
+            "method_name": "updateStatus",
+            "class_name": "SmsFlashPromotionSessionService",
+            "depth": 1,
+            "invocation_lines": [
+              54
+            ],
+            "is_cyclic": false,
+            "is_leaf": true,
+            "db_method_id": 14295,
+            "root_type": "UNKNOWN",
+            "call_type": "DIRECT",
+            "has_multiple_call_sites": false,
+            "api_paths": [],
+            "change_type": "UNCHANGED",
+            "dao_info": null,
+            "children": []
+          },
+          {
+            "node_id": "1|com.macro.mall.common.api.CommonResult|success(int)",
+            "package_class": "com.macro.mall.common.api.CommonResult",
+            "method_signature": "success(int)",
+            "method_name": "success",
+            "class_name": "CommonResult",
+            "depth": 1,
+            "invocation_lines": [
+              56
+            ],
+            "is_cyclic": false,
+            "is_leaf": false,
+            "db_method_id": 14172,
+            "root_type": "UNKNOWN",
+            "call_type": "DIRECT",
+            "has_multiple_call_sites": false,
+            "api_paths": [],
+            "change_type": "UNCHANGED",
+            "dao_info": null,
+            "children": [
+              {
+                "node_id": "2|ResultCode.SUCCESS|getCode()",
+                "package_class": "ResultCode.SUCCESS",
+                "method_signature": "getCode()",
+                "method_name": "getCode",
+                "class_name": "SUCCESS",
+                "depth": 2,
+                "invocation_lines": [
+                  36,
+                  36
+                ],
+                "is_cyclic": false,
+                "is_leaf": true,
+                "db_method_id": null,
+                "root_type": "UNKNOWN",
+                "call_type": "DIRECT",
+                "has_multiple_call_sites": false,
+                "api_paths": [],
+                "change_type": "UNKNOWN",
+                "dao_info": null,
+                "children": []
+              },
+              {
+                "node_id": "2|ResultCode.SUCCESS|getMessage()",
+                "package_class": "ResultCode.SUCCESS",
+                "method_signature": "getMessage()",
+                "method_name": "getMessage",
+                "class_name": "SUCCESS",
+                "depth": 2,
+                "invocation_lines": [
+                  36,
+                  36
+                ],
+                "is_cyclic": false,
+                "is_leaf": true,
+                "db_method_id": null,
+                "root_type": "UNKNOWN",
+                "call_type": "DIRECT",
+                "has_multiple_call_sites": false,
+                "api_paths": [],
+                "change_type": "UNKNOWN",
+                "dao_info": null,
+                "children": []
+              }
+            ]
+          },
+          {
+            "node_id": "1|com.macro.mall.common.api.CommonResult|failed()",
+            "package_class": "com.macro.mall.common.api.CommonResult",
+            "method_signature": "failed()",
+            "method_name": "failed",
+            "class_name": "CommonResult",
+            "depth": 1,
+            "invocation_lines": [
+              58
+            ],
+            "is_cyclic": false,
+            "is_leaf": false,
+            "db_method_id": 14177,
+            "root_type": "UNKNOWN",
+            "call_type": "DIRECT",
+            "has_multiple_call_sites": false,
+            "api_paths": [],
+            "change_type": "UNCHANGED",
+            "dao_info": null,
+            "children": [
+              {
+                "node_id": "2|com.macro.mall.common.api.CommonResult|failed(com.macro.mall.common.api.IErrorCode)",
+                "package_class": "com.macro.mall.common.api.CommonResult",
+                "method_signature": "failed(com.macro.mall.common.api.IErrorCode)",
+                "method_name": "failed",
+                "class_name": "CommonResult",
+                "depth": 2,
+                "invocation_lines": [
+                  78
+                ],
+                "is_cyclic": false,
+                "is_leaf": false,
+                "db_method_id": 14174,
+                "root_type": "UNKNOWN",
+                "call_type": "DIRECT",
+                "has_multiple_call_sites": false,
+                "api_paths": [],
+                "change_type": "UNCHANGED",
+                "dao_info": null,
+                "children": [
+                  {
+                    "node_id": "3|com.macro.mall.common.api.IErrorCode|getCode()",
+                    "package_class": "com.macro.mall.common.api.IErrorCode",
+                    "method_signature": "getCode()",
+                    "method_name": "getCode",
+                    "class_name": "IErrorCode",
+                    "depth": 3,
+                    "invocation_lines": [
+                      54,
+                      54
+                    ],
+                    "is_cyclic": false,
+                    "is_leaf": true,
+                    "db_method_id": 13540,
+                    "root_type": "UNKNOWN",
+                    "call_type": "DIRECT",
+                    "has_multiple_call_sites": false,
+                    "api_paths": [],
+                    "change_type": "UNCHANGED",
+                    "dao_info": null,
+                    "children": []
+                  },
+                  {
+                    "node_id": "3|com.macro.mall.common.api.IErrorCode|getMessage()",
+                    "package_class": "com.macro.mall.common.api.IErrorCode",
+                    "method_signature": "getMessage()",
+                    "method_name": "getMessage",
+                    "class_name": "IErrorCode",
+                    "depth": 3,
+                    "invocation_lines": [
+                      54,
+                      54
+                    ],
+                    "is_cyclic": false,
+                    "is_leaf": true,
+                    "db_method_id": 13541,
+                    "root_type": "UNKNOWN",
+                    "call_type": "DIRECT",
+                    "has_multiple_call_sites": false,
+                    "api_paths": [],
+                    "change_type": "UNCHANGED",
+                    "dao_info": null,
+                    "children": []
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "direction": "downwards",
+      "method_info": {
+        "class_name": "UmsMenuController",
+        "method_name": "list",
+        "parameters": "[{\"parameter_type\": \"Long\", \"parameter_name\": \"parentId\", \"parameter_varargs\": false}, {\"parameter_type\": \"Integer\", \"parameter_name\": \"pageSize\", \"parameter_varargs\": false}, {\"parameter_type\": \"Integer\", \"parameter_name\": \"pageNum\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult<com.macro.mall.common.api.CommonPage>",
+        "change_type": "MODIFIED"
+      },
+      "package_class": "com.macro.mall.controller.UmsMenuController",
+      "method_signature": "list(Long,Integer,Integer)",
+      "chain": {
+        "node_id": "0|com.macro.mall.controller.UmsMenuController|list(Long,Integer,Integer)",
+        "package_class": "com.macro.mall.controller.UmsMenuController",
+        "method_signature": "list(Long,Integer,Integer)",
+        "method_name": "list",
+        "class_name": "UmsMenuController",
+        "depth": 0,
+        "invocation_lines": [],
+        "is_cyclic": false,
+        "is_leaf": false,
+        "db_method_id": 14456,
+        "root_type": "UNKNOWN",
+        "call_type": "DIRECT",
+        "has_multiple_call_sites": false,
+        "api_paths": [],
+        "change_type": "MODIFIED",
+        "dao_info": null,
+        "children": [
+          {
+            "node_id": "1|com.macro.mall.service.UmsMenuService|list(Long,Integer,Integer)",
+            "package_class": "com.macro.mall.service.UmsMenuService",
+            "method_signature": "list(Long,Integer,Integer)",
+            "method_name": "list",
+            "class_name": "UmsMenuService",
+            "depth": 1,
+            "invocation_lines": [
+              81
+            ],
+            "is_cyclic": false,
+            "is_leaf": true,
+            "db_method_id": 14347,
+            "root_type": "UNKNOWN",
+            "call_type": "DIRECT",
+            "has_multiple_call_sites": false,
+            "api_paths": [],
+            "change_type": "UNCHANGED",
+            "dao_info": null,
+            "children": []
+          },
+          {
+            "node_id": "1|com.macro.mall.common.api.CommonPage|restPage(List<com.macro.mall.model.UmsMenu>)",
+            "package_class": "com.macro.mall.common.api.CommonPage",
+            "method_signature": "restPage(List<com.macro.mall.model.UmsMenu>)",
+            "method_name": "restPage",
+            "class_name": "CommonPage",
+            "depth": 1,
+            "invocation_lines": [
+              82,
+              82
+            ],
+            "is_cyclic": false,
+            "is_leaf": false,
+            "db_method_id": 14111,
+            "root_type": "UNKNOWN",
+            "call_type": "DIRECT",
+            "has_multiple_call_sites": false,
+            "api_paths": [],
+            "change_type": "UNCHANGED",
+            "dao_info": null,
+            "children": [
+              {
+                "node_id": "2|com.macro.mall.common.api.CommonPage<T>|setTotalPage(com.github.pagehelper.PageInfo<T>)",
+                "package_class": "com.macro.mall.common.api.CommonPage<T>",
+                "method_signature": "setTotalPage(com.github.pagehelper.PageInfo<T>)",
+                "method_name": "setTotalPage",
+                "class_name": "CommonPage<T>",
+                "depth": 2,
+                "invocation_lines": [
+                  40
+                ],
+                "is_cyclic": false,
+                "is_leaf": true,
+                "db_method_id": null,
+                "root_type": "UNKNOWN",
+                "call_type": "DIRECT",
+                "has_multiple_call_sites": false,
+                "api_paths": [],
+                "change_type": "UNKNOWN",
+                "dao_info": null,
+                "children": []
+              },
+              {
+                "node_id": "2|com.github.pagehelper.PageInfo<T>|getPages()",
+                "package_class": "com.github.pagehelper.PageInfo<T>",
+                "method_signature": "getPages()",
+                "method_name": "getPages",
+                "class_name": "PageInfo<T>",
+                "depth": 2,
+                "invocation_lines": [
+                  40,
+                  40
+                ],
+                "is_cyclic": false,
+                "is_leaf": true,
+                "db_method_id": null,
+                "root_type": "UNKNOWN",
+                "call_type": "DIRECT",
+                "has_multiple_call_sites": false,
+                "api_paths": [],
+                "change_type": "UNKNOWN",
+                "dao_info": null,
+                "children": []
+              },
+              {
+                "node_id": "2|com.macro.mall.common.api.CommonPage<T>|setPageNum(com.github.pagehelper.PageInfo<T>)",
+                "package_class": "com.macro.mall.common.api.CommonPage<T>",
+                "method_signature": "setPageNum(com.github.pagehelper.PageInfo<T>)",
+                "method_name": "setPageNum",
+                "class_name": "CommonPage<T>",
+                "depth": 2,
+                "invocation_lines": [
+                  41
+                ],
+                "is_cyclic": false,
+                "is_leaf": true,
+                "db_method_id": null,
+                "root_type": "UNKNOWN",
+                "call_type": "DIRECT",
+                "has_multiple_call_sites": false,
+                "api_paths": [],
+                "change_type": "UNKNOWN",
+                "dao_info": null,
+                "children": []
+              },
+              {
+                "node_id": "2|com.github.pagehelper.PageInfo<T>|getPageNum()",
+                "package_class": "com.github.pagehelper.PageInfo<T>",
+                "method_signature": "getPageNum()",
+                "method_name": "getPageNum",
+                "class_name": "PageInfo<T>",
+                "depth": 2,
+                "invocation_lines": [
+                  41,
+                  41
+                ],
+                "is_cyclic": false,
+                "is_leaf": true,
+                "db_method_id": null,
+                "root_type": "UNKNOWN",
+                "call_type": "DIRECT",
+                "has_multiple_call_sites": false,
+                "api_paths": [],
+                "change_type": "UNKNOWN",
+                "dao_info": null,
+                "children": []
+              },
+              {
+                "node_id": "2|com.macro.mall.common.api.CommonPage<T>|setPageSize(com.github.pagehelper.PageInfo<T>)",
+                "package_class": "com.macro.mall.common.api.CommonPage<T>",
+                "method_signature": "setPageSize(com.github.pagehelper.PageInfo<T>)",
+                "method_name": "setPageSize",
+                "class_name": "CommonPage<T>",
+                "depth": 2,
+                "invocation_lines": [
+                  42
+                ],
+                "is_cyclic": false,
+                "is_leaf": true,
+                "db_method_id": null,
+                "root_type": "UNKNOWN",
+                "call_type": "DIRECT",
+                "has_multiple_call_sites": false,
+                "api_paths": [],
+                "change_type": "UNKNOWN",
+                "dao_info": null,
+                "children": []
+              },
+              {
+                "node_id": "2|com.github.pagehelper.PageInfo<T>|getPageSize()",
+                "package_class": "com.github.pagehelper.PageInfo<T>",
+                "method_signature": "getPageSize()",
+                "method_name": "getPageSize",
+                "class_name": "PageInfo<T>",
+                "depth": 2,
+                "invocation_lines": [
+                  42,
+                  42
+                ],
+                "is_cyclic": false,
+                "is_leaf": true,
+                "db_method_id": null,
+                "root_type": "UNKNOWN",
+                "call_type": "DIRECT",
+                "has_multiple_call_sites": false,
+                "api_paths": [],
+                "change_type": "UNKNOWN",
+                "dao_info": null,
+                "children": []
+              },
+              {
+                "node_id": "2|com.macro.mall.common.api.CommonPage<T>|setTotal(com.github.pagehelper.PageInfo<T>)",
+                "package_class": "com.macro.mall.common.api.CommonPage<T>",
+                "method_signature": "setTotal(com.github.pagehelper.PageInfo<T>)",
+                "method_name": "setTotal",
+                "class_name": "CommonPage<T>",
+                "depth": 2,
+                "invocation_lines": [
+                  43
+                ],
+                "is_cyclic": false,
+                "is_leaf": true,
+                "db_method_id": null,
+                "root_type": "UNKNOWN",
+                "call_type": "DIRECT",
+                "has_multiple_call_sites": false,
+                "api_paths": [],
+                "change_type": "UNKNOWN",
+                "dao_info": null,
+                "children": []
+              },
+              {
+                "node_id": "2|com.github.pagehelper.PageInfo<T>|getTotal()",
+                "package_class": "com.github.pagehelper.PageInfo<T>",
+                "method_signature": "getTotal()",
+                "method_name": "getTotal",
+                "class_name": "PageInfo<T>",
+                "depth": 2,
+                "invocation_lines": [
+                  43,
+                  43
+                ],
+                "is_cyclic": false,
+                "is_leaf": true,
+                "db_method_id": null,
+                "root_type": "UNKNOWN",
+                "call_type": "DIRECT",
+                "has_multiple_call_sites": false,
+                "api_paths": [],
+                "change_type": "UNKNOWN",
+                "dao_info": null,
+                "children": []
+              },
+              {
+                "node_id": "2|com.macro.mall.common.api.CommonPage<T>|setList(com.github.pagehelper.PageInfo<T>)",
+                "package_class": "com.macro.mall.common.api.CommonPage<T>",
+                "method_signature": "setList(com.github.pagehelper.PageInfo<T>)",
+                "method_name": "setList",
+                "class_name": "CommonPage<T>",
+                "depth": 2,
+                "invocation_lines": [
+                  44
+                ],
+                "is_cyclic": false,
+                "is_leaf": true,
+                "db_method_id": null,
+                "root_type": "UNKNOWN",
+                "call_type": "DIRECT",
+                "has_multiple_call_sites": false,
+                "api_paths": [],
+                "change_type": "UNKNOWN",
+                "dao_info": null,
+                "children": []
+              },
+              {
+                "node_id": "2|com.github.pagehelper.PageInfo<T>|getList()",
+                "package_class": "com.github.pagehelper.PageInfo<T>",
+                "method_signature": "getList()",
+                "method_name": "getList",
+                "class_name": "PageInfo<T>",
+                "depth": 2,
+                "invocation_lines": [
+                  44,
+                  44
+                ],
+                "is_cyclic": false,
+                "is_leaf": true,
+                "db_method_id": null,
+                "root_type": "UNKNOWN",
+                "call_type": "DIRECT",
+                "has_multiple_call_sites": false,
+                "api_paths": [],
+                "change_type": "UNKNOWN",
+                "dao_info": null,
+                "children": []
+              }
+            ]
+          },
+          {
+            "node_id": "1|com.macro.mall.common.api.CommonPage|restPage(List<T>)",
+            "package_class": "com.macro.mall.common.api.CommonPage",
+            "method_signature": "restPage(List<T>)",
+            "method_name": "restPage",
+            "class_name": "CommonPage",
+            "depth": 1,
+            "invocation_lines": [
+              82,
+              82
+            ],
+            "is_cyclic": false,
+            "is_leaf": false,
+            "db_method_id": 14111,
+            "root_type": "UNKNOWN",
+            "call_type": "DIRECT",
+            "has_multiple_call_sites": false,
+            "api_paths": [],
+            "change_type": "UNCHANGED",
+            "dao_info": null,
+            "children": [
+              {
+                "node_id": "2|com.macro.mall.common.api.CommonPage<T>|setTotalPage(com.github.pagehelper.PageInfo<T>)",
+                "package_class": "com.macro.mall.common.api.CommonPage<T>",
+                "method_signature": "setTotalPage(com.github.pagehelper.PageInfo<T>)",
+                "method_name": "setTotalPage",
+                "class_name": "CommonPage<T>",
+                "depth": 2,
+                "invocation_lines": [
+                  40
+                ],
+                "is_cyclic": false,
+                "is_leaf": true,
+                "db_method_id": null,
+                "root_type": "UNKNOWN",
+                "call_type": "DIRECT",
+                "has_multiple_call_sites": false,
+                "api_paths": [],
+                "change_type": "UNKNOWN",
+                "dao_info": null,
+                "children": []
+              },
+              {
+                "node_id": "2|com.github.pagehelper.PageInfo<T>|getPages()",
+                "package_class": "com.github.pagehelper.PageInfo<T>",
+                "method_signature": "getPages()",
+                "method_name": "getPages",
+                "class_name": "PageInfo<T>",
+                "depth": 2,
+                "invocation_lines": [
+                  40,
+                  40
+                ],
+                "is_cyclic": false,
+                "is_leaf": true,
+                "db_method_id": null,
+                "root_type": "UNKNOWN",
+                "call_type": "DIRECT",
+                "has_multiple_call_sites": false,
+                "api_paths": [],
+                "change_type": "UNKNOWN",
+                "dao_info": null,
+                "children": []
+              },
+              {
+                "node_id": "2|com.macro.mall.common.api.CommonPage<T>|setPageNum(com.github.pagehelper.PageInfo<T>)",
+                "package_class": "com.macro.mall.common.api.CommonPage<T>",
+                "method_signature": "setPageNum(com.github.pagehelper.PageInfo<T>)",
+                "method_name": "setPageNum",
+                "class_name": "CommonPage<T>",
+                "depth": 2,
+                "invocation_lines": [
+                  41
+                ],
+                "is_cyclic": false,
+                "is_leaf": true,
+                "db_method_id": null,
+                "root_type": "UNKNOWN",
+                "call_type": "DIRECT",
+                "has_multiple_call_sites": false,
+                "api_paths": [],
+                "change_type": "UNKNOWN",
+                "dao_info": null,
+                "children": []
+              },
+              {
+                "node_id": "2|com.github.pagehelper.PageInfo<T>|getPageNum()",
+                "package_class": "com.github.pagehelper.PageInfo<T>",
+                "method_signature": "getPageNum()",
+                "method_name": "getPageNum",
+                "class_name": "PageInfo<T>",
+                "depth": 2,
+                "invocation_lines": [
+                  41,
+                  41
+                ],
+                "is_cyclic": false,
+                "is_leaf": true,
+                "db_method_id": null,
+                "root_type": "UNKNOWN",
+                "call_type": "DIRECT",
+                "has_multiple_call_sites": false,
+                "api_paths": [],
+                "change_type": "UNKNOWN",
+                "dao_info": null,
+                "children": []
+              },
+              {
+                "node_id": "2|com.macro.mall.common.api.CommonPage<T>|setPageSize(com.github.pagehelper.PageInfo<T>)",
+                "package_class": "com.macro.mall.common.api.CommonPage<T>",
+                "method_signature": "setPageSize(com.github.pagehelper.PageInfo<T>)",
+                "method_name": "setPageSize",
+                "class_name": "CommonPage<T>",
+                "depth": 2,
+                "invocation_lines": [
+                  42
+                ],
+                "is_cyclic": false,
+                "is_leaf": true,
+                "db_method_id": null,
+                "root_type": "UNKNOWN",
+                "call_type": "DIRECT",
+                "has_multiple_call_sites": false,
+                "api_paths": [],
+                "change_type": "UNKNOWN",
+                "dao_info": null,
+                "children": []
+              },
+              {
+                "node_id": "2|com.github.pagehelper.PageInfo<T>|getPageSize()",
+                "package_class": "com.github.pagehelper.PageInfo<T>",
+                "method_signature": "getPageSize()",
+                "method_name": "getPageSize",
+                "class_name": "PageInfo<T>",
+                "depth": 2,
+                "invocation_lines": [
+                  42,
+                  42
+                ],
+                "is_cyclic": false,
+                "is_leaf": true,
+                "db_method_id": null,
+                "root_type": "UNKNOWN",
+                "call_type": "DIRECT",
+                "has_multiple_call_sites": false,
+                "api_paths": [],
+                "change_type": "UNKNOWN",
+                "dao_info": null,
+                "children": []
+              },
+              {
+                "node_id": "2|com.macro.mall.common.api.CommonPage<T>|setTotal(com.github.pagehelper.PageInfo<T>)",
+                "package_class": "com.macro.mall.common.api.CommonPage<T>",
+                "method_signature": "setTotal(com.github.pagehelper.PageInfo<T>)",
+                "method_name": "setTotal",
+                "class_name": "CommonPage<T>",
+                "depth": 2,
+                "invocation_lines": [
+                  43
+                ],
+                "is_cyclic": false,
+                "is_leaf": true,
+                "db_method_id": null,
+                "root_type": "UNKNOWN",
+                "call_type": "DIRECT",
+                "has_multiple_call_sites": false,
+                "api_paths": [],
+                "change_type": "UNKNOWN",
+                "dao_info": null,
+                "children": []
+              },
+              {
+                "node_id": "2|com.github.pagehelper.PageInfo<T>|getTotal()",
+                "package_class": "com.github.pagehelper.PageInfo<T>",
+                "method_signature": "getTotal()",
+                "method_name": "getTotal",
+                "class_name": "PageInfo<T>",
+                "depth": 2,
+                "invocation_lines": [
+                  43,
+                  43
+                ],
+                "is_cyclic": false,
+                "is_leaf": true,
+                "db_method_id": null,
+                "root_type": "UNKNOWN",
+                "call_type": "DIRECT",
+                "has_multiple_call_sites": false,
+                "api_paths": [],
+                "change_type": "UNKNOWN",
+                "dao_info": null,
+                "children": []
+              },
+              {
+                "node_id": "2|com.macro.mall.common.api.CommonPage<T>|setList(com.github.pagehelper.PageInfo<T>)",
+                "package_class": "com.macro.mall.common.api.CommonPage<T>",
+                "method_signature": "setList(com.github.pagehelper.PageInfo<T>)",
+                "method_name": "setList",
+                "class_name": "CommonPage<T>",
+                "depth": 2,
+                "invocation_lines": [
+                  44
+                ],
+                "is_cyclic": false,
+                "is_leaf": true,
+                "db_method_id": null,
+                "root_type": "UNKNOWN",
+                "call_type": "DIRECT",
+                "has_multiple_call_sites": false,
+                "api_paths": [],
+                "change_type": "UNKNOWN",
+                "dao_info": null,
+                "children": []
+              },
+              {
+                "node_id": "2|com.github.pagehelper.PageInfo<T>|getList()",
+                "package_class": "com.github.pagehelper.PageInfo<T>",
+                "method_signature": "getList()",
+                "method_name": "getList",
+                "class_name": "PageInfo<T>",
+                "depth": 2,
+                "invocation_lines": [
+                  44,
+                  44
+                ],
+                "is_cyclic": false,
+                "is_leaf": true,
+                "db_method_id": null,
+                "root_type": "UNKNOWN",
+                "call_type": "DIRECT",
+                "has_multiple_call_sites": false,
+                "api_paths": [],
+                "change_type": "UNKNOWN",
+                "dao_info": null,
+                "children": []
+              }
+            ]
+          },
+          {
+            "node_id": "1|com.macro.mall.common.api.CommonResult|success(com.macro.mall.common.api.CommonPage<T>)",
+            "package_class": "com.macro.mall.common.api.CommonResult",
+            "method_signature": "success(com.macro.mall.common.api.CommonPage<T>)",
+            "method_name": "success",
+            "class_name": "CommonResult",
+            "depth": 1,
+            "invocation_lines": [
+              82
+            ],
+            "is_cyclic": false,
+            "is_leaf": false,
+            "db_method_id": 14172,
+            "root_type": "UNKNOWN",
+            "call_type": "DIRECT",
+            "has_multiple_call_sites": false,
+            "api_paths": [],
+            "change_type": "UNCHANGED",
+            "dao_info": null,
+            "children": [
+              {
+                "node_id": "2|ResultCode.SUCCESS|getCode()",
+                "package_class": "ResultCode.SUCCESS",
+                "method_signature": "getCode()",
+                "method_name": "getCode",
+                "class_name": "SUCCESS",
+                "depth": 2,
+                "invocation_lines": [
+                  36,
+                  36
+                ],
+                "is_cyclic": false,
+                "is_leaf": true,
+                "db_method_id": null,
+                "root_type": "UNKNOWN",
+                "call_type": "DIRECT",
+                "has_multiple_call_sites": false,
+                "api_paths": [],
+                "change_type": "UNKNOWN",
+                "dao_info": null,
+                "children": []
+              },
+              {
+                "node_id": "2|ResultCode.SUCCESS|getMessage()",
+                "package_class": "ResultCode.SUCCESS",
+                "method_signature": "getMessage()",
+                "method_name": "getMessage",
+                "class_name": "SUCCESS",
+                "depth": 2,
+                "invocation_lines": [
+                  36,
+                  36
+                ],
+                "is_cyclic": false,
+                "is_leaf": true,
+                "db_method_id": null,
+                "root_type": "UNKNOWN",
+                "call_type": "DIRECT",
+                "has_multiple_call_sites": false,
+                "api_paths": [],
+                "change_type": "UNKNOWN",
+                "dao_info": null,
+                "children": []
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "direction": "downwards",
+      "method_info": {
+        "class_name": "UmsMenuController",
+        "method_name": "updateHidden",
+        "parameters": "[{\"parameter_type\": \"Long\", \"parameter_name\": \"id\", \"parameter_varargs\": false}, {\"parameter_type\": \"Integer\", \"parameter_name\": \"hidden\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult",
+        "change_type": "MODIFIED"
+      },
+      "package_class": "com.macro.mall.controller.UmsMenuController",
+      "method_signature": "updateHidden(Long,Integer)",
+      "chain": {
+        "node_id": "0|com.macro.mall.controller.UmsMenuController|updateHidden(Long,Integer)",
+        "package_class": "com.macro.mall.controller.UmsMenuController",
+        "method_signature": "updateHidden(Long,Integer)",
+        "method_name": "updateHidden",
+        "class_name": "UmsMenuController",
+        "depth": 0,
+        "invocation_lines": [],
+        "is_cyclic": false,
+        "is_leaf": false,
+        "db_method_id": 14458,
+        "root_type": "UNKNOWN",
+        "call_type": "DIRECT",
+        "has_multiple_call_sites": false,
+        "api_paths": [],
+        "change_type": "MODIFIED",
+        "dao_info": null,
+        "children": [
+          {
+            "node_id": "1|com.macro.mall.service.UmsMenuService|updateHidden(Long,Integer)",
+            "package_class": "com.macro.mall.service.UmsMenuService",
+            "method_signature": "updateHidden(Long,Integer)",
+            "method_name": "updateHidden",
+            "class_name": "UmsMenuService",
+            "depth": 1,
+            "invocation_lines": [
+              97
+            ],
+            "is_cyclic": false,
+            "is_leaf": true,
+            "db_method_id": 14349,
+            "root_type": "UNKNOWN",
+            "call_type": "DIRECT",
+            "has_multiple_call_sites": false,
+            "api_paths": [],
+            "change_type": "UNCHANGED",
+            "dao_info": null,
+            "children": []
+          },
+          {
+            "node_id": "1|com.macro.mall.common.api.CommonResult|success(int)",
+            "package_class": "com.macro.mall.common.api.CommonResult",
+            "method_signature": "success(int)",
+            "method_name": "success",
+            "class_name": "CommonResult",
+            "depth": 1,
+            "invocation_lines": [
+              99
+            ],
+            "is_cyclic": false,
+            "is_leaf": false,
+            "db_method_id": 14172,
+            "root_type": "UNKNOWN",
+            "call_type": "DIRECT",
+            "has_multiple_call_sites": false,
+            "api_paths": [],
+            "change_type": "UNCHANGED",
+            "dao_info": null,
+            "children": [
+              {
+                "node_id": "2|ResultCode.SUCCESS|getCode()",
+                "package_class": "ResultCode.SUCCESS",
+                "method_signature": "getCode()",
+                "method_name": "getCode",
+                "class_name": "SUCCESS",
+                "depth": 2,
+                "invocation_lines": [
+                  36,
+                  36
+                ],
+                "is_cyclic": false,
+                "is_leaf": true,
+                "db_method_id": null,
+                "root_type": "UNKNOWN",
+                "call_type": "DIRECT",
+                "has_multiple_call_sites": false,
+                "api_paths": [],
+                "change_type": "UNKNOWN",
+                "dao_info": null,
+                "children": []
+              },
+              {
+                "node_id": "2|ResultCode.SUCCESS|getMessage()",
+                "package_class": "ResultCode.SUCCESS",
+                "method_signature": "getMessage()",
+                "method_name": "getMessage",
+                "class_name": "SUCCESS",
+                "depth": 2,
+                "invocation_lines": [
+                  36,
+                  36
+                ],
+                "is_cyclic": false,
+                "is_leaf": true,
+                "db_method_id": null,
+                "root_type": "UNKNOWN",
+                "call_type": "DIRECT",
+                "has_multiple_call_sites": false,
+                "api_paths": [],
+                "change_type": "UNKNOWN",
+                "dao_info": null,
+                "children": []
+              }
+            ]
+          },
+          {
+            "node_id": "1|com.macro.mall.common.api.CommonResult|failed()",
+            "package_class": "com.macro.mall.common.api.CommonResult",
+            "method_signature": "failed()",
+            "method_name": "failed",
+            "class_name": "CommonResult",
+            "depth": 1,
+            "invocation_lines": [
+              101
+            ],
+            "is_cyclic": false,
+            "is_leaf": false,
+            "db_method_id": 14177,
+            "root_type": "UNKNOWN",
+            "call_type": "DIRECT",
+            "has_multiple_call_sites": false,
+            "api_paths": [],
+            "change_type": "UNCHANGED",
+            "dao_info": null,
+            "children": [
+              {
+                "node_id": "2|com.macro.mall.common.api.CommonResult|failed(com.macro.mall.common.api.IErrorCode)",
+                "package_class": "com.macro.mall.common.api.CommonResult",
+                "method_signature": "failed(com.macro.mall.common.api.IErrorCode)",
+                "method_name": "failed",
+                "class_name": "CommonResult",
+                "depth": 2,
+                "invocation_lines": [
+                  78
+                ],
+                "is_cyclic": false,
+                "is_leaf": false,
+                "db_method_id": 14174,
+                "root_type": "UNKNOWN",
+                "call_type": "DIRECT",
+                "has_multiple_call_sites": false,
+                "api_paths": [],
+                "change_type": "UNCHANGED",
+                "dao_info": null,
+                "children": [
+                  {
+                    "node_id": "3|com.macro.mall.common.api.IErrorCode|getCode()",
+                    "package_class": "com.macro.mall.common.api.IErrorCode",
+                    "method_signature": "getCode()",
+                    "method_name": "getCode",
+                    "class_name": "IErrorCode",
+                    "depth": 3,
+                    "invocation_lines": [
+                      54,
+                      54
+                    ],
+                    "is_cyclic": false,
+                    "is_leaf": true,
+                    "db_method_id": 13540,
+                    "root_type": "UNKNOWN",
+                    "call_type": "DIRECT",
+                    "has_multiple_call_sites": false,
+                    "api_paths": [],
+                    "change_type": "UNCHANGED",
+                    "dao_info": null,
+                    "children": []
+                  },
+                  {
+                    "node_id": "3|com.macro.mall.common.api.IErrorCode|getMessage()",
+                    "package_class": "com.macro.mall.common.api.IErrorCode",
+                    "method_signature": "getMessage()",
+                    "method_name": "getMessage",
+                    "class_name": "IErrorCode",
+                    "depth": 3,
+                    "invocation_lines": [
+                      54,
+                      54
+                    ],
+                    "is_cyclic": false,
+                    "is_leaf": true,
+                    "db_method_id": 13541,
+                    "root_type": "UNKNOWN",
+                    "call_type": "DIRECT",
+                    "has_multiple_call_sites": false,
+                    "api_paths": [],
+                    "change_type": "UNCHANGED",
+                    "dao_info": null,
+                    "children": []
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "direction": "downwards",
+      "method_info": {
+        "class_name": "UmsRoleController",
+        "method_name": "listMenu",
+        "parameters": "[{\"parameter_type\": \"Long\", \"parameter_name\": \"roleId\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult<List>",
+        "change_type": "MODIFIED"
+      },
+      "package_class": "com.macro.mall.controller.UmsRoleController",
+      "method_signature": "listMenu(Long)",
+      "chain": {
+        "node_id": "0|com.macro.mall.controller.UmsRoleController|listMenu(Long)",
+        "package_class": "com.macro.mall.controller.UmsRoleController",
+        "method_signature": "listMenu(Long)",
+        "method_name": "listMenu",
+        "class_name": "UmsRoleController",
+        "depth": 0,
+        "invocation_lines": [],
+        "is_cyclic": false,
+        "is_leaf": false,
+        "db_method_id": 26350,
+        "root_type": "UNKNOWN",
+        "call_type": "DIRECT",
+        "has_multiple_call_sites": false,
+        "api_paths": [],
+        "change_type": "MODIFIED",
+        "dao_info": null,
+        "children": [
+          {
+            "node_id": "1|com.macro.mall.service.UmsRoleService|listMenu(Long)",
+            "package_class": "com.macro.mall.service.UmsRoleService",
+            "method_signature": "listMenu(Long)",
+            "method_name": "listMenu",
+            "class_name": "UmsRoleService",
+            "depth": 1,
+            "invocation_lines": [
+              96
+            ],
+            "is_cyclic": false,
+            "is_leaf": true,
+            "db_method_id": 26340,
+            "root_type": "UNKNOWN",
+            "call_type": "DIRECT",
+            "has_multiple_call_sites": false,
+            "api_paths": [],
+            "change_type": "UNCHANGED",
+            "dao_info": null,
+            "children": []
+          },
+          {
+            "node_id": "1|com.macro.mall.common.api.CommonResult|success(List<com.macro.mall.model.UmsMenu>)",
+            "package_class": "com.macro.mall.common.api.CommonResult",
+            "method_signature": "success(List<com.macro.mall.model.UmsMenu>)",
+            "method_name": "success",
+            "class_name": "CommonResult",
+            "depth": 1,
+            "invocation_lines": [
+              97
+            ],
+            "is_cyclic": false,
+            "is_leaf": false,
+            "db_method_id": 14172,
+            "root_type": "UNKNOWN",
+            "call_type": "DIRECT",
+            "has_multiple_call_sites": false,
+            "api_paths": [],
+            "change_type": "UNCHANGED",
+            "dao_info": null,
+            "children": [
+              {
+                "node_id": "2|ResultCode.SUCCESS|getCode()",
+                "package_class": "ResultCode.SUCCESS",
+                "method_signature": "getCode()",
+                "method_name": "getCode",
+                "class_name": "SUCCESS",
+                "depth": 2,
+                "invocation_lines": [
+                  36,
+                  36
+                ],
+                "is_cyclic": false,
+                "is_leaf": true,
+                "db_method_id": null,
+                "root_type": "UNKNOWN",
+                "call_type": "DIRECT",
+                "has_multiple_call_sites": false,
+                "api_paths": [],
+                "change_type": "UNKNOWN",
+                "dao_info": null,
+                "children": []
+              },
+              {
+                "node_id": "2|ResultCode.SUCCESS|getMessage()",
+                "package_class": "ResultCode.SUCCESS",
+                "method_signature": "getMessage()",
+                "method_name": "getMessage",
+                "class_name": "SUCCESS",
+                "depth": 2,
+                "invocation_lines": [
+                  36,
+                  36
+                ],
+                "is_cyclic": false,
+                "is_leaf": true,
+                "db_method_id": null,
+                "root_type": "UNKNOWN",
+                "call_type": "DIRECT",
+                "has_multiple_call_sites": false,
+                "api_paths": [],
+                "change_type": "UNKNOWN",
+                "dao_info": null,
+                "children": []
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "failed": [],
+  "analysis_limitations": [
+    {
+      "id": "DYNAMIC_DISPATCH",
+      "severity": "HIGH",
+      "description": "无法覆盖通过反射、Lambda、方法引用、动态代理发起的调用",
+      "examples": [
+        "Spring AOP 代理方法",
+        "MyBatis Mapper 动态绑定",
+        "反射调用 invoke()"
+      ],
+      "impact": "向上分析可能遗漏实际调用者，结果属于'过于乐观的下界'"
+    },
+    {
+      "id": "INTERFACE_RESOLUTION",
+      "severity": "MEDIUM",
+      "description": "CHA 解析基于静态类层次，无法处理运行时类型确定",
+      "examples": [
+        "条件分支中不同实现类赋值",
+        "工厂模式返回类型"
+      ],
+      "impact": "可能包含不可达调用路径（假阳性），或遗漏某些实现类（假阴性）"
+    }
+  ]
+}
