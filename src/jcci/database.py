@@ -164,3 +164,56 @@ class SqliteHelper(object):
         except Exception as ex:
             logging.error(f"insert data error {ex}")
             return False
+
+    def begin_transaction(self):
+        """开始显式事务"""
+        try:
+            conn = self.connect()
+            # SQLite默认就是事务模式，这里主要是为了明确事务边界
+            logging.debug("Transaction started")
+            return conn
+        except Exception as e:
+            logging.error(f"begin_transaction fail: {e}")
+            raise
+
+    def commit_transaction(self, conn=None):
+        """提交事务"""
+        try:
+            if conn is None:
+                conn = self.connect()
+            conn.commit()
+            logging.debug("Transaction committed")
+        except Exception as e:
+            logging.error(f"commit_transaction fail: {e}")
+            raise
+
+    def rollback_transaction(self, conn=None):
+        """回滚事务"""
+        try:
+            if conn is None:
+                conn = self.connect()
+            conn.rollback()
+            logging.warning("Transaction rolled back")
+        except Exception as e:
+            logging.error(f"rollback_transaction fail: {e}")
+            raise
+
+    def query_one(self, sql, params=None):
+        """查询单条记录（支持参数化查询）"""
+        try:
+            conn = self.connect()
+            c = conn.cursor()
+            if params:
+                c.execute(sql, params)
+            else:
+                c.execute(sql)
+            result = c.fetchone()
+            if result:
+                columns = [column_name[0] for column_name in c.description]
+                return dict(zip(columns, result))
+            return None
+        except Exception as e:
+            logging.error(f"query_one fail: {e}")
+            raise
+        finally:
+            conn.close()

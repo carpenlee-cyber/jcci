@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 class ClassHierarchyIndex:
     """
     类层次索引：支持 CHA（Class Hierarchy Analysis）
-    解决接口/实现类方法调用关系缺失问题
+    v3.2修订版：实现O(n)构建复杂度，短名索引优化
     """
     
     def __init__(self, db_connection, project_ids: List[int]):
@@ -29,13 +29,17 @@ class ClassHierarchyIndex:
         self._class_hierarchy: Dict[str, dict] = {}
         self._interface_impls: Dict[str, List[str]] = {}
         self._method_override_map: Dict[str, List[dict]] = {}
+        
+        # ⭐v3.2新增: 短名快速索引（避免O(n²)遍历）
+        self._short_name_index: Dict[str, List[str]] = {}  # short_name -> [full_name, ...]
+        
         self._build_hierarchy(db_connection, project_ids)
-        logger.info(f"Class hierarchy index built: {len(self._class_hierarchy)} classes, "
-                   f"{len(self._interface_impls)} interfaces")
+        logger.info(f"Class hierarchy index built (v3.2 optimized): {len(self._class_hierarchy)} classes, "
+                   f"{len(self._interface_impls)} interfaces, {len(self._short_name_index)} short names")
     
     def _build_hierarchy(self, db_connection, project_ids: List[int]):
         """
-        从数据库加载类层次信息
+        从数据库加载类层次信息（v3.2优化版 - O(n)复杂度）
         
         假设数据库表结构：
         - class_table: class_id, project_id, package_name, class_name, super_class, interfaces(JSON)
@@ -53,6 +57,7 @@ class ClassHierarchyIndex:
         cursor.execute(query, project_ids)
         rows = cursor.fetchall()
         
+        # ⭐v3.2优化: 步骤1 - 建立短名索引 O(n)
         for row in rows:
             if isinstance(row, dict):
                 class_id = row['class_id']
@@ -65,6 +70,13 @@ class ClassHierarchyIndex:
             
             package_class = f"{package_name}.{class_name}"
             interfaces = json.loads(interfaces_json) if interfaces_json else []
+            
+            # 建立短名索引
+            short_name = class_name
+            if short_name not in self._short_name_index:
+                self._short_name_index[short_name] = []
+            if package_class not in self._short_name_index[short_name]:
+                self._short_name_index[short_name].append(package_class)
             
             self._class_hierarchy[package_class] = {
                 'class_id': class_id,
@@ -221,3 +233,45 @@ class ClassHierarchyIndex:
             return True
         
         return False
+    
+    def resolve_short_name(self, short_name: str, current_package: str = None, imports: List[str] = None) -> Optional[str]:
+        """
+        v3.2新增：使用短名索引快速解析类全限定名 - O(1)平均复杂度
+        
+        Args:
+            short_name: 短类名（如 "UserService"）
+            current_package: 当前包名（可选，用于同包优先匹配）
+            imports: import语句列表（可选，用于import匹配）
+        
+        Returns:
+            全限定类名，如果无法解析则返回None
+        """
+        candidates = self._short_name_index.get(short_name, [])
+        
+        if not candidates:
+            return None
+        
+        if len(candidates) == 1:
+            return candidates[0]
+        
+        # 多候选时，按优先级解析：
+        # 1. 同包优先
+        if current_package:
+            for c in candidates:
+                if c.rsplit('.', 1)[0] == current_package:
+                    return c
+        
+        # 2. 通过import语句匹配
+        if imports:
+            for imp in imports:
+                if imp.endswith(f'.{short_name}'):
+                    return imp
+        
+        # 3. 通过java.lang默认包匹配
+        for c in candidates:
+            if c.startswith('java.lang.'):
+                return c
+        
+        # 4. 模糊匹配：返回第一个（记录警告）
+        logger.warning(f"类 {short_name} 存在 {len(candidates)} 个候选，使用第一个: {candidates[0]}")
+        return candidates[0]

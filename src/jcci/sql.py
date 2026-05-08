@@ -132,4 +132,34 @@ CREATE TABLE llm_analysis_cache (
     UNIQUE(analysis_type, direction, class_name, method_name, change_type, chain_index)
 );
 
+-- v3.2新增：方法字段访问记录表
+CREATE TABLE method_field_access (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    method_id INTEGER NOT NULL,
+    field_name TEXT NOT NULL,
+    access_type TEXT NOT NULL CHECK(access_type IN ('READ', 'WRITE', 'METHOD_CALL')),
+    line_number INTEGER,
+    field_type TEXT,
+    project_id INTEGER NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (method_id) REFERENCES methods(method_id) ON DELETE CASCADE
+);
+
+-- v3.2新增：优化索引
+CREATE INDEX idx_mfa_method ON method_field_access(method_id);
+CREATE INDEX idx_mfa_field ON method_field_access(field_name, project_id);
+CREATE INDEX idx_mfa_project ON method_field_access(project_id);
+
+-- v3.2新增：字段影响关联表
+CREATE TABLE field_impact (
+    impact_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    field_id INTEGER NOT NULL,
+    method_id INTEGER NOT NULL,
+    impact_type TEXT NOT NULL, -- 'DIRECT_READ', 'DIRECT_WRITE', 'SERIALIZATION', 'REFLECTION'
+    impact_level TEXT NOT NULL DEFAULT 'MEDIUM', -- 'LOW', 'MEDIUM', 'HIGH', 'CRITICAL'
+    project_id INTEGER NOT NULL,
+    FOREIGN KEY (field_id) REFERENCES field(field_id),
+    FOREIGN KEY (method_id) REFERENCES methods(method_id)
+);
+
 '''

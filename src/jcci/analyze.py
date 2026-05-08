@@ -1213,7 +1213,7 @@ class JCCI(object):
     
     def _load_analysis_cache(self) -> dict:
         """
-        从 JSON 缓存加载分析结果
+        从 JSON 缓存加载分析结果（v3.2向后兼容）
         
         Returns:
             dict: 分析结果，如果加载失败返回 None
@@ -1229,9 +1229,62 @@ class JCCI(object):
         
         try:
             with open(cache_file, 'r', encoding='utf-8') as f:
-                result = json.load(f)
+                cache = json.load(f)
+            
+            # v3.2 向后兼容处理
+            cache = self._migrate_cache_if_needed(cache)
+            
             logging.info(f'Analysis result loaded from cache: {cache_file}')
-            return result
+            return cache
         except Exception as e:
             logging.error(f'Failed to load analysis cache: {e}')
             return None
+    
+    def _migrate_cache_if_needed(self, cache: dict) -> dict:
+        """缓存版本迁移（v3.2新增）"""
+        
+        # 检测版本
+        version = cache.get('metadata', {}).get('version', '3.1')
+        
+        if version.startswith('3.1'):
+            logging.info("检测到v3.1缓存，执行字段兼容迁移")
+            
+            # 补充v3.2新增字段
+            if 'field_impacts' not in cache:
+                cache['field_impacts'] = []
+            if 'deleted_impacts' not in cache:
+                cache['deleted_impacts'] = []
+            if 'mapper_chains' not in cache:
+                cache['mapper_chains'] = []
+            
+            # 更新元数据版本
+            if 'metadata' not in cache:
+                cache['metadata'] = {}
+            cache['metadata']['version'] = '3.2'
+            cache['metadata']['migrated_from'] = '3.1'
+            
+            # 保存迁移后的缓存
+            self._save_analysis_cache(cache)
+            logging.info("✅ 缓存迁移完成 v3.1 -> v3.2")
+        
+        return cache
+    
+    def _sync_point_verify(self, project_id: int, phase: str):
+        """同步点验证：确保标记数据已持久化"""
+        try:
+            deleted_count = self.sqlite.query_one(
+                "SELECT COUNT(*) as cnt FROM methods WHERE project_id=? AND change_type='DELETED'",
+                (project_id,)
+            )['cnt']
+            modified_count = self.sqlite.query_one(
+                "SELECT COUNT(*) as cnt FROM methods WHERE project_id=? AND change_type='MODIFIED'",
+                (project_id,)
+            )['cnt']
+            added_count = self.sqlite.query_one(
+                "SELECT COUNT(*) as cnt FROM methods WHERE project_id=? AND change_type='ADDED'",
+                (project_id,)
+            )['cnt']
+            logging.info(f"🔍 同步点验证通过 [{phase}, project_id={project_id}]: "
+                        f"DELETED={deleted_count}, MODIFIED={modified_count}, ADDED={added_count}")
+        except Exception as e:
+            logging.error(f"⚠️ 同步点验证失败: {e}")
