@@ -67,12 +67,12 @@ def workflow1():
     username = 'carpenlee-cyber'
     
     # # 方式1：使用commit hash（用于开发测试）
-    tag_old = 'dd6569c3558f79af5b21aad601349e0f029b9a6d'
-    tag_new = 'dd94f3b4b317e604eee9b96252160e1a5c69785d'    
+    # tag_old = 'dd6569c3558f79af5b21aad601349e0f029b9a6d'
+    # tag_new = 'dd94f3b4b317e604eee9b96252160e1a5c69785d'    
     
     # 方式2：使用长tag名称（生产环境示例）
-    # tag_old = 'baseline_20260508_01'
-    # tag_new = 'baseline_fix1_20260508_02'
+    tag_old = 'baseline_20260508_01'
+    tag_new = 'baseline_fix1_20260508_02'
     # tag_old = 'MIX_LJ01.BUP_BUP3_UAT_UAT_00.00.01_SUMMER_20260403_01'
     # tag_new = 'MIX_LJ01.BUP_BUP3_UAT_UAT_00.00.01_SUMMER_20260403_02'
     
