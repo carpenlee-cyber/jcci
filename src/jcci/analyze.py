@@ -122,7 +122,7 @@ class JCCI(object):
             dependent_git_url = dependent.get('git_url')
             if not dependent_git_url:
                 continue
-            dependent_branch = dependent.get('branch', 'master')
+            dependent_branch = dependent.get('branch')
             dependent_commit_id = dependent.get('commit_id', 'HEAD')
             dependent_project_name = dependent_git_url.split('/')[-1].split('.git')[0]
             dependent_file_path = os.path.join(self.file_path, dependent_project_name)

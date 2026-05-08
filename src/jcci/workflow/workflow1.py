@@ -68,7 +68,7 @@ def workflow1():
     
     # # 方式1：使用commit hash（用于开发测试）
     tag_old = 'dd6569c3558f79af5b21aad601349e0f029b9a6d'
-    tag_new = '0db78d7f79c48b7349346c1380408f60ba0c3c54'    
+    tag_new = 'dd94f3b4b317e604eee9b96252160e1a5c69785d'    
     
     # 方式2：使用长tag名称（生产环境示例）
     # tag_old = 'baseline_20260508_01'
