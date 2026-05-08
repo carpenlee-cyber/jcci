@@ -3,6 +3,7 @@ tests
 src/jcci.egg-info
 .idea
 src/jcci/__pycache__/
+src/jcci/**/__pycache__/
 test/
 
 # Database files

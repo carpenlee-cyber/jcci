@@ -174,7 +174,15 @@ class UpwardsCallChainBuilder:
     def build(self, package_class: str, method_signature: str) -> CallChainNode:
         """构建向上调用链"""
         root = self._create_node(package_class, method_signature, depth=0)
+        
+        # 分类根节点类型，并获取API路径信息
         root.root_type = self._classify_root(package_class, method_signature, has_callers=False)
+        
+        # 如果是HTTP API入口，从entry_detector中获取API路径
+        if self.entry_detector and root.root_type == 'HTTP_API':
+            entry_info = self.entry_detector.is_entry_method(package_class, method_signature)
+            if entry_info and 'api_paths' in entry_info:
+                root.api_paths = entry_info['api_paths']
         
         path_visited = {f"{package_class}|{method_signature}"}
         self._dfs_expand(root, path_visited, current_depth=0)

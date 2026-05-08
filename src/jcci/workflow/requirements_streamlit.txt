@@ -1,0 +1,3 @@
+# JCCI Streamlit Web应用依赖
+streamlit>=1.52.0
+requests>=2.27.0

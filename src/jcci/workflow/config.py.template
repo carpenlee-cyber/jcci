@@ -1,0 +1,17 @@
+# JCCI Streamlit Web应用配置文件模板
+# 复制此文件为 config.py 并填入你的配置信息
+
+# LLM API配置
+LLM_API_URL = "https://openai.good.hidns.vip/v1"
+LLM_API_KEY = "your-api-key-here"  # 替换为你的API Key
+LLM_MODEL = "moonshotai/kimi-k2.6"
+
+# 数据库路径（根据实际情况修改）
+DB_PATH = r"path/to/your/database.db"
+
+# 分析结果目录（根据实际情况修改）
+RESULT_DIR = r"path/to/analyze_result"
+
+# Streamlit服务配置
+STREAMLIT_PORT = 8501
+STREAMLIT_HOST = "0.0.0.0"  # 允许外部访问，仅本地访问改为 "127.0.0.1"

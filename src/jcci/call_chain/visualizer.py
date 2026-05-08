@@ -31,6 +31,34 @@ class CallChainVisualizer:
             str: 格式化后的文本
         """
         lines = []
+        
+        # 添加metadata信息
+        metadata = upwards_result.get('metadata', {})
+        lines.append("=" * 80)
+        lines.append("向上调用链分析 - 元数据信息")
+        lines.append("=" * 80)
+        lines.append(f"项目: {metadata.get('project_name', 'N/A')}")
+        lines.append(f"用户名: {metadata.get('username', 'N/A')}")
+        lines.append(f"Git URL: {metadata.get('git_url', 'N/A')}")
+        lines.append(f"Commit范围: {metadata.get('commit_old', 'N/A')}..{metadata.get('commit_new', 'N/A')}")
+        lines.append(f"分析版本: {metadata.get('analysis_version', 'N/A')}")
+        lines.append(f"最大深度: {metadata.get('max_depth', 'N/A')}")
+        lines.append(f"总变更方法数: {metadata.get('total_methods', 0)}")
+        lines.append(f"成功分析: {metadata.get('successful_chains', 0)}")
+        lines.append(f"失败分析: {metadata.get('failed_chains', 0)}")
+        
+        # 功能启用状态
+        features = metadata.get('features_enabled', {})
+        if features:
+            lines.append("")
+            lines.append("功能启用状态:")
+            lines.append(f"  - 类层次分析 (CHA): {'是' if features.get('class_hierarchy_analysis') else '否'}")
+            lines.append(f"  - 入口检测: {'是' if features.get('entry_detection') else '否'}")
+        
+        lines.append("")
+        lines.append("=" * 80)
+        lines.append("")
+        
         lines.append("\n向上调用链分析（影响面：谁调用了变更方法？）")
         lines.append("")
         
@@ -60,7 +88,8 @@ class CallChainVisualizer:
                         'package_class': package_class,
                         'method_signature': method_signature,
                         'root_type': entry.get('root_type', 'UNKNOWN'),
-                        'depth_from_change': entry.get('depth_from_change', 0)
+                        'depth_from_change': entry.get('depth_from_change', 0),
+                        'api_paths': entry.get('api_paths', [])  # 添加API路径
                     })
         
         # 展示所有入口点汇总
@@ -71,7 +100,18 @@ class CallChainVisualizer:
             for idx, entry in enumerate(all_entry_points, 1):
                 entry_tag = "(入口)" if entry['root_type'] in ['HTTP_API', 'SCHEDULED_TASK', 'EVENT_LISTENER',
                                                                   'MESSAGE_CONSUMER', 'CONTROLLER_BY_CONVENTION'] else ""
-                lines.append(f"  {idx}. {entry['key']}{entry_tag} [{entry['root_type']}]")
+                
+                # 构建显示文本
+                display_text = f"  {idx}. {entry['key']}{entry_tag} [{entry['root_type']}]"
+                
+                # 如果有API路径，添加到显示中
+                api_paths = entry.get('api_paths', [])
+                if api_paths:
+                    # 格式化API路径，例如: [POST]/coupon/delete/{id}
+                    api_path_str = ', '.join(api_paths)
+                    display_text += f" - {api_path_str}"
+                
+                lines.append(display_text)
                 
                 # 展示该入口点关联的调用链
                 related_chains = []
@@ -142,6 +182,26 @@ class CallChainVisualizer:
             str: 格式化后的文本
         """
         lines = []
+        
+        # 添加metadata信息
+        metadata = downwards_result.get('metadata', {})
+        lines.append("=" * 80)
+        lines.append("向下调用链分析 - 元数据信息")
+        lines.append("=" * 80)
+        lines.append(f"项目: {metadata.get('project_name', 'N/A')}")
+        lines.append(f"用户名: {metadata.get('username', 'N/A')}")
+        lines.append(f"Git URL: {metadata.get('git_url', 'N/A')}")
+        lines.append(f"Commit范围: {metadata.get('commit_old', 'N/A')}..{metadata.get('commit_new', 'N/A')}")
+        lines.append(f"分析版本: {metadata.get('analysis_version', 'N/A')}")
+        lines.append(f"最大深度: {metadata.get('max_depth', 'N/A')}")
+        lines.append(f"总变更方法数: {metadata.get('total_methods', 0)}")
+        lines.append(f"成功分析: {metadata.get('successful_chains', 0)}")
+        lines.append(f"失败分析: {metadata.get('failed_chains', 0)}")
+        
+        lines.append("")
+        lines.append("=" * 80)
+        lines.append("")
+        
         lines.append("\n向下调用链分析（功能风险：变更方法调用了谁？）")
         lines.append("")
         

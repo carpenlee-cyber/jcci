@@ -59,11 +59,27 @@ class SqliteHelper(object):
         except Exception as e:
             logging.error(f'add_project fail')
 
-    def get_baseline_db_path(self, username, project_name, commit_old):
-        """构造基线数据库文件路径"""
-        commit_short = commit_old[0:7] if len(commit_old) > 7 else commit_old
-        db_filename = f"{username}_{project_name}_baseline_{commit_short}.db"
-        return os.path.join(os.path.dirname(self.db_path), db_filename)
+    def get_baseline_db_path(self, username, project_name, commit_short, output_dir=None):
+        """
+        构造基线数据库文件路径
+        
+        Args:
+            username: Git用户名（保留参数以兼容调用方）
+            project_name: 项目名称
+            commit_short: 已标准化的短标识符（由调用方负责标准化）
+            output_dir: 输出目录（可选，默认为jcci根目录）
+        
+        Returns:
+            str: 基线数据库完整路径
+        """
+        db_filename = f"{project_name}_{commit_short}_baseline.db"
+        
+        if output_dir:
+            # 如果指定了输出目录，保存到该目录
+            return os.path.join(output_dir, db_filename)
+        else:
+            # 否则保存到jcci根目录（向后兼容）
+            return os.path.join(os.path.dirname(self.db_path), db_filename)
 
     def check_duplicate_analysis(self, project_name, git_url, branch, commit_new, commit_old):
         """检查是否已经进行过相同的分析"""

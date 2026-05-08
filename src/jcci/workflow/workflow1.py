@@ -2,6 +2,7 @@
 import sys
 import os
 import logging
+import time
 
 # 配置日志
 logging.basicConfig(
@@ -20,33 +21,83 @@ if project_root not in sys.path:
 
 from src.jcci import JCCI  # noqa: E402
 
+
+def extract_short_tag(tag: str) -> str:
+    """
+    从tag或commit hash中提取短标识符
+    
+    规则：
+    - Commit Hash (40位十六进制): 截取前8位
+    - Git Tag (长度>11): 截取后11位
+    - 短标识符 (长度<=11): 保持不变
+    
+    例如：
+    - dd6569c3558f79af5b21aad601349e0f029b9a6d -> dd6569c3 (commit hash)
+    - MIX_LJ01.BUP_BUP3_UAT_UAT_00.00.01_SUMMER_20260403_01 -> 20260403_01 (tag)
+    - d9501e9 -> d9501e9 (短标识符)
+    
+    Args:
+        tag: 完整的tag或commit hash字符串
+        
+    Returns:
+        短标识符
+    """
+    import re
+    
+    # 判断是否为40位commit hash（十六进制字符串）
+    if len(tag) == 40 and re.match(r'^[0-9a-f]{40}$', tag, re.IGNORECASE):
+        # Commit hash：截取前8位
+        return tag[:8]
+    elif '_' in tag or len(tag) > 11:
+        # Git Tag（包含下划线或长度>11）：取最后11个字符
+        return tag[-11:]
+    else:
+        # 短标识符：保持不变
+        return tag
+
+
 def workflow1():
     # 步骤1：配置参数
     logger.info("\n")
     logger.info("步骤1：开始配置参数")
     logger.info("=" * 80)
 
-    # 配置参数
+    # 配置参数 - 支持tag和commit hash
     git_url = 'https://github.com/carpenlee-cyber/mall.git'
     username = 'carpenlee-cyber'
-    commit_old = 'd9501e9'  # Update README.md
-    commit_new = '78e3a22'  # test: 添加双向调用链分析测试方法
-
+    
+    # # 方式1：使用commit hash（用于开发测试）
+    tag_old = 'dd6569c3558f79af5b21aad601349e0f029b9a6d'
+    tag_new = 'dd94f3b4b317e604eee9b96252160e1a5c69785d'    
+    
+    # 方式2：使用长tag名称（生产环境示例）
+    # tag_old = 'baseline_20260508_01'
+    # tag_new = 'baseline_fix1_20260508_02'
+    # tag_old = 'MIX_LJ01.BUP_BUP3_UAT_UAT_00.00.01_SUMMER_20260403_01'
+    # tag_new = 'MIX_LJ01.BUP_BUP3_UAT_UAT_00.00.01_SUMMER_20260403_02'
+    
+    # 提取短标识符用于本地文件和数据库存储（最后11个字符）
+    # 对于短commit hash（<=11字符），保持不变
+    commit_old = extract_short_tag(tag_old)  # d9501e9
+    commit_new = extract_short_tag(tag_new)  # 78e3a22
 
     logger.info(f"  - git_url: {git_url}")
     logger.info(f"  - username: {username}")
-    logger.info(f"  - commit_old: {commit_old}")
-    logger.info(f"  - commit_new: {commit_new}")
+    logger.info(f"  - tag_old (完整): {tag_old}")
+    logger.info(f"  - tag_new (完整): {tag_new}")
+    logger.info(f"  - commit_old (短标识): {commit_old}")
+    logger.info(f"  - commit_new (短标识): {commit_new}")
 
         
     # 步骤2：调用analyze_two_commit_incremental
     logger.info("\n")
     logger.info("步骤2：调用JCI新方法, 第一次调用（预期为首次分析，将创建 JSON 缓存）, 重复调用将使用缓存")
+    logger.info(f"  - 使用完整tag调用Git: {tag_old}..{tag_new}")
     
     jcci1 = JCCI(git_url, username)
     result1 = jcci1.analyze_two_commit_incremental(
-        commit_new=commit_new,
-        commit_old=commit_old
+        commit_new=tag_new,  # 使用完整tag进行Git操作
+        commit_old=tag_old   # 使用完整tag进行Git操作
     )
 
     if result1.get('is_duplicate', False):
@@ -73,8 +124,8 @@ def workflow1():
         bidirectional_result = build_call_chains_for_changes(
             username=username,
             git_url=git_url,
-            commit_old=commit_old,
-            commit_new=commit_new,
+            commit_old=commit_old,    # 使用短标识符（与基线数据库文件名一致）
+            commit_new=commit_new,    # 使用短标识符
             changed_methods=changed_methods,
             max_depth=5
         )
@@ -96,25 +147,91 @@ def workflow1():
         )
         logger.info(downwards_text)
         
-        # 将结果写入文件
-        output_dir = os.path.join(project_root, "src", "jcci", "analyze_result")
-        os.makedirs(output_dir, exist_ok=True)
-        
-        # 生成文件名（基于commit范围）
-        filename_prefix = f"{username}_mall_{commit_old}..{commit_new}"
+        # 将结果写入文件（使用新的目录结构：基线目录/版本子目录）
+        baseline_dir = os.path.join(project_root, "src", "jcci", "analyze_result", f"mall_{commit_old}")
+        version_subdir = os.path.join(baseline_dir, commit_new)
+        os.makedirs(version_subdir, exist_ok=True)
         
         # 写入向上调用链
-        upwards_file = os.path.join(output_dir, f"{filename_prefix}_upwards.txt")
+        upwards_file = os.path.join(version_subdir, "upwards.txt")
         with open(upwards_file, 'w', encoding='utf-8') as f:
             f.write(upwards_text)
         logger.info(f"向上调用链已保存到: {upwards_file}")
         
         # 写入向下调用链
-        downwards_file = os.path.join(output_dir, f"{filename_prefix}_downwards.txt")
+        downwards_file = os.path.join(version_subdir, "downwards.txt")
         with open(downwards_file, 'w', encoding='utf-8') as f:
             f.write(downwards_text)
         logger.info(f"向下调用链已保存到: {downwards_file}")
         
+        # 步骤5：启动Streamlit Web服务进行可视化展示和LLM分析
+        logger.info("\n")
+        logger.info("步骤5：启动Streamlit Web服务")
+        logger.info("=" * 80)
+        logger.info("  - 提供可视化的调用链展示界面")
+        logger.info("  - 支持点击方法/调用链进行AI智能分析")
+        logger.info("  - 自动查询数据库获取详细信息")
+        logger.info("  - 集成LLM生成测试建议和变更分析")
+        logger.info("=" * 80)
+        
+        import subprocess
+        import webbrowser
+        import threading
+        import socket
+        
+        streamlit_script = os.path.join(os.path.dirname(__file__), "streamlit_app.py")
+        
+        if os.path.exists(streamlit_script):
+            # 尝试导入配置
+            try:
+                sys.path.insert(0, os.path.dirname(__file__))
+                from config import STREAMLIT_PORT, STREAMLIT_HOST
+            except ImportError:
+                STREAMLIT_PORT = 8501
+                STREAMLIT_HOST = "0.0.0.0"
+                logger.warning("未找到config.py，使用默认配置")
+            
+            logger.info(f"启动Streamlit服务: {streamlit_script}")
+            logger.info(f"服务地址: http://{STREAMLIT_HOST}:{STREAMLIT_PORT}")
+            
+            # 获取本地IP用于分享
+            try:
+                hostname = socket.gethostname()
+                local_ip = socket.gethostbyname(hostname)
+                logger.info(f"局域网访问: http://{local_ip}:{STREAMLIT_PORT}")
+            except:
+                pass
+            
+            logger.info("按 Ctrl+C 停止服务")
+            
+            # 在后台启动Streamlit
+            def start_streamlit():
+                subprocess.run([
+                    sys.executable, "-m", "streamlit", "run", 
+                    streamlit_script,
+                    "--server.port", str(STREAMLIT_PORT),
+                    "--server.address", STREAMLIT_HOST,
+                    "--server.headless", "true"
+                ])
+            
+            # 延迟2秒后自动打开浏览器
+            def open_browser():
+                time.sleep(2)
+                # 使用baseline参数实现基线隔离
+                webbrowser.open(f"http://localhost:{STREAMLIT_PORT}/?baseline=mall_{commit_old}")
+            
+            # 启动浏览器打开线程
+            browser_thread = threading.Thread(target=open_browser, daemon=True)
+            browser_thread.start()
+            
+            # 启动Streamlit（阻塞）
+            try:
+                start_streamlit()
+            except KeyboardInterrupt:
+                logger.info("\nStreamlit服务已停止")
+        else:
+            logger.warning(f"Streamlit脚本不存在: {streamlit_script}")
+
 
 if __name__ == "__main__":
     workflow1()

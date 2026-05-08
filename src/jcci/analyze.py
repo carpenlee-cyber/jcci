@@ -28,8 +28,10 @@ class JCCI(object):
         self.git_url = git_url
         self.username: str = username
         self.branch_name: str = ''
-        self.commit_or_branch_new: str = ''
-        self.commit_or_branch_old: str = ''
+        self.commit_or_branch_new: str = ''  # 用于Git操作的原始值（完整tag或commit hash）
+        self.commit_or_branch_old: str = ''  # 用于Git操作的原始值（完整tag或commit hash）
+        self.commit_short_new: str = ''      # 用于数据库和文件命名的短标识符
+        self.commit_short_old: str = ''      # 用于数据库和文件命名的短标识符
         self.project_id: int = -1
         self.cci_filepath: str = ''
         self.project_name: str = ''
@@ -42,6 +44,40 @@ class JCCI(object):
         self.diff_parse_map = {}
         self.xml_parse_results_new = {}
         self.xml_parse_results_old = {}
+
+    @staticmethod
+    def _normalize_commit_or_tag(identifier: str) -> str:
+        """
+        标准化commit hash或tag标识符
+        
+        规则：
+        - 如果是commit hash（40位十六进制字符串），截取前8位
+        - 如果是长tag（长度>11且不是40位十六进制），取最后11个字符作为短标识符
+        - 如果是短tag或短commit（长度<=11），保持不变
+        
+        例如：
+        - dd6569c3558f79af5b21aad601349e0f029b9a6d -> dd6569c3 (commit hash，前8位)
+        - MIX_LJ01.BUP_BUP3_UAT_UAT_00.00.01_SUMMER_20260403_01 -> 20260403_01 (tag，后11位)
+        - d9501e9 -> d9501e9 (保持不变)
+        
+        Args:
+            identifier: commit hash或tag字符串
+            
+        Returns:
+            标准化后的标识符
+        """
+        import re
+        
+        # 判断是否为40位commit hash（十六进制字符串）
+        if len(identifier) == 40 and re.match(r'^[0-9a-f]{40}$', identifier, re.IGNORECASE):
+            # Commit hash：截取前8位
+            return identifier[:8]
+        elif len(identifier) > 11:
+            # 长tag：取最后11个字符
+            return identifier[-11:]
+        else:
+            # 短标识符：保持不变
+            return identifier
 
     # Step 1.1
     def _can_analyze(self, filepath, cci_file_path):
@@ -86,7 +122,7 @@ class JCCI(object):
             dependent_git_url = dependent.get('git_url')
             if not dependent_git_url:
                 continue
-            dependent_branch = dependent.get('branch', 'master')
+            dependent_branch = dependent.get('branch')
             dependent_commit_id = dependent.get('commit_id', 'HEAD')
             dependent_project_name = dependent_git_url.split('/')[-1].split('.git')[0]
             dependent_file_path = os.path.join(self.file_path, dependent_project_name)
@@ -103,11 +139,35 @@ class JCCI(object):
         os.system(f'cd {filepath} && git checkout {branch} && git pull')
         time.sleep(1)
         logging.info(f'Git diff between {commit_new} and {commit_old}')
-        diff_base = f'cd {self.file_path} && git diff {commit_old}..{commit_new} > diff_{commit_old}..{commit_new}.txt'
+        # 使用标准化后的短标识符命名diff文件
+        commit_old_short = self._normalize_commit_or_tag(commit_old)
+        commit_new_short = self._normalize_commit_or_tag(commit_new)
+        diff_base = f'cd {self.file_path} && git diff {commit_old}..{commit_new} > diff_{commit_old_short}..{commit_new_short}.txt'
         os.system(diff_base)
-        diff_txt = os.path.join(self.file_path, f'diff_{commit_old}..{commit_new}.txt')
+        diff_txt = os.path.join(self.file_path, f'diff_{commit_old_short}..{commit_new_short}.txt')
         logging.info(f'Analyzing diff file, location: {diff_txt}')
-        return diff_parse.get_diff_info(diff_txt)
+        
+        # 检查diff文件是否存在且有内容
+        if os.path.exists(diff_txt):
+            file_size = os.path.getsize(diff_txt)
+            logging.info(f'Diff file size: {file_size} bytes')
+            if file_size == 0:
+                logging.warning(f'⚠️  Diff file is empty! No changes found between {commit_old} and {commit_new}')
+                logging.warning(f'   Please verify that these commits/tags exist in the repository')
+        else:
+            logging.error(f'❌ Diff file not created: {diff_txt}')
+        
+        diff_parse_map = diff_parse.get_diff_info(diff_txt)
+        logging.info(f'Diff parse result: {len(diff_parse_map)} files changed')
+        if diff_parse_map:
+            for filepath, diff_info in list(diff_parse_map.items())[:5]:  # 显示前5个文件
+                added = len(diff_info.get('line_num_added', []))
+                removed = len(diff_info.get('line_num_removed', []))
+                logging.info(f'  - {filepath}: +{added} -{removed}')
+            if len(diff_parse_map) > 5:
+                logging.info(f'  ... and {len(diff_parse_map) - 5} more files')
+        
+        return diff_parse_map
 
     # Step 2
     def _get_branch_diff_parse_map(self, filepath, commit_new, commit_old):
@@ -117,9 +177,12 @@ class JCCI(object):
         os.system(f'cd {filepath} && git fetch --all && git checkout -b {commit_new} origin/{commit_new} && git checkout {commit_new} && git pull')
         time.sleep(1)
         logging.info(f'Git diff between {commit_new} and {commit_old}')
-        diff_base = f'cd {self.file_path} && git diff {commit_old}..{commit_new} > diff_{commit_old}..{commit_new}.txt'
+        # 使用标准化后的短标识符命名diff文件
+        commit_old_short = self._normalize_commit_or_tag(commit_old)
+        commit_new_short = self._normalize_commit_or_tag(commit_new)
+        diff_base = f'cd {self.file_path} && git diff {commit_old}..{commit_new} > diff_{commit_old_short}..{commit_new_short}.txt'
         os.system(diff_base)
-        diff_txt = os.path.join(self.file_path, f'diff_{commit_old}..{commit_new}.txt')
+        diff_txt = os.path.join(self.file_path, f'diff_{commit_old_short}..{commit_new_short}.txt')
         logging.info(f'Analyzing diff file, location: {diff_txt}')
         return diff_parse.get_diff_info(diff_txt)
 
@@ -256,16 +319,16 @@ class JCCI(object):
 
     # Step 4.2
     def _java_diff_analyze(self, patch_filepath: str, diff_parse_obj: dict):
-        # new branch or commit
-        class_db = self.sqlite.select_data(f'''SELECT * FROM class WHERE project_id = {self.project_id} and commit_or_branch = "{self.commit_or_branch_new}" and filepath LIKE "%{patch_filepath}"''')
+        # new branch or commit（使用短标识符）
+        class_db = self.sqlite.select_data(f'''SELECT * FROM class WHERE project_id = {self.project_id} and commit_or_branch = "{self.commit_short_new}" and filepath LIKE "%{patch_filepath}"''')
         for class_db_obj in class_db:
-            self._java_field_method_diff_analyze(class_db_obj, diff_parse_obj['line_num_added'], diff_parse_obj['line_content_added'], self.commit_or_branch_new)
+            self._java_field_method_diff_analyze(class_db_obj, diff_parse_obj['line_num_added'], diff_parse_obj['line_content_added'], self.commit_short_new)
         # old branch or commit
         if not self.commit_or_branch_old:
             return
-        class_db = self.sqlite.select_data(f'SELECT * FROM class WHERE project_id = {self.project_id} and commit_or_branch = "{self.commit_or_branch_old}" and filepath LIKE "%{patch_filepath}"')
+        class_db = self.sqlite.select_data(f'SELECT * FROM class WHERE project_id = {self.project_id} and commit_or_branch = "{self.commit_short_old}" and filepath LIKE "%{patch_filepath}"')
         for class_db_obj in class_db:
-            self._java_field_method_diff_analyze(class_db_obj, diff_parse_obj['line_num_removed'], diff_parse_obj['line_content_removed'], self.commit_or_branch_old)
+            self._java_field_method_diff_analyze(class_db_obj, diff_parse_obj['line_num_removed'], diff_parse_obj['line_content_removed'], self.commit_short_old)
 
     # Step 4.2.1
     def _java_field_method_diff_analyze(self, class_db: dict, line_num_list: list, line_content_list: list, commit_or_branch: str or None):
@@ -460,7 +523,7 @@ class JCCI(object):
     def _get_right_class_entity(self, class_db_list, commit_or_branch):
         right_class_entity = next((item for item in class_db_list if item.get("commit_or_branch") == commit_or_branch), None)
         if right_class_entity is None:
-            right_class_entity = next((item for item in class_db_list if item.get("commit_or_branch") == self.commit_or_branch_new), None)
+            right_class_entity = next((item for item in class_db_list if item.get("commit_or_branch") == self.commit_short_new), None)
         return right_class_entity
 
     # Step 5.2
@@ -745,7 +808,7 @@ class JCCI(object):
                         f'JOIN class c ON m.class_id = c.class_id '
                         f'WHERE m.project_id = {self.project_id} '
                         f'AND m.start_line <= {line_num} AND m.end_line >= {line_num} '
-                        f'AND c.commit_or_branch = "{self.commit_or_branch_new}"'
+                        f'AND c.commit_or_branch = "{self.commit_short_new}"'
                     )
                     
                     for method in methods_list:
@@ -764,14 +827,14 @@ class JCCI(object):
             # 获取删除行的方法(旧版本)
             if diff_info.get('line_num_removed') and self.commit_or_branch_old:
                 for line_num in diff_info['line_num_removed']:
-                    # 查询旧方法
+                    # 查询旧方法（使用短标识符）
                     methods_list = self.sqlite.select_data(
                         f'SELECT m.method_name, m.parameters, m.class_id, c.class_name, c.package_name '
                         f'FROM methods m '
                         f'JOIN class c ON m.class_id = c.class_id '
                         f'WHERE m.project_id = 0 '
                         f'AND m.start_line <= {line_num} AND m.end_line >= {line_num} '
-                        f'AND c.commit_or_branch = "{self.commit_or_branch_old}"'
+                        f'AND c.commit_or_branch = "{self.commit_short_old}"'
                     )
                     
                     for method in methods_list:
@@ -857,231 +920,88 @@ class JCCI(object):
         
         return result
 
-    def analyze_two_branch(self, commit_new, commit_old, **kwargs):
-        logging.info('*' * 10 + 'Analyze start' + '*' * 10)
-        self.commit_or_branch_new = commit_new
-        self.commit_or_branch_old = commit_old
-        self.branch_name = commit_new
-        self.project_name = self.git_url.split('/')[-1].split('.git')[0]
-        self.file_path = os.path.join(config.project_path, self.project_name)
-        self.project_id = self.sqlite.add_project(self.project_name, self.git_url, self.branch_name, commit_new, commit_old)
-        # 已有分析结果
-        self.cci_filepath = os.path.join(self.file_path, f'{commit_old.replace("/", "#")}..{commit_new.replace("/", "#")}.cci')
-        self._can_analyze(self.file_path, self.cci_filepath)
-        # 无此项目, 先clone项目
-        if not os.path.exists(self.file_path):
-            logging.info(f'Cloning project: {self.git_url}')
-            os.system(f'git clone -b {commit_new} {self.git_url} {self.file_path}')
-
-        dependents: list[dict] = kwargs.get('dependents', [])
-        self._clone_dependents_project(dependents)
-
-        self._occupy_project()
-        self.diff_parse_map = self._get_branch_diff_parse_map(self.file_path, commit_new, commit_old)
-        self.xml_parse_results_new, self.xml_parse_results_old = self._parse_branch_project(self.file_path, commit_new, commit_old)
-        self._start_analysis_diff_and_impact()
-
-    def analyze_two_commit(self, branch, commit_new, commit_old, **kwargs):
-        logging.info('*' * 10 + 'Analyze start' + '*' * 10)
-        self.branch_name = branch
-        self.commit_or_branch_new = commit_new[0: 7] if len(commit_new) > 7 else commit_new
-        self.commit_or_branch_old = commit_old[0: 7] if len(commit_old) > 7 else commit_old
-
-        self.project_name = self.git_url.split('/')[-1].split('.git')[0]
-        self.file_path = os.path.join(config.project_path, self.project_name)
-
-        self.project_id = self.sqlite.add_project(self.project_name, self.git_url, self.branch_name, self.commit_or_branch_new, self.commit_or_branch_old)
-        # 已有分析结果
-        self.cci_filepath = os.path.join(self.file_path, f'{self.commit_or_branch_old}..{self.commit_or_branch_new}.cci')
-        self._can_analyze(self.file_path, self.cci_filepath)
-
-        # 无此项目, 先clone项目
-        if not os.path.exists(self.file_path):
-            logging.info(f'Cloning project: {self.git_url}')
-            os.system(f'git clone -b {self.branch_name} {self.git_url} {self.file_path}')
-
-        dependents: list[dict] = kwargs.get('dependents', [])
-        self._clone_dependents_project(dependents)
-
-        self._occupy_project()
-        self.diff_parse_map = self._get_diff_parse_map(self.file_path, self.branch_name, self.commit_or_branch_new, self.commit_or_branch_old)
-
-        self.xml_parse_results_new, self.xml_parse_results_old = self._parse_project(self.file_path, self.commit_or_branch_new, self.commit_or_branch_old)
-
-        self._start_analysis_diff_and_impact()
-
-    def analyze_class_method(self, branch, commit_id, package_class, method_nums, **kwargs):
-        logging.info('*' * 10 + 'Analyze start' + '*' * 10)
-        package_class = package_class.replace("\\", "/")
-        self.branch_name = branch
-        self.commit_or_branch_new = commit_id
-        self.commit_or_branch_new = self.commit_or_branch_new[0: 7] if len(self.commit_or_branch_new) > 7 else self.commit_or_branch_new
-        self.project_name = self.git_url.split('/')[-1].split('.git')[0]
-        self.file_path = os.path.join(config.project_path, self.project_name)
-
-        self.project_id = self.sqlite.add_project(self.project_name, self.git_url, self.branch_name, self.commit_or_branch_new, f'{package_class}.{method_nums}')
-        class_name = package_class.split("/")[-1].replace('.java', '')
-        cci_path = f'{branch.replace("/", "#")}_{commit_id}_{class_name}_{method_nums}.cci'
-        self.cci_filepath = os.path.join(self.file_path, cci_path)
-        self._can_analyze(self.file_path, self.cci_filepath)
-
-        # 无此项目, 先clone项目
-        if not os.path.exists(self.file_path):
-            logging.info(f'Cloning project: {self.git_url}')
-            os.system(f'git clone -b {self.branch_name} {self.git_url} {self.file_path}')
-
-        dependents: list[dict] = kwargs.get('dependents', [])
-        self._clone_dependents_project(dependents)
-
-        self._occupy_project()
-
-        logging.info('Git pull project to HEAD')
-        os.system(f'cd {self.file_path} && git checkout {branch} && git pull')
-        time.sleep(1)
-
-        if not method_nums:
-            method_nums_all = []
-            # todo
-            class_db = self.sqlite.select_data('SELECT * FROM class WHERE project_id = ' + str(self.project_id) + ' and filepath LIKE "%' + package_class + '"')
-            if not class_db:
-                logging.error(f'Can not find {package_class} in db')
-            class_id = class_db[0]['class_id']
-            field_db = self.sqlite.select_data(f'SELECT * FROM field WHERE class_id = {class_id}')
-            method_nums_all += [field['start_line'] for field in field_db]
-            method_db = self.sqlite.select_data(f'SELECT * FROM methods WHERE class_id = {class_id}')
-            method_nums_all += [method['start_line'] for method in method_db]
-        else:
-            method_nums_all = [int(num) for num in method_nums.split(',')]
-
-        self.diff_parse_map[package_class] = {
-            'line_num_added': method_nums_all,
-            'line_content_added': method_nums_all,
-            'line_num_removed': [],
-            'line_content_removed': []
-        }
-
-        self.xml_parse_results_new, self.xml_parse_results_old = self._parse_project(self.file_path, self.commit_or_branch_new, None)
-
-        self._start_analysis_diff_and_impact()
-
-    def analyze_one_commit(self, commit_id, **kwargs):
-        """只分析一个commit，不对比其他commit，将指定commit的全部代码信息存储到数据库中"""
-        logging.info('*' * 10 + 'Analyze single commit start' + '*' * 10)
-        self.commit_or_branch_new = commit_id[0: 7] if len(commit_id) > 7 else commit_id
-        self.commit_or_branch_old = ''  # 不需要对比其他commit
-
-        # 获取项目基本信息
-        self.project_name = self.git_url.split('/')[-1].split('.git')[0]
-        self.file_path = os.path.join(config.project_path, self.project_name)
-
-        # 创建项目记录（由于是单次commit分析，将old_commit设为空字符串）
-        self.project_id = self.sqlite.add_project(self.project_name, self.git_url, 'master', self.commit_or_branch_new, self.commit_or_branch_old)
-        
-        # 设置CCI文件路径
-        cci_filepath = os.path.join(self.file_path, f'{self.commit_or_branch_new}_full_analysis.cci')
-        self.cci_filepath = cci_filepath
-
-        # 检查是否已有分析结果
-        self._can_analyze(self.file_path, self.cci_filepath)
-
-        # 如果项目不存在，则克隆项目
-        if not os.path.exists(self.file_path):
-            logging.info(f'Cloning project: {self.git_url}')
-            os.system(f'git clone {self.git_url} {self.file_path}')
-
-        dependents: list[dict] = kwargs.get('dependents', [])
-        self._clone_dependents_project(dependents)
-
-        self._occupy_project()
-
-        # 将代码重置到指定commit
-        logging.info(f'Resetting project to commit: {commit_id}')
-        os.system(f'cd {self.file_path} && git reset --hard {commit_id}')
-        time.sleep(2)
-
-        # 初始化空的diff_parse_map，因为这不是对比分析
-        self.diff_parse_map = {}
-
-        # 解析整个项目，不进行对比
-        self.xml_parse_results_new, self.xml_parse_results_old = self._parse_project(self.file_path, self.commit_or_branch_new, None)
-
-        # 由于没有差异分析，直接完成处理
-        self._draw_and_write_result()
-        t2 = datetime.datetime.now()
-        try:
-            logging.info('Analyze done, remove occupy, others can analyze now')
-            os.remove(os.path.join(self.file_path, 'Occupy.ing'))
-        finally:
-            pass
-        logging.info(f'Analyze done, spend: {t2 - self.t1}')
 
     def analyze_two_commit_incremental(self, commit_new, commit_old, **kwargs):
         """
         基线增量分析策略:以基线为中心的增量分析
         
         Args:
-            commit_new: 新的提交ID
-            commit_old: 基线提交ID
+            commit_new: 新的提交ID或tag（可以是完整tag或短标识符）
+            commit_old: 基线提交ID或tag（可以是完整tag或短标识符）
             **kwargs: 其他参数(如 branch, dependents)
         """
         logging.info('*' * 10 + 'Incremental Analyze start' + '*' * 10)
         
         # 1. 初始化基本信息
-        self.commit_or_branch_new = commit_new[0:7] if len(commit_new) > 7 else commit_new
-        self.commit_or_branch_old = commit_old[0:7] if len(commit_old) > 7 else commit_old
+        # 保存原始值用于Git操作（完整tag或commit hash）
+        self.commit_or_branch_new = commit_new
+        self.commit_or_branch_old = commit_old
+        
+        # 生成短标识符用于数据库和文件命名
+        self.commit_short_new = self._normalize_commit_or_tag(commit_new)
+        self.commit_short_old = self._normalize_commit_or_tag(commit_old)
+        
         self.branch_name = kwargs.get('branch', 'master')
+        
+        logging.info(f'Original tags/commits: {commit_old}..{commit_new}')
+        logging.info(f'Short identifiers: {self.commit_short_old}..{self.commit_short_new}')
         
         self.project_name = self.git_url.split('/')[-1].split('.git')[0]
         self.file_path = os.path.join(config.project_path, self.project_name)
         
-        # 2. 构造基线数据库路径
+        # 2. 构造输出目录（基线目录）
+        output_dir = os.path.join(os.path.dirname(__file__), 'analyze_result', 
+                                 f"{self.project_name}_{self.commit_short_old}")
+        os.makedirs(output_dir, exist_ok=True)
+        
+        # 3. 构造基线数据库路径（使用短标识符，保存到output_dir）
         baseline_db_path = self.sqlite.get_baseline_db_path(
-            self.username, self.project_name, self.commit_or_branch_old
+            self.username, self.project_name, self.commit_short_old, output_dir
         )
         
-        # 3. 判断是否为首次运行
+        # 4. 判断是否为首次运行
         is_first_run = not os.path.exists(baseline_db_path)
         
         if is_first_run:
             # === 场景 A: 首次运行(基线初始化) ===
             logging.info('First run detected, initializing baseline database')
             
-            # 3.1 创建新的 SqliteHelper 实例指向基线数据库
+            # 4.1 创建新的 SqliteHelper 实例指向基线数据库
             baseline_sqlite = SqliteHelper(baseline_db_path)
             self.sqlite = baseline_sqlite
             
-            # 3.2 克隆项目(如果不存在)
+            # 4.2 克隆项目(如果不存在)
             if not os.path.exists(self.file_path):
                 logging.info(f'Cloning project: {self.git_url}')
                 os.system(f'git clone -b {self.branch_name} {self.git_url} {self.file_path}')
             
-            # 3.3 占住项目
+            # 4.3 占住项目
             self._occupy_project()
             
-            # 3.4 全量解析 commit_old → project_id = 0
+            # 4.4 全量解析 commit_old → project_id = 0（使用短标识符）
             logging.info(f'Full parsing baseline commit: {self.commit_or_branch_old}')
             os.system(f'cd {self.file_path} && git reset --hard {self.commit_or_branch_old}')
             time.sleep(2)
             
             file_path_list = self._get_project_files(self.file_path)
             java_parse = JavaParse(self.sqlite.db_path, project_id=0)
-            java_parse.parse_java_file_list(file_path_list, self.commit_or_branch_old)
+            java_parse.parse_java_file_list(file_path_list, self.commit_short_old)
             
-            # 3.5 记录基线分析到 project 表
+            # 3.5 记录基线分析到 project 表（使用短标识符）
             baseline_project_id = self.sqlite.add_project(
                 self.project_name, self.git_url, self.branch_name,
-                self.commit_or_branch_old, self.commit_or_branch_old,
+                self.commit_short_old, self.commit_short_old,
                 project_id=0
             )
             
-            # 3.6 计算差异并增量解析 commit_new → project_id = 1
+            # 4.6 计算差异并增量解析 commit_new → project_id = 1（使用短标识符）
             logging.info(f'Incremental parsing new commit: {self.commit_or_branch_new}')
             self.diff_parse_map = self._get_diff_parse_map(
                 self.file_path, self.branch_name, 
                 self.commit_or_branch_new, self.commit_or_branch_old
             )
             
-            # 切换到新提交
+            # 切换到新提交（使用原始tag进行Git操作）
             os.system(f'cd {self.file_path} && git reset --hard {self.commit_or_branch_new}')
             time.sleep(2)
             
@@ -1091,12 +1011,12 @@ class JCCI(object):
                                  if any(f.endswith(diff_path) for diff_path in diff_files)]
             
             java_parse_new = JavaParse(self.sqlite.db_path, project_id=1)
-            java_parse_new.parse_java_file_list(matched_java_files, self.commit_or_branch_new)
+            java_parse_new.parse_java_file_list(matched_java_files, self.commit_short_new)
             
-            # 3.7 记录增量分析到 project 表
+            # 4.7 记录增量分析到 project 表（使用短标识符）
             self.project_id = self.sqlite.add_project(
                 self.project_name, self.git_url, self.branch_name,
-                self.commit_or_branch_new, self.commit_or_branch_old,
+                self.commit_short_new, self.commit_short_old,
                 project_id=1
             )
             
@@ -1113,10 +1033,10 @@ class JCCI(object):
             baseline_sqlite = SqliteHelper(baseline_db_path)
             self.sqlite = baseline_sqlite
             
-            # 检查是否为重复运行(场景 B)
+            # 检查是否为重复运行(场景 B)（使用短标识符）
             is_duplicate = self.sqlite.check_duplicate_analysis(
                 self.project_name, self.git_url, self.branch_name,
-                self.commit_or_branch_new, self.commit_or_branch_old
+                self.commit_short_new, self.commit_short_old
             )
             
             if is_duplicate:
@@ -1165,17 +1085,17 @@ class JCCI(object):
                                  if any(f.endswith(diff_path) for diff_path in diff_files)]
             
             java_parse = JavaParse(self.sqlite.db_path, project_id=next_project_id)
-            java_parse.parse_java_file_list(matched_java_files, self.commit_or_branch_new)
+            java_parse.parse_java_file_list(matched_java_files, self.commit_short_new)
             
             # 解析 XML 文件
             diff_xml_files = [f for f in matched_java_files if f.endswith('.xml')]
             self.xml_parse_results_new = self._parse_xml_file(diff_xml_files)
             self.xml_parse_results_old = {}
             
-            # 记录分析到 project 表
+            # 记录分析到 project 表（使用短标识符）
             self.sqlite.add_project(
                 self.project_name, self.git_url, self.branch_name,
-                self.commit_or_branch_new, self.commit_or_branch_old,
+                self.commit_short_new, self.commit_short_old,
                 project_id=next_project_id
             )
         
@@ -1183,10 +1103,10 @@ class JCCI(object):
         dependents: list[dict] = kwargs.get('dependents', [])
         self._clone_dependents_project(dependents)
         
-        # 5. 设置 CCI 文件路径（虽然不输出，但需要设置）
+        # 5. 设置 CCI 文件路径（使用短标识符）
         self.cci_filepath = os.path.join(
             self.file_path, 
-            f'{self.commit_or_branch_old}..{self.commit_or_branch_new}_incremental.cci'
+            f'{self.commit_short_old}..{self.commit_short_new}_incremental.cci'
         )
         
         # 6. 执行变更类型分析（如果 ChangeTypeAnalyzer 可用）
@@ -1200,16 +1120,16 @@ class JCCI(object):
                     logging.info('处理基线中被删除的方法 (project_id=0)...')
                     analyzer.analyze_and_mark_changes(
                         diff_parse_map=self.diff_parse_map,
-                        commit_new=self.commit_or_branch_new,
-                        commit_old=self.commit_or_branch_old,
+                        commit_new=self.commit_short_new,  # 使用短标识符
+                        commit_old=self.commit_short_old,  # 使用短标识符
                         project_id=0  # 基线 project_id
                     )
                 
                 # 6.2 再处理增量中的 ADDED/MODIFIED 方法
                 analyzer.analyze_and_mark_changes(
                     diff_parse_map=self.diff_parse_map,
-                    commit_new=self.commit_or_branch_new,
-                    commit_old=self.commit_or_branch_old,
+                    commit_new=self.commit_short_new,  # 使用短标识符
+                    commit_old=self.commit_short_old,  # 使用短标识符
                     project_id=self.project_id
                 )
                 
@@ -1264,13 +1184,14 @@ class JCCI(object):
         import os
         from src.jcci import config
         
-        cache_dir = os.path.join(os.path.dirname(__file__), 'analyze_result')
+        # 创建基线目录和版本子目录
+        base_dir = os.path.join(os.path.dirname(__file__), 'analyze_result', 
+                                f"{self.project_name}_{self.commit_short_old}")
+        cache_dir = os.path.join(base_dir, self.commit_short_new)
         os.makedirs(cache_dir, exist_ok=True)
         
-        commit_old_short = self.commit_or_branch_old[:7] if len(self.commit_or_branch_old) > 7 else self.commit_or_branch_old
-        commit_new_short = self.commit_or_branch_new[:7] if len(self.commit_or_branch_new) > 7 else self.commit_or_branch_new
-        
-        filename = f"{self.username}_{self.project_name}_{commit_old_short}..{commit_new_short}.json"
+        # JSON文件名不再包含项目名和commit范围（因为已经在目录名中）
+        filename = f"analysis_result.json"
         return os.path.join(cache_dir, filename)
     
     def _save_analysis_cache(self, result: dict):
