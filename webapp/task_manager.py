@@ -270,8 +270,17 @@ class AsyncTaskManager:
             self._update_task_status(task_id, TaskStatus.RUNNING, progress=90.0)
             
             # 构造 Web 访问链接
-            # 格式: http://host:port/?baseline=project_commit
-            baseline_name = f"{project_name}_{tag_old}"
+            # 格式: http://host:port/?baseline=project_shorttag
+            # 需要从 tag_old 提取短标识符（与 workflow1 中的逻辑一致）
+            import re
+            if len(tag_old) == 40 and re.match(r'^[0-9a-f]{40}$', tag_old, re.IGNORECASE):
+                short_tag = tag_old[:8]  # Commit hash: 前8位
+            elif '_' in tag_old or len(tag_old) > 11:
+                short_tag = tag_old[-11:]  # Git Tag: 后11位
+            else:
+                short_tag = tag_old  # 短标识符: 保持不变
+            
+            baseline_name = f"{project_name}_{short_tag}"
             result_url = f"http://localhost:8501/?baseline={baseline_name}"
             
             # 更新状态为完成
