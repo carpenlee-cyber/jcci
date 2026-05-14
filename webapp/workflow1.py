@@ -184,13 +184,13 @@ def workflow1(
                     logger.info("\n构建类层次索引（CHA）...")
                     from jcci.call_chain.class_hierarchy import ClassHierarchyIndex
                     from jcci.database import SqliteHelper
-                    from config import RESULT_DIR
+                    from jcci.utils.path_utils import get_baseline_db_path
                     
                     # 从 git_url 提取项目名
                     project_name = git_url.split('/')[-1].split('.git')[0]
                     
-                    # 构造基线数据库路径（使用 config 中的 RESULT_DIR）
-                    db_path = os.path.join(RESULT_DIR, f"{project_name}_{commit_old}", f"{project_name}_{commit_old}_baseline.db")
+                    # 构造基线数据库路径（使用统一路径管理）
+                    db_path = get_baseline_db_path(project_name, commit_old)
                     
                     if not os.path.exists(db_path):
                         logger.error(f"基线数据库不存在: {db_path}")
@@ -258,20 +258,20 @@ def workflow1(
             )
             # logger.info(downwards_text)
             
-            # 将结果写入文件（使用新的目录结构：基线目录/版本子目录）
-            from config import RESULT_DIR
-            baseline_dir = os.path.join(RESULT_DIR, f"{project_name}_{commit_old}")
-            version_subdir = os.path.join(baseline_dir, commit_new)
-            os.makedirs(version_subdir, exist_ok=True)
+            # 将结果写入文件（使用统一路径管理）
+            from jcci.utils.path_utils import get_version_subdir, ensure_dir_exists, get_upwards_txt_path, get_downwards_txt_path
+            
+            version_subdir = get_version_subdir(project_name, commit_old, commit_new)
+            ensure_dir_exists(version_subdir)
             
             # 写入向上调用链
-            upwards_file = os.path.join(version_subdir, "upwards.txt")
+            upwards_file = get_upwards_txt_path(project_name, commit_old, commit_new)
             with open(upwards_file, 'w', encoding='utf-8') as f:
                 f.write(upwards_text)
             # logger.info(f"向上调用链已保存到: {upwards_file}")
             
             # 写入向下调用链
-            downwards_file = os.path.join(version_subdir, "downwards.txt")
+            downwards_file = get_downwards_txt_path(project_name, commit_old, commit_new)
             with open(downwards_file, 'w', encoding='utf-8') as f:
                 f.write(downwards_text)
             # logger.info(f"向下调用链已保存到: {downwards_file}")

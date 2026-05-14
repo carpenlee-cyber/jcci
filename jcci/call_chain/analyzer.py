@@ -65,21 +65,21 @@ def _get_baseline_db_path(username: str, project_name: str, commit_old: str, out
     Returns:
         str: 基线数据库完整路径
     """
-    from jcci import config
+    from jcci.utils.path_utils import get_baseline_db_path, ensure_dir_exists
     
     # 使用标准化后的短标识符
     commit_short = _normalize_commit_or_tag(commit_old)
-    db_filename = f"{project_name}_{commit_short}_baseline.db"
     
     if output_dir:
         # 如果指定了输出目录，保存到该目录（output_dir现在是基线目录）
+        db_filename = f"{project_name}_{commit_short}_baseline.db"
         return os.path.join(output_dir, db_filename)
     else:
-        # 否则保存到analyze_result/{project_name}_{commit_old}目录
-        base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'analyze_result')
-        baseline_dir = os.path.join(base_dir, f"{project_name}_{commit_short}")
-        os.makedirs(baseline_dir, exist_ok=True)
-        return os.path.join(baseline_dir, db_filename)
+        # 否则使用统一路径管理
+        baseline_dir = get_baseline_db_path(project_name, commit_short)
+        baseline_dir_parent = os.path.dirname(baseline_dir)
+        ensure_dir_exists(baseline_dir_parent)
+        return baseline_dir
 
 
 def _extract_method_signature(method_name: str, parameters_json: str) -> str:
@@ -228,8 +228,8 @@ def build_upwards_call_chains(
     commit_new_short = _normalize_commit_or_tag(commit_new)
     
     if output_dir is None:
-        base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'analyze_result')
-        output_dir = os.path.join(base_dir, f"{project_name}_{commit_old_short}")
+        from jcci.utils.path_utils import get_baseline_dir
+        output_dir = get_baseline_dir(project_name, commit_old_short)
     
     os.makedirs(output_dir, exist_ok=True)
     
@@ -466,8 +466,8 @@ def build_downwards_call_chains(
     commit_new_short = _normalize_commit_or_tag(commit_new)
     
     if output_dir is None:
-        base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'analyze_result')
-        output_dir = os.path.join(base_dir, f"{project_name}_{commit_old_short}")
+        from jcci.utils.path_utils import get_baseline_dir
+        output_dir = get_baseline_dir(project_name, commit_old_short)
     
     os.makedirs(output_dir, exist_ok=True)
     

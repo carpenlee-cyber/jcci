@@ -36,7 +36,9 @@ class JCCI(object):
         self.cci_filepath: str = ''
         self.project_name: str = ''
         self.file_path: str = ''
-        self.sqlite = SqliteHelper(config.db_path + '/' + username + '_jcci.db')
+        # 使用 config.db_dir 存储用户数据库
+        db_path = os.path.join(config.db_dir, f"{username}_jcci.db")
+        self.sqlite = SqliteHelper(db_path)
         self.view = graph.Graph()
         self.t1 = datetime.datetime.now()
         self.need_analyze_obj_list = []
@@ -949,9 +951,9 @@ class JCCI(object):
         self.project_name = self.git_url.split('/')[-1].split('.git')[0]
         self.file_path = os.path.join(config.project_path, self.project_name)
         
-        # 2. 构造输出目录（基线目录）
-        output_dir = os.path.join(os.path.dirname(__file__), 'analyze_result', 
-                                 f"{self.project_name}_{self.commit_short_old}")
+        # 2. 构造输出目录（基线目录）- 使用统一路径管理
+        from jcci.utils.path_utils import get_baseline_dir
+        output_dir = get_baseline_dir(self.project_name, self.commit_short_old)
         os.makedirs(output_dir, exist_ok=True)
         
         # 3. 构造基线数据库路径（使用短标识符，保存到output_dir）
@@ -1189,18 +1191,14 @@ class JCCI(object):
         Returns:
             str: 缓存文件的完整路径
         """
-        import os
-        from jcci import config
+        from jcci.utils.path_utils import get_analysis_cache_path, ensure_dir_exists
         
         # 创建基线目录和版本子目录
-        base_dir = os.path.join(os.path.dirname(__file__), 'analyze_result', 
-                                f"{self.project_name}_{self.commit_short_old}")
-        cache_dir = os.path.join(base_dir, self.commit_short_new)
-        os.makedirs(cache_dir, exist_ok=True)
+        cache_path = get_analysis_cache_path(self.project_name, self.commit_short_old, self.commit_short_new)
+        cache_dir = os.path.dirname(cache_path)
+        ensure_dir_exists(cache_dir)
         
-        # JSON文件名不再包含项目名和commit范围（因为已经在目录名中）
-        filename = f"analysis_result.json"
-        return os.path.join(cache_dir, filename)
+        return cache_path
     
     def _save_analysis_cache(self, result: dict):
         """
