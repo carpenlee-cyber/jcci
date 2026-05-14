@@ -259,7 +259,8 @@ def workflow1(
             # logger.info(downwards_text)
             
             # 将结果写入文件（使用新的目录结构：基线目录/版本子目录）
-            baseline_dir = os.path.join(project_root, "src", "jcci", "analyze_result", f"mall_{commit_old}")
+            from config import RESULT_DIR
+            baseline_dir = os.path.join(RESULT_DIR, f"mall_{commit_old}")
             version_subdir = os.path.join(baseline_dir, commit_new)
             os.makedirs(version_subdir, exist_ok=True)
             
