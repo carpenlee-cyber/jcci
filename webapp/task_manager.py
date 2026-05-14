@@ -271,7 +271,8 @@ class AsyncTaskManager:
             
             # 构造 Web 访问链接
             # 格式: http://host:port/?baseline=project_commit
-            result_url = f"http://localhost:8501/?baseline={tag_old}"
+            baseline_name = f"{project_name}_{tag_old}"
+            result_url = f"http://localhost:8501/?baseline={baseline_name}"
             
             # 更新状态为完成
             self._update_task_status(
