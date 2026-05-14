@@ -15,7 +15,7 @@ project_root = os.path.abspath(os.path.dirname(__file__))
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
-from src.jcci.workflow.workflow1 import workflow1
+from webapp.workflow1 import workflow1
 
 
 def main():
@@ -33,19 +33,22 @@ def main():
     # GitHub用户名
     username = 'carpenlee-cyber'
     
-    # 基线版本（旧版本）- 支持tag或commit hash
+    # 方式1：使用tag
     tag_old = 'baseline_20260508_01'
-    
-    # 当前版本（新版本）- 支持tag或commit hash
     tag_new = 'baseline_fix1_20260508_02'
+    
+    # # 方式2：使用commit hash（用于开发测试）
+    # tag_old = 'dd6569c3558f79af5b21aad601349e0f029b9a6d'
+    # tag_new = 'dd94f3b4b317e604eee9b96252160e1a5c69785d'    
+    
     
     # ===== 可选参数配置 =====
     
     # 调用链最大深度（默认5）
-    max_depth = 5
+    max_depth = 10
     
     # 是否启动Streamlit Web服务（默认True）
-    enable_streamlit = True
+    enable_streamlit = False
     
     # Streamlit服务端口（默认8501）
     streamlit_port = 8501

@@ -1,12 +1,17 @@
 dist
 tests
-src/jcci.egg-info
+jcci.egg-info
 .idea
-src/jcci/__pycache__/
+jcci/__pycache__/
 test/
 
 # Database files
-src/jcci/*.db
+jcci/*.db
+webapp/*.db
+
+# Python cache
+__pycache__/
+*.pyc
 
 # Mall project (submodule)
-src/jcci/mall
+jcci/mall

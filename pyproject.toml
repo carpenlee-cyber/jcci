@@ -25,3 +25,7 @@ dependencies = [
 [project.urls]
 "Homepage" = "https://github.com/baikaishuipp/jcci"
 "Bug Tracker" = "https://github.com/baikaishuipp/jcci/issues"
+
+[tool.setuptools.packages.find]
+where = ["."]  # 在项目根目录查找包
+include = ["jcci*"]  # 包含 jcci 及其子包

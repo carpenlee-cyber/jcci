@@ -23,8 +23,8 @@ def main():
     
     # 获取当前脚本所在目录
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    # streamlit_app.py 在 src/jcci/workflow/ 目录下
-    streamlit_app = os.path.join(script_dir, 'src', 'jcci', 'workflow', 'streamlit_app.py')
+    # streamlit_app.py 在 webapp/ 目录下
+    streamlit_app = os.path.join(script_dir, 'webapp', 'streamlit_app.py')
     
     if not os.path.exists(streamlit_app):
         print(f"❌ 错误: 找不到 streamlit_app.py: {streamlit_app}")
@@ -38,10 +38,6 @@ def main():
     print("=" * 80)
     print()
     print("💡 提示:")
-    print("  - 访问 http://localhost:8501/?page=submit 提交新任务")
-    print("  - 访问 http://localhost:8501/?page=tasks 查看任务列表")
-    print("  - 访问 http://localhost:8501/?baseline=xxx 查看分析结果")
-    print()
     print("按 Ctrl+C 停止服务")
     print("=" * 80)
     print()
@@ -50,6 +46,16 @@ def main():
     app_dir = os.path.dirname(streamlit_app)
     os.chdir(app_dir)
     print(f"📂 工作目录: {app_dir}")
+    
+    # 将项目根目录添加到 PYTHONPATH 环境变量，确保 Streamlit 子进程可以导入 jcci 模块
+    project_root = script_dir  # jcci/ 目录就是项目根目录
+    current_pythonpath = os.environ.get('PYTHONPATH', '')
+    if project_root not in current_pythonpath:
+        if current_pythonpath:
+            os.environ['PYTHONPATH'] = f"{project_root}{os.pathsep}{current_pythonpath}"
+        else:
+            os.environ['PYTHONPATH'] = project_root
+    print(f"📦 PYTHONPATH 已设置: {os.environ['PYTHONPATH']}")
     print()
     
     # 启动 Streamlit
@@ -60,7 +66,8 @@ def main():
             '--server.address', args.host,
             '--server.port', str(args.port),
             '--server.headless', 'true',
-            '--browser.gatherUsageStats', 'false'
+            '--browser.gatherUsageStats', 'false',
+            '--server.fileWatcherType', 'none'  # 禁用文件监控，避免跨驱动器路径错误
         ])
     except KeyboardInterrupt:
         print("\n\n✅ 服务已停止")
