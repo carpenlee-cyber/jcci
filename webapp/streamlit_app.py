@@ -230,8 +230,6 @@ def render_task_list_page():
     if not tasks:
         st.info("📭 暂无任务记录")
         
-        if st.button("➕ 提交新任务"):
-            navigate_to('submit')
         return
     
     # 显示任务统计
@@ -1498,10 +1496,10 @@ def main():
             st.markdown("""
             ### 📋 如何查看分析结果
             
-            请在左侧边栏选择一个基线，或者通过 URL 参数指定：
+            请在任务列表中查看分析进度，分析完成后会显示：
             
             ```
-            http://localhost:8501/?baseline={基线标识符}
+            访问链接：http://localhost:8501/?baseline={基线标识符}
             ```
             
             ### 📝 示例

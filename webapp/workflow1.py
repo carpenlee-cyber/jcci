@@ -260,7 +260,7 @@ def workflow1(
             
             # 将结果写入文件（使用新的目录结构：基线目录/版本子目录）
             from config import RESULT_DIR
-            baseline_dir = os.path.join(RESULT_DIR, f"mall_{commit_old}")
+            baseline_dir = os.path.join(RESULT_DIR, f"{project_name}_{commit_old}")
             version_subdir = os.path.join(baseline_dir, commit_new)
             os.makedirs(version_subdir, exist_ok=True)
             
@@ -331,7 +331,7 @@ def workflow1(
                     def open_browser():
                         time.sleep(2)
                         # 使用baseline参数实现基线隔离
-                        webbrowser.open(f"http://localhost:{streamlit_port}/?baseline=mall_{commit_old}")
+                        webbrowser.open(f"http://localhost:{streamlit_port}/?baseline={project_name}_{commit_old}")
                     
                     # 启动浏览器打开线程
                     browser_thread = threading.Thread(target=open_browser, daemon=True)

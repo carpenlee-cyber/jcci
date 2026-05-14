@@ -281,7 +281,7 @@ class AsyncTaskManager:
                 short_tag = tag_old  # 短标识符: 保持不变
             
             baseline_name = f"{project_name}_{short_tag}"
-            result_url = f"http://localhost:8501/?baseline={baseline_name}"
+            result_url = f"http://host:port/?baseline={baseline_name}"
             
             # 更新状态为完成
             self._update_task_status(
