@@ -103,6 +103,26 @@ def render_task_submission_page():
     请填写以下信息以启动代码变更分析任务。任务将在后台异步执行，完成后您可以访问结果页面。
     """)
     
+    # 初始化 session state 用于保存表单值
+    if 'last_git_url' not in st.session_state:
+        st.session_state.last_git_url = "https://github.com/carpenlee-cyber/mall.git"
+    if 'last_username' not in st.session_state:
+        st.session_state.last_username = "carpenlee-cyber"
+    if 'last_tag_old' not in st.session_state:
+        st.session_state.last_tag_old = "baseline_20260508_01"
+    if 'last_tag_new' not in st.session_state:
+        st.session_state.last_tag_new = "baseline_fix1_20260508_02"
+    if 'last_max_depth' not in st.session_state:
+        st.session_state.last_max_depth = 5
+    
+    # 检测是否需要显示密码输入框（非默认用户）
+    default_username = "carpenlee-cyber"
+    show_password = st.session_state.last_username != default_username
+    
+    # 如果需要密码但未设置，初始化
+    if show_password and 'last_git_password' not in st.session_state:
+        st.session_state.last_git_password = ""
+    
     # 表单输入
     with st.form("submit_task_form"):
         col1, col2 = st.columns(2)
@@ -110,27 +130,27 @@ def render_task_submission_page():
         with col1:
             git_url = st.text_input(
                 "Git 仓库地址",
-                value="https://github.com/carpenlee-cyber/mall.git",
+                value=st.session_state.last_git_url,
                 placeholder="https://github.com/username/repo.git",
                 help="Git 仓库的 HTTPS 或 SSH 地址"
             )
             username = st.text_input(
                 "Git 用户名",
-                value="carpenlee-cyber",
+                value=st.session_state.last_username,
                 placeholder="your_username",
-                help="Git 用户名（用于认证）"
+                help="Git 用户名（用于认证）。如果不是默认用户，将需要输入密码"
             )
         
         with col2:
             tag_old = st.text_input(
                 "旧版本标签",
-                value="baseline_20260508_01",
+                value=st.session_state.last_tag_old,
                 placeholder="v1.0.0 或 commit hash",
                 help="对比的起始版本"
             )
             tag_new = st.text_input(
                 "新版本标签",
-                value="baseline_fix1_20260508_02",
+                value=st.session_state.last_tag_new,
                 placeholder="v2.0.0 或 commit hash",
                 help="对比的目标版本"
             )
@@ -139,9 +159,21 @@ def render_task_submission_page():
             "最大分析深度",
             min_value=1,
             max_value=10,
-            value=5,
+            value=st.session_state.last_max_depth,
             help="调用链分析的最大深度（建议 3-7）"
         )
+        
+        # 如果用户名不是默认值，显示密码输入框
+        if username != default_username:
+            git_password = st.text_input(
+                "Git 密码 / Personal Access Token",
+                type="password",
+                value=st.session_state.get('last_git_password', ''),
+                placeholder="输入您的 Git 密码或 PAT",
+                help="⚠️ 非默认用户需要提供密码。建议使用 GitHub Personal Access Token"
+            )
+        else:
+            git_password = None
         
         submitted = st.form_submit_button("🚀 提交分析任务", type="primary")
     
@@ -151,15 +183,30 @@ def render_task_submission_page():
             st.error("❌ 请填写所有必填字段")
             return
         
+        # 如果是非默认用户但没有提供密码，提示错误
+        if username != default_username and not git_password:
+            st.error("❌ 非默认用户需要提供 Git 密码或 Personal Access Token")
+            return
+        
         try:
             # 获取任务管理器
             task_manager = get_task_manager(DB_PATH)
+            
+            # 保存当前输入到 session state（用于下次恢复）
+            st.session_state.last_git_url = git_url
+            st.session_state.last_username = username
+            st.session_state.last_tag_old = tag_old
+            st.session_state.last_tag_new = tag_new
+            st.session_state.last_max_depth = max_depth
+            if git_password:
+                st.session_state.last_git_password = git_password
             
             # 提交任务（显示加载动画）
             with st.spinner("⏳ 正在提交任务，请稍候..."):
                 task_id, result_url = task_manager.submit_task(
                     git_url=git_url,
                     username=username,
+                    password=git_password,  # 传递密码
                     tag_old=tag_old,
                     tag_new=tag_new,
                     max_depth=max_depth

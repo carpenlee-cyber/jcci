@@ -88,7 +88,8 @@ class AsyncTaskManager:
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 started_at TIMESTAMP,
                 completed_at TIMESTAMP,
-                output_dir TEXT
+                output_dir TEXT,
+                has_password BOOLEAN DEFAULT 0
             )
         ''')
         
@@ -166,7 +167,7 @@ class AsyncTaskManager:
         # ✅ 尝试启动队列中的下一个任务
         self._try_start_next_task()
     
-    def _validate_git_refs(self, git_url: str, username: str, tag_old: str, tag_new: str) -> tuple:
+    def _validate_git_refs(self, git_url: str, username: str, tag_old: str, tag_new: str, password: str = None) -> tuple:
         """
         快速验证 Git 引用（tag/commit）是否存在
         
@@ -177,6 +178,7 @@ class AsyncTaskManager:
             username: Git 用户名
             tag_old: 旧版本标签
             tag_new: 新版本标签
+            password: Git 密码或 Personal Access Token（可选）
             
         Returns:
             tuple: (is_valid, error_message)
@@ -188,8 +190,28 @@ class AsyncTaskManager:
         
         try:
             # 构建 git ls-remote 命令
-            # 对于私有仓库，可能需要认证
             cmd = ['git', 'ls-remote', git_url]
+            
+            # 如果提供了密码，使用用户名密码鉴权
+            if password:
+                # 将密码嵌入到 URL 中（仅用于验证，不会保存）
+                from urllib.parse import urlparse, urlunparse
+                parsed = urlparse(git_url)
+                # 构造带认证的 URL: https://username:password@host/path
+                auth_url = f"https://{username}:{password}@{parsed.netloc}{parsed.path}"
+                cmd = ['git', 'ls-remote', auth_url]
+                
+                # 同时配置 git credential 缓存，以便后续操作使用
+                try:
+                    # 配置 git 使用 store 方式缓存凭据
+                    subprocess.run(
+                        ['git', 'config', '--global', 'credential.helper', 'store'],
+                        capture_output=True,
+                        timeout=5
+                    )
+                    logger.info("已配置 Git 凭据缓存")
+                except Exception as e:
+                    logger.warning(f"配置 Git 凭据缓存失败: {e}")
             
             # 执行命令，设置超时10秒
             result = subprocess.run(
@@ -276,7 +298,7 @@ class AsyncTaskManager:
             return False, f"Git 引用验证失败: {str(e)}"
     
     def submit_task(self, git_url: str, username: str, tag_old: str, 
-                   tag_new: str, max_depth: int = 5) -> str:
+                   tag_new: str, max_depth: int = 5, password: str = None) -> str:
         """
         提交分析任务
         
@@ -286,6 +308,7 @@ class AsyncTaskManager:
             tag_old: 旧版本标签
             tag_new: 新版本标签
             max_depth: 最大分析深度
+            password: Git 密码或 Personal Access Token（可选）
             
         Returns:
             tuple: (task_id, result_url)
@@ -327,7 +350,7 @@ class AsyncTaskManager:
             logger.info(f"任务已失败，将创建新任务: {existing_task_id}")
         
         # ✅ 快速验证 Git 引用是否存在（使用 git ls-remote）
-        is_valid, error_msg = self._validate_git_refs(git_url, username, tag_old, tag_new)
+        is_valid, error_msg = self._validate_git_refs(git_url, username, tag_old, tag_new, password)
         if not is_valid:
             raise Exception(error_msg)
         
@@ -336,14 +359,14 @@ class AsyncTaskManager:
         
         task_id = str(uuid.uuid4())[:12]
         
-        # 保存任务信息到数据库
+        # 保存任务信息到数据库（不存储密码，只标记是否有密码）
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
         cursor.execute('''
             INSERT INTO analysis_tasks 
-            (task_id, status, git_url, username, tag_old, tag_new, max_depth)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        ''', (task_id, TaskStatus.PENDING, git_url, username, tag_old, tag_new, max_depth))
+            (task_id, status, git_url, username, tag_old, tag_new, max_depth, has_password)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (task_id, TaskStatus.PENDING, git_url, username, tag_old, tag_new, max_depth, 1 if password else 0))
         conn.commit()
         conn.close()
         
