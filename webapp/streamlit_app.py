@@ -1146,7 +1146,7 @@ def render_upwards_analysis(upwards_data: Dict, upwards_text: str):
     # 添加自动刷新选项
     col_auto_refresh, col_manual_refresh = st.columns([1, 4])
     with col_auto_refresh:
-        auto_refresh = st.checkbox("🔄 自动刷新", value=False, help="每5秒自动刷新一次以查看分析进度")
+        auto_refresh = st.checkbox("🔄 自动刷新", value=False, help="每5秒自动刷新一次以查看分析进度", key="up_auto_refresh")
     
     if auto_refresh:
         # 使用 meta refresh 实现自动刷新
@@ -1159,7 +1159,7 @@ def render_upwards_analysis(upwards_data: Dict, upwards_text: str):
         st.caption("⏱️ 页面将在 5 秒后自动刷新")
     
     with col_manual_refresh:
-        if st.button("🔄 手动刷新", use_container_width=True):
+        if st.button("🔄 手动刷新", use_container_width=True, key="up_manual_refresh"):
             st.rerun()
     
     # 显示元数据
@@ -1439,7 +1439,7 @@ def render_downwards_analysis(downwards_data: Dict, downwards_text: str):
     # 添加自动刷新选项
     col_auto_refresh, col_manual_refresh = st.columns([1, 4])
     with col_auto_refresh:
-        auto_refresh = st.checkbox("🔄 自动刷新", value=False, help="每5秒自动刷新一次以查看分析进度")
+        auto_refresh = st.checkbox("🔄 自动刷新", value=False, help="每5秒自动刷新一次以查看分析进度", key="down_auto_refresh")
     
     if auto_refresh:
         # 使用 meta refresh 实现自动刷新
@@ -1452,7 +1452,7 @@ def render_downwards_analysis(downwards_data: Dict, downwards_text: str):
         st.caption("⏱️ 页面将在 5 秒后自动刷新")
     
     with col_manual_refresh:
-        if st.button("🔄 手动刷新", use_container_width=True):
+        if st.button("🔄 手动刷新", use_container_width=True, key="down_manual_refresh"):
             st.rerun()
     
     # 显示元数据
