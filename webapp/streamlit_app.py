@@ -16,6 +16,7 @@ import os
 import sqlite3
 import time
 import uuid
+import threading
 from typing import Dict, List, Optional
 
 # 第三方库导入
@@ -622,7 +623,54 @@ def get_chain_detail_from_json(json_data: Dict, target_class: str, target_method
     return {}
 
 
-# ==================== LLM分析函数 ====================
+# ==================== 异步分析管理 ====================
+def start_async_analysis(analysis_func, args_kwargs, result_key: str):
+    """
+    启动异步分析任务
+    
+    Args:
+        analysis_func: 分析函数
+        args_kwargs: 函数的参数 (args, kwargs)
+        result_key: 存储结果的 session_state key
+    """
+    # 检查是否已经在运行
+    running_key = f"{result_key}_running"
+    if st.session_state.get(running_key, False):
+        st.warning("⏳ 分析正在进行中，请勿重复提交")
+        return False
+    
+    # 标记为运行中
+    st.session_state[running_key] = True
+    st.session_state[f"{result_key}_status"] = "running"
+    
+    def run_analysis():
+        try:
+            args, kwargs = args_kwargs
+            result = analysis_func(*args, **kwargs)
+            st.session_state[result_key] = result
+            st.session_state[f"{result_key}_status"] = "completed"
+        except Exception as e:
+            st.session_state[f"{result_key}_status"] = "failed"
+            st.session_state[f"{result_key}_error"] = str(e)
+            logger.error(f"异步分析失败: {e}", exc_info=True)
+        finally:
+            st.session_state[running_key] = False
+    
+    # 启动后台线程
+    thread = threading.Thread(target=run_analysis, daemon=True)
+    thread.start()
+    
+    return True
+
+
+def check_analysis_status(result_key: str):
+    """
+    检查分析状态
+    
+    Returns:
+        str: 'pending', 'running', 'completed', 'failed', 或 None
+    """
+    return st.session_state.get(f"{result_key}_status", None)
 def save_to_llm_cache(analysis_type: str, direction: str, class_name: str, 
                       method_name: str, change_type: str, analysis_result: str,
                       chain_index: Optional[int] = None, method_signature: str = "",
@@ -710,6 +758,8 @@ def call_llm_api(prompt: str, system_prompt: str = "") -> str:
     if system_prompt:
         messages.append({"role": "system", "content": system_prompt})
     messages.append({"role": "user", "content": prompt})
+
+    print(messages)
     
     payload = {
         "model": LLM_MODEL,
@@ -723,7 +773,8 @@ def call_llm_api(prompt: str, system_prompt: str = "") -> str:
             f"{LLM_API_URL}/chat/completions",
             json=payload,
             headers=headers,
-            timeout=60
+            timeout=300,
+            verify=True  # 确保SSL验证开启
         )
         
         if response.status_code == 200:
@@ -811,8 +862,8 @@ def analyze_single_method(method_info: Dict, db_info: Dict, direction: str = 'up
         
         # 如果有方法体，添加方法体信息
         body = db_info.get('body')
-        if body and isinstance(body, list):
-            prompt += "\n【方法实现】\n```java\n" + "\n".join(body) + "\n```\n"
+        if body and isinstance(body, str):
+            prompt += "\n【方法实现】\n```java\n" + json.dumps(body, ensure_ascii=False) + "\n```\n"
     
     prompt += """
 【分析要求】
@@ -1092,6 +1143,25 @@ def render_upwards_analysis(upwards_data: Dict, upwards_text: str):
     """渲染向上分析（影响面）"""
     st.header("⬆️ 向上调用链分析（影响面）")
     
+    # 添加自动刷新选项
+    col_auto_refresh, col_manual_refresh = st.columns([1, 4])
+    with col_auto_refresh:
+        auto_refresh = st.checkbox("🔄 自动刷新", value=False, help="每5秒自动刷新一次以查看分析进度")
+    
+    if auto_refresh:
+        # 使用 meta refresh 实现自动刷新
+        st.markdown(
+            """
+            <meta http-equiv="refresh" content="5">
+            """,
+            unsafe_allow_html=True
+        )
+        st.caption("⏱️ 页面将在 5 秒后自动刷新")
+    
+    with col_manual_refresh:
+        if st.button("🔄 手动刷新", use_container_width=True):
+            st.rerun()
+    
     # 显示元数据
     metadata = upwards_data.get('metadata', {})
     col1, col2, col3 = st.columns(3)
@@ -1143,16 +1213,49 @@ def render_upwards_analysis(upwards_data: Dict, upwards_text: str):
                 # 添加“强制全新分析”复选框
                 force_fresh = st.checkbox("🔄 强制全新", key=f"force_fresh_up_{idx}")
                 
-                if st.button("🤖 AI分析此方法", key=f"up_method_{idx}"):
-                    with st.spinner("正在调用LLM分析..."):
-                        db_info = get_method_info_from_db(class_name, method_name)
-                        analysis_result = analyze_single_method(method_info, db_info, 'upwards', force_fresh)
-                        st.session_state[f'up_method_analysis_{idx}'] = analysis_result
+                # 检查分析状态
+                method_result_key = f'up_method_analysis_{idx}'
+                chain_result_key = f'up_chain_analysis_{idx}'
                 
-                if st.button("🔗 AI分析完整链路", key=f"up_chain_{idx}"):
-                    with st.spinner("正在调用LLM分析调用链..."):
-                        analysis_result = analyze_call_chain(chain_data, 'upwards', force_fresh)
-                        st.session_state[f'up_chain_analysis_{idx}'] = analysis_result
+                method_status = check_analysis_status(method_result_key)
+                chain_status = check_analysis_status(chain_result_key)
+                
+                # AI分析此方法按钮
+                if st.button("🤖 AI分析此方法", key=f"up_method_{idx}", disabled=(method_status == 'running')):
+                    db_info = get_method_info_from_db(class_name, method_name)
+                    success = start_async_analysis(
+                        analyze_single_method,
+                        ([method_info, db_info, 'upwards', force_fresh], {}),
+                        method_result_key
+                    )
+                    if success:
+                        st.success("✅ 分析任务已提交，正在后台执行...")
+                        st.rerun()
+                
+                # 显示方法分析状态
+                if method_status == 'running':
+                    st.info("⏳ 分析方法中，请稍候...")
+                elif method_status == 'failed':
+                    error_msg = st.session_state.get(f'{method_result_key}_error', '未知错误')
+                    st.error(f"❌ 分析失败: {error_msg}")
+                
+                # AI分析完整链路按钮
+                if st.button("🔗 AI分析完整链路", key=f"up_chain_{idx}", disabled=(chain_status == 'running')):
+                    success = start_async_analysis(
+                        analyze_call_chain,
+                        ([chain_data, 'upwards', force_fresh], {}),
+                        chain_result_key
+                    )
+                    if success:
+                        st.success("✅ 链路分析任务已提交，正在后台执行...")
+                        st.rerun()
+                
+                # 显示链路分析状态
+                if chain_status == 'running':
+                    st.info("⏳ 分析调用链中，请稍候...")
+                elif chain_status == 'failed':
+                    error_msg = st.session_state.get(f'{chain_result_key}_error', '未知错误')
+                    st.error(f"❌ 分析失败: {error_msg}")
             
             # 显示分析结果
             if f'up_method_analysis_{idx}' in st.session_state:
@@ -1333,6 +1436,25 @@ def render_downwards_analysis(downwards_data: Dict, downwards_text: str):
     """渲染向下分析（功能风险）"""
     st.header("⬇️ 向下调用链分析（功能风险）")
     
+    # 添加自动刷新选项
+    col_auto_refresh, col_manual_refresh = st.columns([1, 4])
+    with col_auto_refresh:
+        auto_refresh = st.checkbox("🔄 自动刷新", value=False, help="每5秒自动刷新一次以查看分析进度")
+    
+    if auto_refresh:
+        # 使用 meta refresh 实现自动刷新
+        st.markdown(
+            """
+            <meta http-equiv="refresh" content="5">
+            """,
+            unsafe_allow_html=True
+        )
+        st.caption("⏱️ 页面将在 5 秒后自动刷新")
+    
+    with col_manual_refresh:
+        if st.button("🔄 手动刷新", use_container_width=True):
+            st.rerun()
+    
     # 显示元数据
     metadata = downwards_data.get('metadata', {})
     col1, col2, col3 = st.columns(3)
@@ -1383,16 +1505,49 @@ def render_downwards_analysis(downwards_data: Dict, downwards_text: str):
                 # 添加“强制全新分析”复选框
                 force_fresh = st.checkbox("🔄 强制全新", key=f"force_fresh_down_{idx}")
                 
-                if st.button("🤖 AI分析此方法", key=f"down_method_{idx}"):
-                    with st.spinner("正在调用LLM分析..."):
-                        db_info = get_method_info_from_db(class_name, method_name)
-                        analysis_result = analyze_single_method(method_info, db_info, 'downwards', force_fresh)
-                        st.session_state[f'down_method_analysis_{idx}'] = analysis_result
+                # 检查分析状态
+                method_result_key = f'down_method_analysis_{idx}'
+                chain_result_key = f'down_chain_analysis_{idx}'
                 
-                if st.button("🔗 AI分析完整链路", key=f"down_chain_{idx}"):
-                    with st.spinner("正在调用LLM分析调用链..."):
-                        analysis_result = analyze_call_chain(chain_data, 'downwards', force_fresh)
-                        st.session_state[f'down_chain_analysis_{idx}'] = analysis_result
+                method_status = check_analysis_status(method_result_key)
+                chain_status = check_analysis_status(chain_result_key)
+                
+                # AI分析此方法按钮
+                if st.button("🤖 AI分析此方法", key=f"down_method_{idx}", disabled=(method_status == 'running')):
+                    db_info = get_method_info_from_db(class_name, method_name)
+                    success = start_async_analysis(
+                        analyze_single_method,
+                        ([method_info, db_info, 'downwards', force_fresh], {}),
+                        method_result_key
+                    )
+                    if success:
+                        st.success("✅ 分析任务已提交，正在后台执行...")
+                        st.rerun()
+                
+                # 显示方法分析状态
+                if method_status == 'running':
+                    st.info("⏳ 分析方法中，请稍候...")
+                elif method_status == 'failed':
+                    error_msg = st.session_state.get(f'{method_result_key}_error', '未知错误')
+                    st.error(f"❌ 分析失败: {error_msg}")
+                
+                # AI分析完整链路按钮
+                if st.button("🔗 AI分析完整链路", key=f"down_chain_{idx}", disabled=(chain_status == 'running')):
+                    success = start_async_analysis(
+                        analyze_call_chain,
+                        ([chain_data, 'downwards', force_fresh], {}),
+                        chain_result_key
+                    )
+                    if success:
+                        st.success("✅ 链路分析任务已提交，正在后台执行...")
+                        st.rerun()
+                
+                # 显示链路分析状态
+                if chain_status == 'running':
+                    st.info("⏳ 分析调用链中，请稍候...")
+                elif chain_status == 'failed':
+                    error_msg = st.session_state.get(f'{chain_result_key}_error', '未知错误')
+                    st.error(f"❌ 分析失败: {error_msg}")
             
             # 显示分析结果
             if f'down_method_analysis_{idx}' in st.session_state:
