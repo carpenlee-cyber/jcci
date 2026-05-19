@@ -15,3 +15,9 @@ from jcci.utils.path_utils import (
 # Streamlit服务配置
 STREAMLIT_PORT = 8501
 STREAMLIT_HOST = "0.0.0.0"  # 允许外部访问
+
+# 外部访问URL（可选）
+# 如果设置了此值，任务完成后的访问链接将使用此URL
+# 例如: "http://192.168.1.100:8501" 或 "https://jcci.example.com"
+# 如果未设置，将自动使用 STREAMLIT_HOST:STREAMLIT_PORT
+STREAMLIT_EXTERNAL_URL = None  # 例如: "http://your-server-ip:8501"

@@ -466,7 +466,7 @@ class AsyncTaskManager:
             # 格式: http://host:port/?baseline=project_shorttag
             # 需要从 tag_old 提取短标识符（与 workflow1 中的逻辑一致）
             import re
-            from config import STREAMLIT_PORT, STREAMLIT_HOST
+            from config import STREAMLIT_PORT, STREAMLIT_HOST, STREAMLIT_EXTERNAL_URL
             
             if len(tag_old) == 40 and re.match(r'^[0-9a-f]{40}$', tag_old, re.IGNORECASE):
                 short_tag = tag_old[:8]  # Commit hash: 前8位
@@ -477,9 +477,14 @@ class AsyncTaskManager:
             
             baseline_name = f"{project_name}_{short_tag}"
             
-            # 使用配置的 host 和 port
-            host = "localhost" if STREAMLIT_HOST == "0.0.0.0" else STREAMLIT_HOST
-            result_url = f"http://{host}:{STREAMLIT_PORT}/?baseline={baseline_name}"
+            # 优先使用外部URL配置，如果没有则根据HOST自动生成
+            if STREAMLIT_EXTERNAL_URL:
+                # 使用配置的外部URL
+                result_url = f"{STREAMLIT_EXTERNAL_URL}/?baseline={baseline_name}"
+            else:
+                # 自动生成本地访问URL
+                host = "localhost" if STREAMLIT_HOST == "0.0.0.0" else STREAMLIT_HOST
+                result_url = f"http://{host}:{STREAMLIT_PORT}/?baseline={baseline_name}"
             
             # 更新状态为完成
             self._update_task_status(
