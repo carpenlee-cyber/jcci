@@ -57,6 +57,9 @@ class AsyncTaskManager:
         
         # 确保数据库中存在任务表
         self._ensure_task_table()
+        
+        # ✅ 恢复未完成的队列任务
+        self._recover_pending_tasks()
     
     def _ensure_task_table(self):
         """确保任务表存在"""
@@ -102,6 +105,175 @@ class AsyncTaskManager:
         else:
             logger.error(f"❌ 数据库表创建失败: {self.db_path}")
             raise RuntimeError(f"Failed to create analysis_tasks table in {self.db_path}")
+    
+    def _recover_pending_tasks(self):
+        """
+        从数据库中恢复未完成的任务到内存队列
+        
+        系统重启后，将数据库中status为pending或running的任务加载到内存中
+        如果有running任务，将其状态改为failed（因为进程已中断）
+        然后尝试启动队列中的下一个任务
+        """
+        conn = sqlite3.connect(self.db_path)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        
+        # 查询所有未完成的任务
+        cursor.execute('''
+            SELECT * FROM analysis_tasks 
+            WHERE status IN (?, ?)
+            ORDER BY created_at ASC
+        ''', (TaskStatus.PENDING, TaskStatus.RUNNING))
+        
+        rows = cursor.fetchall()
+        conn.close()
+        
+        if not rows:
+            logger.info("没有需要恢复的队列任务")
+            return
+        
+        recovered_count = 0
+        for row in rows:
+            task_dict = dict(row)
+            task_id = task_dict['task_id']
+            
+            # 如果是running状态，说明系统崩溃或重启，将其改为failed
+            if task_dict['status'] == TaskStatus.RUNNING:
+                logger.warning(f"发现中断的任务 {task_id}，状态从 RUNNING 改为 FAILED")
+                task_dict['status'] = TaskStatus.FAILED
+                task_dict['error_message'] = '系统重启，任务中断'
+                
+                # 更新数据库
+                conn = sqlite3.connect(self.db_path)
+                cursor = conn.cursor()
+                cursor.execute('''
+                    UPDATE analysis_tasks 
+                    SET status = ?, error_message = ?, completed_at = CURRENT_TIMESTAMP
+                    WHERE task_id = ?
+                ''', (TaskStatus.FAILED, '系统重启，任务中断', task_id))
+                conn.commit()
+                conn.close()
+            
+            # 加载到内存
+            with self._lock:
+                self.tasks[task_id] = task_dict
+            
+            recovered_count += 1
+            logger.info(f"恢复任务: {task_id} ({task_dict['status']})")
+        
+        logger.info(f"共恢复 {recovered_count} 个任务到队列")
+        
+        # ✅ 尝试启动队列中的下一个任务
+        self._try_start_next_task()
+    
+    def _validate_git_refs(self, git_url: str, username: str, tag_old: str, tag_new: str) -> tuple:
+        """
+        快速验证 Git 引用（tag/commit）是否存在
+        
+        使用 git ls-remote 命令远程检查，无需 clone 整个仓库
+        
+        Args:
+            git_url: Git 仓库地址
+            username: Git 用户名
+            tag_old: 旧版本标签
+            tag_new: 新版本标签
+            
+        Returns:
+            tuple: (is_valid, error_message)
+                - is_valid: True 如果两个引用都存在
+                - error_message: 错误信息，如果验证通过则为 None
+        """
+        import subprocess
+        import re
+        
+        try:
+            # 构建 git ls-remote 命令
+            # 对于私有仓库，可能需要认证
+            cmd = ['git', 'ls-remote', git_url]
+            
+            # 执行命令，设置超时10秒
+            result = subprocess.run(
+                cmd,
+                capture_output=True,
+                text=True,
+                timeout=10
+            )
+            
+            if result.returncode != 0:
+                # git 命令失败
+                error_msg = result.stderr.strip()
+                if 'Authentication failed' in error_msg or 'could not read Username' in error_msg:
+                    return False, f"Git 认证失败，请检查用户名和密码。错误: {error_msg[:100]}"
+                elif 'not found' in error_msg.lower() or 'could not resolve host' in error_msg.lower():
+                    return False, f"Git 仓库不存在或无法访问: {git_url}"
+                else:
+                    return False, f"Git 命令执行失败: {error_msg[:100]}"
+            
+            # 解析输出，获取所有引用
+            output = result.stdout
+            refs = set()
+            for line in output.split('\n'):
+                if line.strip():
+                    parts = line.split('\t')
+                    if len(parts) == 2:
+                        commit_hash, ref_name = parts
+                        refs.add(ref_name)
+                        # 也添加短名称（refs/tags/v1.0.0 -> v1.0.0）
+                        if ref_name.startswith('refs/tags/'):
+                            refs.add(ref_name.replace('refs/tags/', ''))
+                        elif ref_name.startswith('refs/heads/'):
+                            refs.add(ref_name.replace('refs/heads/', ''))
+            
+            # 验证 tag_old
+            if tag_old not in refs:
+                # 检查是否是完整的 commit hash（40位）
+                if len(tag_old) == 40 and re.match(r'^[0-9a-f]{40}$', tag_old, re.IGNORECASE):
+                    # 对于 commit hash，需要检查是否在输出中
+                    # git ls-remote 默认不列出所有 commit，只列出引用
+                    # 所以我们假设如果是40位十六进制，就认为可能是有效的
+                    logger.info(f"tag_old '{tag_old}' 是 commit hash，跳过精确验证")
+                else:
+                    # 尝试模糊匹配
+                    matched = [r for r in refs if tag_old in r]
+                    if matched:
+                        logger.info(f"tag_old '{tag_old}' 模糊匹配到: {matched[0]}")
+                    else:
+                        available_tags = [r for r in refs if r.startswith('refs/tags/') or not r.startswith('refs/')]
+                        available_sample = ', '.join(available_tags[:5])
+                        return False, (
+                            f"tag_old '{tag_old}' 不存在于仓库中。\n"
+                            f"可用的标签/分支示例: {available_sample}"
+                        )
+            
+            # 验证 tag_new
+            if tag_new not in refs:
+                # 检查是否是完整的 commit hash（40位）
+                if len(tag_new) == 40 and re.match(r'^[0-9a-f]{40}$', tag_new, re.IGNORECASE):
+                    logger.info(f"tag_new '{tag_new}' 是 commit hash，跳过精确验证")
+                else:
+                    # 尝试模糊匹配
+                    matched = [r for r in refs if tag_new in r]
+                    if matched:
+                        logger.info(f"tag_new '{tag_new}' 模糊匹配到: {matched[0]}")
+                    else:
+                        available_tags = [r for r in refs if r.startswith('refs/tags/') or not r.startswith('refs/')]
+                        available_sample = ', '.join(available_tags[:5])
+                        return False, (
+                            f"tag_new '{tag_new}' 不存在于仓库中。\n"
+                            f"可用的标签/分支示例: {available_sample}"
+                        )
+            
+            # 验证通过
+            logger.info(f"✅ Git 引用验证通过: {tag_old}, {tag_new}")
+            return True, None
+            
+        except subprocess.TimeoutExpired:
+            return False, f"Git 命令超时（10秒），请检查网络连接或仓库地址: {git_url}"
+        except FileNotFoundError:
+            return False, "Git 未安装或不在 PATH 中"
+        except Exception as e:
+            logger.error(f"Git 引用验证异常: {e}", exc_info=True)
+            return False, f"Git 引用验证失败: {str(e)}"
     
     def submit_task(self, git_url: str, username: str, tag_old: str, 
                    tag_new: str, max_depth: int = 5) -> str:
@@ -154,33 +326,13 @@ class AsyncTaskManager:
             # 这里我们选择允许重新提交（会创建新任务）
             logger.info(f"任务已失败，将创建新任务: {existing_task_id}")
         
-        # 检查任务完成事件（确保上一个任务完全结束）
-        if not self._task_complete_event.is_set():
-            # 获取当前运行的任务 ID
-            with self._lock:
-                for task in self.tasks.values():
-                    if task['status'] in [TaskStatus.PENDING, TaskStatus.RUNNING]:
-                        raise Exception(
-                            f"已有任务正在执行中（任务ID: {task['task_id']}，状态: {task['status']}）。"
-                            f"请等待当前任务完成后再提交新任务。"
-                        )
-            
-            # 如果内存中没有找到，查数据库
-            conn = sqlite3.connect(self.db_path)
-            cursor = conn.cursor()
-            cursor.execute('''
-                SELECT task_id, status FROM analysis_tasks 
-                WHERE status IN (?, ?)
-                LIMIT 1
-            ''', (TaskStatus.PENDING, TaskStatus.RUNNING))
-            running_task = cursor.fetchone()
-            conn.close()
-            
-            if running_task:
-                raise Exception(
-                    f"已有任务正在执行中（任务ID: {running_task[0]}，状态: {running_task[1]}）。"
-                    f"请等待当前任务完成后再提交新任务。"
-                )
+        # ✅ 快速验证 Git 引用是否存在（使用 git ls-remote）
+        is_valid, error_msg = self._validate_git_refs(git_url, username, tag_old, tag_new)
+        if not is_valid:
+            raise Exception(error_msg)
+        
+        # ✅ 允许提交新任务，进入队列等待
+        # 不再检查是否有任务在执行，所有新任务都进入pending状态
         
         task_id = str(uuid.uuid4())[:12]
         
@@ -210,19 +362,60 @@ class AsyncTaskManager:
                 'error_message': None,
                 'created_at': datetime.now().isoformat(),
             }
-            # 清除任务完成事件，阻止新任务提交
-            self._task_complete_event.clear()
         
-        # 启动后台线程执行任务
-        thread = threading.Thread(
-            target=self._execute_task,
-            args=(task_id, git_url, username, tag_old, tag_new, max_depth),
-            daemon=True
-        )
-        thread.start()
+        # ✅ 尝试启动队列调度（如果有任务在运行，新任务会等待）
+        self._try_start_next_task()
         
         logger.info(f"任务已提交: {task_id}")
         return task_id, None  # 新任务，result_url 为 None
+    
+    def _try_start_next_task(self):
+        """
+        尝试启动下一个等待中的任务
+        
+        检查是否有正在运行的任务，如果没有，则启动队列中最早的pending任务
+        """
+        with self._lock:
+            # 检查是否有正在运行的任务
+            has_running = any(
+                task['status'] == TaskStatus.RUNNING 
+                for task in self.tasks.values()
+            )
+            
+            if has_running:
+                logger.info("当前有任务正在运行，新任务将在队列中等待")
+                return
+            
+            # 查找最早的pending任务（按创建时间）
+            pending_tasks = [
+                task for task in self.tasks.values()
+                if task['status'] == TaskStatus.PENDING
+            ]
+            
+            if not pending_tasks:
+                logger.info("队列中没有等待的任务")
+                return
+            
+            # 按创建时间排序，取最早的
+            pending_tasks.sort(key=lambda x: x['created_at'])
+            next_task = pending_tasks[0]
+            
+            logger.info(f"启动队列中的下一个任务: {next_task['task_id']}")
+            
+            # 启动任务执行线程
+            thread = threading.Thread(
+                target=self._execute_task,
+                args=(
+                    next_task['task_id'],
+                    next_task['git_url'],
+                    next_task['username'],
+                    next_task['tag_old'],
+                    next_task['tag_new'],
+                    next_task['max_depth']
+                ),
+                daemon=True
+            )
+            thread.start()
     
     def _execute_task(self, task_id: str, git_url: str, username: str,
                      tag_old: str, tag_new: str, max_depth: int):
@@ -298,8 +491,8 @@ class AsyncTaskManager:
             
             logger.info(f"任务完成: {task_id}, URL: {result_url}")
             
-            # 设置任务完成事件，允许新任务提交
-            self._task_complete_event.set()
+            # ✅ 启动队列中的下一个任务
+            self._try_start_next_task()
             
         except Exception as e:
             logger.error(f"任务失败: {task_id}, 错误: {str(e)}", exc_info=True)
@@ -309,8 +502,8 @@ class AsyncTaskManager:
                 error_message=str(e)
             )
             
-            # 即使失败也要设置事件，允许新任务提交
-            self._task_complete_event.set()
+            # 即使失败也要启动下一个任务
+            self._try_start_next_task()
     
     def _update_task_status(self, task_id: str, status: str, 
                            progress: Optional[float] = None,
@@ -400,6 +593,119 @@ class AsyncTaskManager:
             return task_info
         
         return None
+    
+    def get_queue_position(self, task_id: str) -> dict:
+        """
+        获取任务在队列中的位置
+        
+        Args:
+            task_id: 任务 ID
+            
+        Returns:
+            dict: {
+                'position': 队列位置 (0表示正在执行，-1表示不在队列中),
+                'total_pending': 等待中的任务总数,
+                'estimated_wait_minutes': 预估等待时间(分钟),
+                'current_running_task': 当前正在执行的任务信息
+            }
+        """
+        conn = sqlite3.connect(self.db_path)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        
+        # 获取所有pending和running任务，按创建时间排序
+        cursor.execute('''
+            SELECT task_id, status, tag_old, tag_new, created_at
+            FROM analysis_tasks 
+            WHERE status IN (?, ?)
+            ORDER BY created_at ASC
+        ''', (TaskStatus.PENDING, TaskStatus.RUNNING))
+        
+        queue_tasks = [dict(row) for row in cursor.fetchall()]
+        conn.close()
+        
+        if not queue_tasks:
+            return {
+                'position': 0,
+                'total_pending': 0,
+                'estimated_wait_minutes': 0,
+                'current_running_task': None
+            }
+        
+        # 找到当前任务的位置
+        position = -1
+        for idx, task in enumerate(queue_tasks):
+            if task['task_id'] == task_id:
+                position = idx
+                break
+        
+        # 如果任务不在队列中（可能已完成或失败）
+        if position == -1:
+            return {
+                'position': -1,
+                'total_pending': len(queue_tasks),
+                'estimated_wait_minutes': 0,
+                'current_running_task': queue_tasks[0] if queue_tasks else None
+            }
+        
+        # 计算预估等待时间（假设每个任务平均需要15分钟）
+        avg_task_duration_minutes = 15
+        tasks_before = position  # 前面的任务数量
+        estimated_wait = tasks_before * avg_task_duration_minutes
+        
+        # 获取当前正在执行的任务
+        current_running = None
+        for task in queue_tasks:
+            if task['status'] == TaskStatus.RUNNING:
+                current_running = task
+                break
+        
+        return {
+            'position': position,
+            'total_pending': len(queue_tasks),
+            'estimated_wait_minutes': estimated_wait,
+            'current_running_task': current_running
+        }
+    
+    def cancel_task(self, task_id: str) -> bool:
+        """
+        取消尚未开始执行的任务
+        
+        Args:
+            task_id: 任务 ID
+            
+        Returns:
+            bool: 是否成功取消
+        """
+        # 只能取消 pending 状态的任务
+        task_info = self.get_task_status(task_id)
+        if not task_info:
+            return False
+        
+        if task_info['status'] != TaskStatus.PENDING:
+            logger.warning(f"无法取消任务 {task_id}，当前状态为 {task_info['status']}")
+            return False
+        
+        # 更新数据库状态
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        cursor.execute('''
+            UPDATE analysis_tasks 
+            SET status = ?, completed_at = CURRENT_TIMESTAMP,
+                error_message = '用户主动取消'
+            WHERE task_id = ?
+        ''', (TaskStatus.FAILED, task_id))
+        conn.commit()
+        conn.close()
+        
+        # 更新内存缓存
+        with self._lock:
+            if task_id in self.tasks:
+                self.tasks[task_id]['status'] = TaskStatus.FAILED
+                self.tasks[task_id]['error_message'] = '用户主动取消'
+        
+        logger.info(f"任务已取消: {task_id}")
+        return True
     
     def list_tasks(self, limit: int = 20) -> List[dict]:
         """

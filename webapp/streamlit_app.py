@@ -182,14 +182,34 @@ def render_task_submission_page():
             else:
                 # 新任务或正在执行的任务
                 st.success("✅ 任务提交成功！")
-                st.info(f"""
+                
+                # 获取队列信息
+                queue_info = task_manager.get_queue_position(task_id)
+                
+                # 构建提示信息
+                info_msg = f"""
                 ### 📊 任务信息
                 
                 - **任务 ID**: `{task_id}`
-                - **状态**: 正在后台执行
-                - **预计时间**: 根据代码规模，可能需要几分钟到几十分钟
+                """
                 
-                """)
+                if queue_info['position'] == 0:
+                    info_msg += "- **当前状态**: 🚀 正在执行中\n"
+                elif queue_info['position'] > 0:
+                    info_msg += f"- **队列位置**: 第 {queue_info['position']} 位（前面还有 {queue_info['position'] - 1} 个任务）\n"
+                    info_msg += f"- **预估等待时间**: 约 {queue_info['estimated_wait_minutes']} 分钟\n"
+                    
+                    if queue_info['current_running_task']:
+                        running = queue_info['current_running_task']
+                        info_msg += f"- **当前执行**: `{running['tag_old']}` → `{running['tag_new']}`\n"
+                
+                info_msg += f"""
+                - **预计总耗时**: 根据代码规模，可能需要几分钟到几十分钟
+                
+                💡 **提示**: 任务已进入队列，将在前一个任务完成后自动开始执行。您可以在任务列表中查看实时进度。
+                """
+                
+                st.info(info_msg)
                  
                 # 设置 session state
                 st.session_state.task_submitted = True
@@ -208,8 +228,10 @@ def render_task_submission_page():
                     unsafe_allow_html=True
                 )
             
-        except Exception as e:           
-            logger.error(f"提交任务失败: {e}", exc_info=True)
+        except Exception as e:
+            error_msg = str(e)
+            logger.error(f"提交任务失败: {error_msg}", exc_info=True)
+            st.error(f"❌ 提交失败: {error_msg}")
 
 
 def render_task_list_page():
@@ -220,6 +242,25 @@ def render_task_list_page():
     
     这里显示最近提交的分析任务及其状态。点击任务可查看详细信息和访问结果。
     """)
+    
+    # 添加自动刷新选项
+    col_auto_refresh, col_manual_refresh = st.columns([1, 4])
+    with col_auto_refresh:
+        auto_refresh = st.checkbox("🔄 自动刷新", value=False, help="每30秒自动刷新一次")
+    
+    if auto_refresh:
+        # 使用 meta refresh 实现自动刷新
+        st.markdown(
+            """
+            <meta http-equiv="refresh" content="30">
+            """,
+            unsafe_allow_html=True
+        )
+        st.caption("⏱️ 页面将在 30 秒后自动刷新")
+    
+    with col_manual_refresh:
+        if st.button("🔄 手动刷新", use_container_width=True):
+            st.rerun()
     
     # 获取任务管理器
     task_manager = get_task_manager(DB_PATH)
@@ -239,11 +280,25 @@ def render_task_list_page():
     failed = sum(1 for t in tasks if t['status'] == 'failed')
     pending = sum(1 for t in tasks if t['status'] == 'pending')
     
-    col1, col2, col3, col4 = st.columns(4)
+    col1, col2, col3, col4, col5 = st.columns(5)
     col1.metric("总任务数", total)
     col2.metric("已完成", completed)
     col3.metric("运行中", running)
-    col4.metric("失败", failed)
+    col4.metric("等待中", pending)
+    col5.metric("失败", failed)
+    
+    # 如果有等待中的任务，显示队列信息
+    if pending > 0 or running > 0:
+        st.markdown("---")
+        st.info(f"📊 **当前队列状态**: {running} 个任务正在执行，{pending} 个任务在等待中")
+        
+        # 获取第一个等待中的任务，显示预估时间
+        pending_tasks = [t for t in tasks if t['status'] == 'pending']
+        if pending_tasks:
+            first_pending = pending_tasks[-1]  # 最早提交的等待任务
+            queue_info = task_manager.get_queue_position(first_pending['task_id'])
+            if queue_info['estimated_wait_minutes'] > 0:
+                st.warning(f"⏳ **队列提示**: 最早提交的任务预计需要等待约 {queue_info['estimated_wait_minutes']} 分钟")
     
     st.markdown("---")
     
@@ -267,29 +322,67 @@ def render_task_list_page():
         
         with st.expander(f"{icon} 任务 {task['task_id']} - {task.get('tag_old', '')} → {task.get('tag_new', '')}", expanded=False):
             col1, col2 = st.columns([3, 1])
-            
+                    
             with col1:
                 st.markdown(f"**状态**: <span style='color:{color}'>{status.upper()}</span>", unsafe_allow_html=True)
                 st.markdown(f"**Git 仓库**: `{task.get('git_url', 'N/A')}`")
                 st.markdown(f"**版本对比**: `{task.get('tag_old', 'N/A')}` → `{task.get('tag_new', 'N/A')}`")
                 st.markdown(f"**分析深度**: {task.get('max_depth', 5)}")
                 st.markdown(f"**创建时间**: {task.get('created_at', 'N/A')}")
-                
+                        
+                # 如果是等待中的任务，显示队列位置
+                if status == 'pending':
+                    queue_info = task_manager.get_queue_position(task['task_id'])
+                    if queue_info['position'] >= 0:
+                        st.markdown(f"**队列位置**: 第 {queue_info['position'] + 1} 位")
+                        if queue_info['estimated_wait_minutes'] > 0:
+                            st.markdown(f"**预估等待**: 约 {queue_info['estimated_wait_minutes']} 分钟")
+                        
                 if task.get('progress') is not None:
                     st.progress(task['progress'] / 100.0)
                     st.caption(f"进度: {task['progress']:.1f}%")
-                
+                        
                 if status == 'completed' and task.get('result_url'):
                     st.success(f"✅ 分析完成！")
                     st.markdown(f"**访问链接**: [{task['result_url']}]({task['result_url']})")                    
-                                    
+                                            
                 if status == 'failed' and task.get('error_message'):
                     st.error(f"❌ 错误: {task['error_message']}")
-            
+                    
             with col2:
                 if status == 'running' or status == 'pending':
                     if st.button("🔄 刷新", key=f"refresh_{task['task_id']}"):
                         st.rerun()
+                        
+                # 添加取消按钮（仅对pending状态的任务）
+                if status == 'pending':
+                    cancel_key = f"show_cancel_{task['task_id']}"
+                    confirm_key = f"confirm_cancel_{task['task_id']}"
+                    
+                    # 初始化session state
+                    if cancel_key not in st.session_state:
+                        st.session_state[cancel_key] = False
+                    
+                    if not st.session_state[cancel_key]:
+                        if st.button("❌ 取消任务", key=f"btn_{cancel_key}", type="secondary"):
+                            st.session_state[cancel_key] = True
+                            st.rerun()
+                    else:
+                        st.warning("⚠️ 确定要取消此任务吗？")
+                        col_confirm, col_cancel = st.columns(2)
+                        with col_confirm:
+                            if st.button("✅ 确认取消", key=confirm_key, type="primary"):
+                                if task_manager.cancel_task(task['task_id']):
+                                    st.success("✅ 任务已取消")
+                                    st.session_state[cancel_key] = False
+                                    st.rerun()
+                                else:
+                                    st.error("❌ 取消失败，任务可能已开始执行")
+                                    st.session_state[cancel_key] = False
+                        with col_cancel:
+                            if st.button("❌ 不取消了", key=f"no_{confirm_key}"):
+                                st.session_state[cancel_key] = False
+                                st.rerun()
     
 
 # ==================== 用户会话管理 ====================
@@ -396,15 +489,52 @@ def query_database(query: str, params: tuple = (), db_path: str = None) -> List[
 
 def get_method_info_from_db(class_name: str, method_name: str) -> Dict:
     """从数据库获取方法的详细信息"""
-    # 先查找class_id
-    class_query = """
+    # 获取当前会话的 commit_range
+    commit_range = st.session_state.get('current_commit_range', None)
+    
+    # 如果存在 commit_range，先查找对应的 project_id
+    project_id_filter = ""
+    project_id_params = []
+    
+    if commit_range and '..' in commit_range:
+        # 从 commit_range 提取 baseline 和 version
+        parts = commit_range.split('..')
+        if len(parts) == 2:
+            commit_old = parts[0]
+            commit_new = parts[1]
+            
+            # 查询对应的 project_id
+            project_query = """
+                SELECT project_id 
+                FROM project 
+                WHERE commit_or_branch_old = ? AND commit_or_branch_new = ?
+                ORDER BY project_id DESC
+                LIMIT 1
+            """
+            projects = query_database(project_query, (commit_old, commit_new))
+            
+            if projects:
+                target_project_id = projects[0]['project_id']
+                project_id_filter = " AND m.project_id = ?"
+                project_id_params = [target_project_id]
+    
+    # 先查找class_id（如果有 project_id 过滤条件，也需要应用到 class 查询）
+    class_where_clause = "WHERE class_name = ?"
+    class_params = [class_name]
+    
+    if project_id_filter:
+        # 对于 class 表，使用 project_id 过滤
+        class_where_clause += " AND project_id = ?"
+        class_params.append(project_id_params[0])
+    
+    class_query = f"""
         SELECT class_id, filepath, package_name, class_type, 
                is_controller, controller_base_url, change_type
         FROM class
-        WHERE class_name = ?
+        {class_where_clause}
         LIMIT 1
     """
-    classes = query_database(class_query, (class_name,))
+    classes = query_database(class_query, tuple(class_params))
     
     if not classes:
         return {}
@@ -412,17 +542,17 @@ def get_method_info_from_db(class_name: str, method_name: str) -> Dict:
     class_info = classes[0]
     class_id = class_info['class_id']
     
-    # 再查找method
-    method_query = """
+    # 再查找method（使用 project_id 过滤确保数据一致性）
+    method_query = f"""
         SELECT m.*, c.filepath, c.package_name, c.class_type,
                c.is_controller, c.controller_base_url
         FROM methods m
         JOIN class c ON m.class_id = c.class_id
-        WHERE m.class_id = ? AND m.method_name = ?
+        WHERE m.class_id = ? AND m.method_name = ?{project_id_filter}
         ORDER BY m.project_id DESC
         LIMIT 1
     """
-    methods = query_database(method_query, (class_id, method_name))
+    methods = query_database(method_query, (class_id, method_name) + tuple(project_id_params))
     
     if methods:
         method_info = methods[0]
