@@ -104,17 +104,73 @@ def render_task_submission_page():
     请填写以下信息以启动代码变更分析任务。任务将在后台异步执行，完成后您可以访问结果页面。
     """)
     
+    # 尝试从 localStorage 加载缓存的参数
+    # 使用 HTML 组件和 JavaScript 来读取 localStorage 并通过 URL 参数传递
+    if 'params_loaded' not in st.session_state:
+        st.session_state.params_loaded = False
+        
+        # 注入 JavaScript 来检查 localStorage 并在有缓存时重新加载页面带参数
+        st.markdown(
+            """
+            <script>
+            (function() {
+                // 检查是否已经有 URL 参数
+                const urlParams = new URLSearchParams(window.location.search);
+                const hasCachedParam = urlParams.get('cached');
+                
+                if (!hasCachedParam) {
+                    // 尝试从 localStorage 加载
+                    const cachedParams = localStorage.getItem('jcci_analysis_params');
+                    if (cachedParams) {
+                        try {
+                            const params = JSON.parse(cachedParams);
+                            console.log('✅ Found cached params, reloading with parameters:', params);
+                            
+                            // 构建新的 URL，带上缓存的参数
+                            const newUrl = new URL(window.location);
+                            newUrl.searchParams.set('cached_git_url', params.git_url || '');
+                            newUrl.searchParams.set('cached_username', params.username || '');
+                            newUrl.searchParams.set('cached_tag_old', params.tag_old || '');
+                            newUrl.searchParams.set('cached_tag_new', params.tag_new || '');
+                            newUrl.searchParams.set('cached_max_depth', params.max_depth || 5);
+                            newUrl.searchParams.set('cached', 'true');
+                            
+                            // 重新加载页面
+                            window.location.replace(newUrl.toString());
+                        } catch (e) {
+                            console.error('Failed to parse cached params:', e);
+                        }
+                    }
+                }
+            })();
+            </script>
+            """,
+            unsafe_allow_html=True
+        )
+    
+    # 从 URL 参数获取缓存的值（如果有）
+    query_params = st.query_params
+    cached_git_url = query_params.get("cached_git_url", None)
+    cached_username = query_params.get("cached_username", None)
+    cached_tag_old = query_params.get("cached_tag_old", None)
+    cached_tag_new = query_params.get("cached_tag_new", None)
+    cached_max_depth = query_params.get("cached_max_depth", None)
+    
     # 初始化 session state 用于保存表单值
     if 'last_git_url' not in st.session_state:
-        st.session_state.last_git_url = "https://github.com/carpenlee-cyber/mall.git"
+        # 优先使用 URL 中的缓存值，否则使用默认值
+        st.session_state.last_git_url = cached_git_url if cached_git_url else "https://github.com/carpenlee-cyber/mall.git"
     if 'last_username' not in st.session_state:
-        st.session_state.last_username = "carpenlee-cyber"
+        st.session_state.last_username = cached_username if cached_username else "carpenlee-cyber"
     if 'last_tag_old' not in st.session_state:
-        st.session_state.last_tag_old = "baseline_20260508_01"
+        st.session_state.last_tag_old = cached_tag_old if cached_tag_old else "baseline_20260508_01"
     if 'last_tag_new' not in st.session_state:
-        st.session_state.last_tag_new = "baseline_fix1_20260508_02"
+        st.session_state.last_tag_new = cached_tag_new if cached_tag_new else "baseline_fix1_20260508_02"
     if 'last_max_depth' not in st.session_state:
-        st.session_state.last_max_depth = 5
+        try:
+            st.session_state.last_max_depth = int(cached_max_depth) if cached_max_depth else 5
+        except (ValueError, TypeError):
+            st.session_state.last_max_depth = 5
     
     # 检测是否需要显示密码输入框（非默认用户）
     default_username = "carpenlee-cyber"
@@ -201,6 +257,25 @@ def render_task_submission_page():
             st.session_state.last_max_depth = max_depth
             if git_password:
                 st.session_state.last_git_password = git_password
+            
+            # 将参数保存到 localStorage（通过 JavaScript）
+            st.markdown(
+                f"""
+                <script>
+                // 保存参数到 localStorage
+                const params = {{
+                    git_url: {json.dumps(git_url)},
+                    username: {json.dumps(username)},
+                    tag_old: {json.dumps(tag_old)},
+                    tag_new: {json.dumps(tag_new)},
+                    max_depth: {max_depth}
+                }};
+                localStorage.setItem('jcci_analysis_params', JSON.stringify(params));
+                console.log('✅ Analysis parameters saved to localStorage');
+                </script>
+                """,
+                unsafe_allow_html=True
+            )
             
             # 提交任务（显示加载动画）
             with st.spinner("⏳ 正在提交任务，请稍候..."):
