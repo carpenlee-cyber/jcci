@@ -239,6 +239,39 @@ def render_task_submission_page():
             help="调用链分析的最大深度（建议 3-7）"
         )
         
+        # 埋点信息输入框
+        st.markdown("---")
+        st.markdown("#### 📊 埋点信息（可选）")
+        
+        col_meta1, col_meta2 = st.columns(2)
+        with col_meta1:
+            project_code = st.text_input(
+                "项目编号",
+                value="",
+                placeholder="例如: PROJ-001",
+                help="本次分析所属的项目编号"
+            )
+            user_name = st.text_input(
+                "用户名",
+                value="网页",
+                placeholder="您的用户名",
+                help="进行分析的用户名"
+            )
+        
+        with col_meta2:
+            task_stage = st.text_input(
+                "子任务阶段",
+                value="",
+                placeholder="例如: Phase-1",
+                help="当前分析的子任务阶段"
+            )
+            user_id = st.text_input(
+                "用户ID",
+                value="web",
+                placeholder="您的用户ID",
+                help="进行分析的用户ID"
+            )
+        
         # 如果用户名不是默认值，显示密码输入框
         if username != default_username:
             git_password = st.text_input(
@@ -289,6 +322,20 @@ def render_task_submission_page():
             
             save_params_to_cache(cache_params)
             
+            # 获取用户IP（尝试从 Streamlit context 获取）
+            user_ip = ""
+            try:
+                # Streamlit 1.40+ 支持 st.context.headers
+                if hasattr(st, 'context') and hasattr(st.context, 'headers'):
+                    forwarded_for = st.context.headers.get("X-Forwarded-For", "")
+                    real_ip = st.context.headers.get("X-Real-IP", "")
+                    user_ip = forwarded_for.split(",")[0].strip() if forwarded_for else real_ip
+            except:
+                pass
+            
+            if not user_ip:
+                user_ip = "unknown"
+            
             # 提交任务（显示加载动画）
             with st.spinner("⏳ 正在提交任务，请稍候..."):
                 task_id, result_url = task_manager.submit_task(
@@ -297,7 +344,12 @@ def render_task_submission_page():
                     password=git_password,  # 传递密码
                     tag_old=tag_old,
                     tag_new=tag_new,
-                    max_depth=max_depth
+                    max_depth=max_depth,
+                    project_code=project_code,
+                    task_stage=task_stage,
+                    user_ip=user_ip,
+                    user_name=user_name,
+                    user_id=user_id
                 )
             
             # 检查是否是已有的完成任务
@@ -455,7 +507,27 @@ def render_task_list_page():
             icon = "⏳"
             color = "gray"
         
-        with st.expander(f"{icon} 任务 {task['task_id']} - {task.get('tag_old', '')} → {task.get('tag_new', '')}", expanded=False):
+        # 构建任务标题：用户ip_项目编号_子任务阶段
+        user_ip = task.get('user_ip', 'unknown')
+        project_code = task.get('project_code', '')
+        task_stage = task.get('task_stage', '')
+        
+        # 组合标题部分
+        title_parts = []
+        if user_ip and user_ip != 'unknown':
+            title_parts.append(user_ip)
+        else:
+            title_parts.append('unknown')
+        
+        if project_code:
+            title_parts.append(project_code)
+        
+        if task_stage:
+            title_parts.append(task_stage)
+        
+        title_prefix = '_'.join(title_parts) if title_parts else 'unknown'
+        
+        with st.expander(f"{icon} {title_prefix} - {task['task_id']} - {task.get('tag_old', '')} → {task.get('tag_new', '')}", expanded=False):
             col1, col2 = st.columns([3, 1])
                     
             with col1:

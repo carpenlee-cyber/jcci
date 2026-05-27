@@ -89,7 +89,12 @@ class AsyncTaskManager:
                 started_at TIMESTAMP,
                 completed_at TIMESTAMP,
                 output_dir TEXT,
-                has_password BOOLEAN DEFAULT 0
+                has_password BOOLEAN DEFAULT 0,
+                project_code TEXT,
+                task_stage TEXT,
+                user_ip TEXT,
+                user_name TEXT,
+                user_id TEXT
             )
         ''')
         
@@ -298,7 +303,9 @@ class AsyncTaskManager:
             return False, f"Git 引用验证失败: {str(e)}"
     
     def submit_task(self, git_url: str, username: str, tag_old: str, 
-                   tag_new: str, max_depth: int = 5, password: str = None) -> str:
+                   tag_new: str, max_depth: int = 5, password: str = None,
+                   project_code: str = "", task_stage: str = "",
+                   user_ip: str = "", user_name: str = "网页", user_id: str = "web") -> str:
         """
         提交分析任务
         
@@ -364,9 +371,11 @@ class AsyncTaskManager:
         cursor = conn.cursor()
         cursor.execute('''
             INSERT INTO analysis_tasks 
-            (task_id, status, git_url, username, tag_old, tag_new, max_depth, has_password)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        ''', (task_id, TaskStatus.PENDING, git_url, username, tag_old, tag_new, max_depth, 1 if password else 0))
+            (task_id, status, git_url, username, tag_old, tag_new, max_depth, has_password,
+             project_code, task_stage, user_ip, user_name, user_id)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (task_id, TaskStatus.PENDING, git_url, username, tag_old, tag_new, max_depth, 1 if password else 0,
+              project_code, task_stage, user_ip, user_name, user_id))
         conn.commit()
         conn.close()
         
@@ -384,6 +393,11 @@ class AsyncTaskManager:
                 'result_url': None,
                 'error_message': None,
                 'created_at': datetime.now().isoformat(),
+                'project_code': project_code,
+                'task_stage': task_stage,
+                'user_ip': user_ip,
+                'user_name': user_name,
+                'user_id': user_id,
             }
         
         # ✅ 尝试启动队列调度（如果有任务在运行，新任务会等待）
@@ -434,14 +448,18 @@ class AsyncTaskManager:
                     next_task['username'],
                     next_task['tag_old'],
                     next_task['tag_new'],
-                    next_task['max_depth']
+                    next_task['max_depth'],
+                    next_task.get('user_ip', ''),
+                    next_task.get('user_name', '网页'),
+                    next_task.get('user_id', 'web')
                 ),
                 daemon=True
             )
             thread.start()
     
     def _execute_task(self, task_id: str, git_url: str, username: str,
-                     tag_old: str, tag_new: str, max_depth: int):
+                     tag_old: str, tag_new: str, max_depth: int,
+                     user_ip: str = "", user_name: str = "网页", user_id: str = "web"):
         """
         在后台线程中执行任务
         
@@ -479,7 +497,10 @@ class AsyncTaskManager:
                 tag_new=tag_new,
                 max_depth=max_depth,
                 enable_streamlit=False,  # 强制禁用 Streamlit
-                auto_open_browser=False
+                auto_open_browser=False,
+                user_ip=user_ip,
+                user_name=user_name,
+                user_id=user_id
             )
             
             # 更新进度

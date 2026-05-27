@@ -14,8 +14,4 @@ __pycache__/
 *.pyc
 
 # Mall project (submodule)
-jcci/mall
-
-# Cache files
-webapp/.cache/
-*.cache/
+projects/

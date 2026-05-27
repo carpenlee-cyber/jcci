@@ -76,7 +76,14 @@ def workflow1(
     auto_open_browser: bool = True,
     
     # 高级参数
-    log_level: str = "INFO"
+    log_level: str = "INFO",
+    
+    # 埋点参数
+    user_ip: str = "",
+    user_name: str = "网页",
+    user_id: str = "web",
+    project_code: str = "",
+    task_stage: str = ""
 ):
     """
     Workflow1: 双向调用链路分析

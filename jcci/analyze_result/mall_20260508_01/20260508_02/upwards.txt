@@ -1,0 +1,123 @@
+================================================================================
+向上调用链分析 - 元数据信息
+================================================================================
+项目: mall
+用户名: carpenlee-cyber
+Git URL: https://github.com/carpenlee-cyber/mall.git
+Commit范围: 20260508_01..20260508_02
+分析版本: 3.1
+最大深度: 5
+总变更方法数: 16
+成功分析: 16
+失败分析: 0
+
+功能启用状态:
+  - 类层次分析 (CHA): 是
+  - 入口检测: 是
+
+================================================================================
+
+
+向上调用链分析（影响面：谁调用了变更方法？）
+
+================================================================================
+🎯 发现的入口点 (16个):
+================================================================================
+  1. SmsCouponController.delete(入口) [HTTP_API] - [POST]/coupon/delete/{id}
+     关联的调用链:
+       - 调用链 1: MODIFIED方法 SmsCouponController.delete
+  2. SmsCouponController.update(入口) [HTTP_API] - [POST]/coupon/update/{id}
+     关联的调用链:
+       - 调用链 2: MODIFIED方法 SmsCouponController.update
+  3. SmsFlashPromotionController.getItem(入口) [HTTP_API] - [GET]/flash/list
+     关联的调用链:
+       - 调用链 3: MODIFIED方法 SmsFlashPromotionController.getItem
+  4. SmsFlashPromotionController.update(入口) [HTTP_API] - [POST]/flash/update/status/{id}
+     关联的调用链:
+       - 调用链 4: MODIFIED方法 SmsFlashPromotionController.update
+  5. SmsFlashPromotionProductRelationController.delete(入口) [HTTP_API] - [POST]/flashProductRelation/delete/{id}
+     关联的调用链:
+       - 调用链 5: MODIFIED方法 SmsFlashPromotionProductRelationController.delete
+  6. SmsFlashPromotionProductRelationController.update(入口) [HTTP_API] - [POST]/flashProductRelation/update/{id}
+     关联的调用链:
+       - 调用链 6: MODIFIED方法 SmsFlashPromotionProductRelationController.update
+  7. SmsFlashPromotionSessionController.updateStatus(入口) [HTTP_API] - [POST]/flashSession/update/status/{id}
+     关联的调用链:
+       - 调用链 7: MODIFIED方法 SmsFlashPromotionSessionController.updateStatus
+  8. SmsHomeAdvertiseController.delete(入口) [HTTP_API] - [POST]/home/advertise/delete
+     关联的调用链:
+       - 调用链 8: MODIFIED方法 SmsHomeAdvertiseController.delete
+  9. SmsHomeAdvertiseController.getItem(入口) [HTTP_API] - [GET]/home/advertise/{id}
+     关联的调用链:
+       - 调用链 9: MODIFIED方法 SmsHomeAdvertiseController.getItem
+  10. SmsHomeAdvertiseController.list(入口) [HTTP_API] - [GET]/home/advertise/list
+     关联的调用链:
+       - 调用链 10: MODIFIED方法 SmsHomeAdvertiseController.list
+  11. SmsHomeAdvertiseController.update(入口) [HTTP_API] - [POST]/home/advertise/update/{id}
+     关联的调用链:
+       - 调用链 11: MODIFIED方法 SmsHomeAdvertiseController.update
+  12. SmsHomeNewProductController.create(入口) [HTTP_API] - [POST]/home/newProduct/create
+     关联的调用链:
+       - 调用链 12: MODIFIED方法 SmsHomeNewProductController.create
+  13. SmsHomeRecommendSubjectController.create(入口) [HTTP_API] - [POST]/home/recommendSubject/create
+     关联的调用链:
+       - 调用链 13: MODIFIED方法 SmsHomeRecommendSubjectController.create
+  14. UmsMenuController.list(入口) [HTTP_API] - [GET]/menu/list/{parentId}
+     关联的调用链:
+       - 调用链 14: MODIFIED方法 UmsMenuController.list
+  15. UmsMenuController.updateHidden(入口) [HTTP_API] - [POST]/menu/updateHidden/{id}
+     关联的调用链:
+       - 调用链 15: MODIFIED方法 UmsMenuController.updateHidden
+  16. UmsRoleController.listMenu(入口) [HTTP_API] - [GET]/role/listMenu/{roleId}
+     关联的调用链:
+       - 调用链 16: MODIFIED方法 UmsRoleController.listMenu
+
+================================================================================
+
+调用链 1：MODIFIED方法 SmsCouponController.delete
+SmsCouponController.delete (UNKNOWN)(入口)
+
+调用链 2：MODIFIED方法 SmsCouponController.update
+SmsCouponController.update (UNKNOWN)(入口)
+
+调用链 3：MODIFIED方法 SmsFlashPromotionController.getItem
+SmsFlashPromotionController.getItem (UNKNOWN)(入口)
+
+调用链 4：MODIFIED方法 SmsFlashPromotionController.update
+SmsFlashPromotionController.update (UNKNOWN)(入口)
+
+调用链 5：MODIFIED方法 SmsFlashPromotionProductRelationController.delete
+SmsFlashPromotionProductRelationController.delete (UNKNOWN)(入口)
+
+调用链 6：MODIFIED方法 SmsFlashPromotionProductRelationController.update
+SmsFlashPromotionProductRelationController.update (UNKNOWN)(入口)
+
+调用链 7：MODIFIED方法 SmsFlashPromotionSessionController.updateStatus
+SmsFlashPromotionSessionController.updateStatus (UNKNOWN)(入口)
+
+调用链 8：MODIFIED方法 SmsHomeAdvertiseController.delete
+SmsHomeAdvertiseController.delete (UNKNOWN)(入口)
+
+调用链 9：MODIFIED方法 SmsHomeAdvertiseController.getItem
+SmsHomeAdvertiseController.getItem (UNKNOWN)(入口)
+
+调用链 10：MODIFIED方法 SmsHomeAdvertiseController.list
+SmsHomeAdvertiseController.list (UNKNOWN)(入口)
+
+调用链 11：MODIFIED方法 SmsHomeAdvertiseController.update
+SmsHomeAdvertiseController.update (UNKNOWN)(入口)
+
+调用链 12：MODIFIED方法 SmsHomeNewProductController.create
+SmsHomeNewProductController.create (UNKNOWN)(入口)
+
+调用链 13：MODIFIED方法 SmsHomeRecommendSubjectController.create
+SmsHomeRecommendSubjectController.create (UNKNOWN)(入口)
+
+调用链 14：MODIFIED方法 UmsMenuController.list
+UmsMenuController.list (UNKNOWN)(入口)
+
+调用链 15：MODIFIED方法 UmsMenuController.updateHidden
+UmsMenuController.updateHidden (UNKNOWN)(入口)
+
+调用链 16：MODIFIED方法 UmsRoleController.listMenu
+UmsRoleController.listMenu (UNKNOWN)(入口)

@@ -85,7 +85,12 @@ def main():
             streamlit_port=streamlit_port,
             streamlit_host=streamlit_host,
             auto_open_browser=auto_open_browser,
-            log_level=log_level
+            log_level=log_level,
+            user_ip="",
+            user_name="网页",
+            user_id="web",
+            project_code="",
+            task_stage=""
         )
         
         print("\n" + "=" * 80)

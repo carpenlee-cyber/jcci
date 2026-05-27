@@ -8,7 +8,7 @@
       "diff_type": [
         "changed"
       ],
-      "file_path": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/jcci/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsCouponController.java",
+      "file_path": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsCouponController.java",
       "diff_content": "    @ApiOperation(\"根据ID删除优惠券\")\n",
       "documentation": "None",
       "body": "[\"    @ApiOperation(\\\"根据ID删除优惠券\\\")\", \"    @RequestMapping(value = \\\"/delete/{id}\\\", method = RequestMethod.POST)\", \"    @ResponseBody\", \"    public CommonResult delete(@PathVariable Long id) {\", \"        int count = couponService.delete(id);\", \"        if(count>0){\", \"            return CommonResult.success(count);\", \"        }\", \"        return CommonResult.failed();\", \"    }\"]",
@@ -35,7 +35,7 @@
       "diff_type": [
         "changed"
       ],
-      "file_path": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/jcci/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsCouponController.java",
+      "file_path": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsCouponController.java",
       "diff_content": "    @ApiOperation(\"根据ID修改优惠券\")\n",
       "documentation": "None",
       "body": "[\"    @ApiOperation(\\\"根据ID修改优惠券\\\")\", \"    @RequestMapping(value = \\\"/update/{id}\\\", method = RequestMethod.POST)\", \"    @ResponseBody\", \"    public CommonResult update(@PathVariable Long id,@RequestBody SmsCouponParam couponParam) {\", \"        int count = couponService.update(id,couponParam);\", \"        if(count>0){\", \"            return CommonResult.success(count);\", \"        }\", \"        return CommonResult.failed();\", \"    }\"]",
@@ -62,7 +62,7 @@
       "diff_type": [
         "changed"
       ],
-      "file_path": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/jcci/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsFlashPromotionController.java",
+      "file_path": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsFlashPromotionController.java",
       "diff_content": "    @ApiOperation(\"修改活动上下线状态\")\n",
       "documentation": "None",
       "body": "[\"    @ApiOperation(\\\"修改活动上下线状态\\\")\", \"    @RequestMapping(value = \\\"/update/status/{id}\\\", method = RequestMethod.POST)\", \"    @ResponseBody\", \"    public CommonResult update(@PathVariable Long id, Integer status) {\", \"        int count = flashPromotionService.updateStatus(id, status);\", \"        if (count > 0) {\", \"            return CommonResult.success(count);\", \"        }\", \"        return CommonResult.failed();\", \"    }\"]",
@@ -89,7 +89,7 @@
       "diff_type": [
         "changed"
       ],
-      "file_path": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/jcci/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsFlashPromotionController.java",
+      "file_path": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsFlashPromotionController.java",
       "diff_content": "    @ApiOperation(\"根据活动名称分页查询活动\")\n",
       "documentation": "None",
       "body": "[\"    @ApiOperation(\\\"根据活动名称分页查询活动\\\")\", \"    @RequestMapping(value = \\\"/list\\\", method = RequestMethod.GET)\", \"    @ResponseBody\", \"    public CommonResult<CommonPage<SmsFlashPromotion>> getItem(@RequestParam(value = \\\"keyword\\\", required = false) String keyword,\", \"                          @RequestParam(value = \\\"pageSize\\\", defaultValue = \\\"5\\\") Integer pageSize,\", \"                          @RequestParam(value = \\\"pageNum\\\", defaultValue = \\\"1\\\") Integer pageNum) {\", \"        List<SmsFlashPromotion> flashPromotionList = flashPromotionService.list(keyword, pageSize, pageNum);\", \"        return CommonResult.success(CommonPage.restPage(flashPromotionList));\", \"    }\"]",
@@ -116,7 +116,7 @@
       "diff_type": [
         "changed"
       ],
-      "file_path": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/jcci/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsFlashPromotionProductRelationController.java",
+      "file_path": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsFlashPromotionProductRelationController.java",
       "diff_content": "    @ApiOperation(\"根据ID修改关联信息\")\n",
       "documentation": "None",
       "body": "[\"    @ApiOperation(\\\"根据ID修改关联信息\\\")\", \"    @RequestMapping(value = \\\"/update/{id}\\\", method = RequestMethod.POST)\", \"    @ResponseBody\", \"    public CommonResult update(@PathVariable Long id, @RequestBody SmsFlashPromotionProductRelation relation) {\", \"        int count = relationService.update(id, relation);\", \"        if (count > 0) {\", \"            return CommonResult.success(count);\", \"        }\", \"        return CommonResult.failed();\", \"    }\"]",
@@ -143,7 +143,7 @@
       "diff_type": [
         "changed"
       ],
-      "file_path": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/jcci/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsFlashPromotionProductRelationController.java",
+      "file_path": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsFlashPromotionProductRelationController.java",
       "diff_content": "    @ApiOperation(\"根据ID删除关联信息\")\n",
       "documentation": "None",
       "body": "[\"    @ApiOperation(\\\"根据ID删除关联信息\\\")\", \"    @RequestMapping(value = \\\"/delete/{id}\\\", method = RequestMethod.POST)\", \"    @ResponseBody\", \"    public CommonResult delete(@PathVariable Long id) {\", \"        int count = relationService.delete(id);\", \"        if (count > 0) {\", \"            return CommonResult.success(count);\", \"        }\", \"        return CommonResult.failed();\", \"    }\"]",
@@ -170,7 +170,7 @@
       "diff_type": [
         "changed"
       ],
-      "file_path": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/jcci/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsFlashPromotionSessionController.java",
+      "file_path": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsFlashPromotionSessionController.java",
       "diff_content": "    @ApiOperation(\"根据ID修改场次启用状态\")\n",
       "documentation": "None",
       "body": "[\"    @ApiOperation(\\\"根据ID修改场次启用状态\\\")\", \"    @RequestMapping(value = \\\"/update/status/{id}\\\", method = RequestMethod.POST)\", \"    @ResponseBody\", \"    public CommonResult updateStatus(@PathVariable Long id, Integer status) {\", \"        int count = flashPromotionSessionService.updateStatus(id, status);\", \"        if (count > 0) {\", \"            return CommonResult.success(count);\", \"        }\", \"        return CommonResult.failed();\", \"    }\"]",
@@ -197,7 +197,7 @@
       "diff_type": [
         "changed"
       ],
-      "file_path": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/jcci/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsHomeAdvertiseController.java",
+      "file_path": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsHomeAdvertiseController.java",
       "diff_content": "    @ApiOperation(\"批量删除广告\")\n",
       "documentation": "None",
       "body": "[\"    @ApiOperation(\\\"批量删除广告\\\")\", \"    @RequestMapping(value = \\\"/delete\\\", method = RequestMethod.POST)\", \"    @ResponseBody\", \"    public CommonResult delete(@RequestParam(\\\"ids\\\") List<Long> ids) {\", \"        int count = advertiseService.delete(ids);\", \"        if (count > 0)\", \"            return CommonResult.success(count);\", \"        return CommonResult.failed();\", \"    }\"]",
@@ -224,7 +224,7 @@
       "diff_type": [
         "changed"
       ],
-      "file_path": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/jcci/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsHomeAdvertiseController.java",
+      "file_path": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsHomeAdvertiseController.java",
       "diff_content": "    @ApiOperation(\"根据ID获取广告详情\")\n",
       "documentation": "None",
       "body": "[\"    @ApiOperation(\\\"根据ID获取广告详情\\\")\", \"    @RequestMapping(value = \\\"/{id}\\\", method = RequestMethod.GET)\", \"    @ResponseBody\", \"    public CommonResult<SmsHomeAdvertise> getItem(@PathVariable Long id) {\", \"        SmsHomeAdvertise advertise = advertiseService.getItem(id);\", \"        return CommonResult.success(advertise);\", \"    }\"]",
@@ -251,7 +251,7 @@
       "diff_type": [
         "changed"
       ],
-      "file_path": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/jcci/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsHomeAdvertiseController.java",
+      "file_path": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsHomeAdvertiseController.java",
       "diff_content": "    @ApiOperation(\"根据ID修改广告\")\n",
       "documentation": "None",
       "body": "[\"    @ApiOperation(\\\"根据ID修改广告\\\")\", \"    @RequestMapping(value = \\\"/update/{id}\\\", method = RequestMethod.POST)\", \"    @ResponseBody\", \"    public CommonResult update(@PathVariable Long id, @RequestBody SmsHomeAdvertise advertise) {\", \"        int count = advertiseService.update(id, advertise);\", \"        if (count > 0)\", \"            return CommonResult.success(count);\", \"        return CommonResult.failed();\", \"    }\"]",
@@ -278,7 +278,7 @@
       "diff_type": [
         "changed"
       ],
-      "file_path": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/jcci/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsHomeAdvertiseController.java",
+      "file_path": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsHomeAdvertiseController.java",
       "diff_content": "    @ApiOperation(\"分页查询首页广告\")\n",
       "documentation": "None",
       "body": "[\"    @ApiOperation(\\\"分页查询首页广告\\\")\", \"    @RequestMapping(value = \\\"/list\\\", method = RequestMethod.GET)\", \"    @ResponseBody\", \"    public CommonResult<CommonPage<SmsHomeAdvertise>> list(@RequestParam(value = \\\"name\\\", required = false) String name,\", \"                                                           @RequestParam(value = \\\"type\\\", required = false) Integer type,\", \"                                                           @RequestParam(value = \\\"endTime\\\", required = false) String endTime,\", \"                                                           @RequestParam(value = \\\"pageSize\\\", defaultValue = \\\"5\\\") Integer pageSize,\", \"                                                           @RequestParam(value = \\\"pageNum\\\", defaultValue = \\\"1\\\") Integer pageNum) {\", \"        List<SmsHomeAdvertise> advertiseList = advertiseService.list(name, type, endTime, pageSize, pageNum);\", \"        return CommonResult.success(CommonPage.restPage(advertiseList));\", \"    }\"]",
@@ -305,7 +305,7 @@
       "diff_type": [
         "changed"
       ],
-      "file_path": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/jcci/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsHomeNewProductController.java",
+      "file_path": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsHomeNewProductController.java",
       "diff_content": "    @ApiOperation(\"批量添加首页新品\")\n",
       "documentation": "None",
       "body": "[\"    @ApiOperation(\\\"批量添加首页新品\\\")\", \"    @RequestMapping(value = \\\"/create\\\", method = RequestMethod.POST)\", \"    @ResponseBody\", \"    public CommonResult create(@RequestBody List<SmsHomeNewProduct> homeNewProductList) {\", \"        int count = homeNewProductService.create(homeNewProductList);\", \"        if (count > 0) {\", \"            return CommonResult.success(count);\", \"        }\", \"        return CommonResult.failed();\", \"    }\"]",
@@ -332,7 +332,7 @@
       "diff_type": [
         "changed"
       ],
-      "file_path": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/jcci/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsHomeRecommendSubjectController.java",
+      "file_path": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsHomeRecommendSubjectController.java",
       "diff_content": "    @ApiOperation(\"批量添加首页专题推荐\")\n",
       "documentation": "None",
       "body": "[\"    @ApiOperation(\\\"批量添加首页专题推荐\\\")\", \"    @RequestMapping(value = \\\"/create\\\", method = RequestMethod.POST)\", \"    @ResponseBody\", \"    public CommonResult create(@RequestBody List<SmsHomeRecommendSubject> homeRecommendSubjectList) {\", \"        int count = recommendSubjectService.create(homeRecommendSubjectList);\", \"        if (count > 0) {\", \"            return CommonResult.success(count);\", \"        }\", \"        return CommonResult.failed();\", \"    }\"]",
@@ -359,7 +359,7 @@
       "diff_type": [
         "changed"
       ],
-      "file_path": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/jcci/mall/mall-admin/src/main/java/com/macro/mall/controller/UmsMenuController.java",
+      "file_path": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/UmsMenuController.java",
       "diff_content": "    @ApiOperation(\"根据上级菜单ID分页查询菜单\")\n",
       "documentation": "None",
       "body": "[\"    @ApiOperation(\\\"根据上级菜单ID分页查询菜单\\\")\", \"    @RequestMapping(value = \\\"/list/{parentId}\\\", method = RequestMethod.GET)\", \"    @ResponseBody\", \"    public CommonResult<CommonPage<UmsMenu>> list(@PathVariable Long parentId,\", \"                                                  @RequestParam(value = \\\"pageSize\\\", defaultValue = \\\"5\\\") Integer pageSize,\", \"                                                  @RequestParam(value = \\\"pageNum\\\", defaultValue = \\\"1\\\") Integer pageNum) {\", \"        List<UmsMenu> menuList = menuService.list(parentId, pageSize, pageNum);\", \"        return CommonResult.success(CommonPage.restPage(menuList));\", \"    }\"]",
@@ -386,7 +386,7 @@
       "diff_type": [
         "changed"
       ],
-      "file_path": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/jcci/mall/mall-admin/src/main/java/com/macro/mall/controller/UmsMenuController.java",
+      "file_path": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/UmsMenuController.java",
       "diff_content": "    @ApiOperation(\"根据ID修改菜单显示状态\")\n",
       "documentation": "None",
       "body": "[\"    @ApiOperation(\\\"根据ID修改菜单显示状态\\\")\", \"    @RequestMapping(value = \\\"/updateHidden/{id}\\\", method = RequestMethod.POST)\", \"    @ResponseBody\", \"    public CommonResult updateHidden(@PathVariable Long id, @RequestParam(\\\"hidden\\\") Integer hidden) {\", \"        int count = menuService.updateHidden(id, hidden);\", \"        if (count > 0) {\", \"            return CommonResult.success(count);\", \"        } else {\", \"            return CommonResult.failed();\", \"        }\"]",
@@ -413,7 +413,7 @@
       "diff_type": [
         "changed"
       ],
-      "file_path": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/jcci/mall/mall-admin/src/main/java/com/macro/mall/controller/UmsRoleController.java",
+      "file_path": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/UmsRoleController.java",
       "diff_content": "    @ApiOperation(\"根据角色ID获取菜单列表\")\n",
       "documentation": "None",
       "body": "[\"    @ApiOperation(\\\"根据角色ID获取菜单列表\\\")\", \"    @RequestMapping(value = \\\"/listMenu/{roleId}\\\", method = RequestMethod.GET)\", \"    @ResponseBody\", \"    public CommonResult<List<UmsMenu>> listMenu(@PathVariable Long roleId) {\", \"        List<UmsMenu> roleList = roleService.listMenu(roleId);\", \"        return CommonResult.success(roleList);\", \"    }\"]",
@@ -485,112 +485,112 @@
     {
       "change_type": "MODIFIED",
       "method_signature": "SmsCouponController.delete(Long)",
-      "file_path": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/jcci/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsCouponController.java",
+      "file_path": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsCouponController.java",
       "new_start_line": 39,
       "old_start_line": null
     },
     {
       "change_type": "MODIFIED",
       "method_signature": "SmsCouponController.update(Long,com.macro.mall.dto.SmsCouponParam)",
-      "file_path": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/jcci/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsCouponController.java",
+      "file_path": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsCouponController.java",
       "new_start_line": 50,
       "old_start_line": null
     },
     {
       "change_type": "MODIFIED",
       "method_signature": "SmsFlashPromotionController.update(Long,Integer)",
-      "file_path": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/jcci/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsFlashPromotionController.java",
+      "file_path": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsFlashPromotionController.java",
       "new_start_line": 61,
       "old_start_line": null
     },
     {
       "change_type": "MODIFIED",
       "method_signature": "SmsFlashPromotionController.getItem(String,Integer,Integer)",
-      "file_path": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/jcci/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsFlashPromotionController.java",
+      "file_path": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsFlashPromotionController.java",
       "new_start_line": 80,
       "old_start_line": null
     },
     {
       "change_type": "MODIFIED",
       "method_signature": "SmsFlashPromotionProductRelationController.update(Long,com.macro.mall.model.SmsFlashPromotionProductRelation)",
-      "file_path": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/jcci/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsFlashPromotionProductRelationController.java",
+      "file_path": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsFlashPromotionProductRelationController.java",
       "new_start_line": 40,
       "old_start_line": null
     },
     {
       "change_type": "MODIFIED",
       "method_signature": "SmsFlashPromotionProductRelationController.delete(Long)",
-      "file_path": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/jcci/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsFlashPromotionProductRelationController.java",
+      "file_path": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsFlashPromotionProductRelationController.java",
       "new_start_line": 51,
       "old_start_line": null
     },
     {
       "change_type": "MODIFIED",
       "method_signature": "SmsFlashPromotionSessionController.updateStatus(Long,Integer)",
-      "file_path": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/jcci/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsFlashPromotionSessionController.java",
+      "file_path": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsFlashPromotionSessionController.java",
       "new_start_line": 50,
       "old_start_line": null
     },
     {
       "change_type": "MODIFIED",
       "method_signature": "SmsHomeAdvertiseController.delete(List<Long>)",
-      "file_path": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/jcci/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsHomeAdvertiseController.java",
+      "file_path": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsHomeAdvertiseController.java",
       "new_start_line": 38,
       "old_start_line": null
     },
     {
       "change_type": "MODIFIED",
       "method_signature": "SmsHomeAdvertiseController.getItem(Long)",
-      "file_path": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/jcci/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsHomeAdvertiseController.java",
+      "file_path": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsHomeAdvertiseController.java",
       "new_start_line": 58,
       "old_start_line": null
     },
     {
       "change_type": "MODIFIED",
       "method_signature": "SmsHomeAdvertiseController.update(Long,com.macro.mall.model.SmsHomeAdvertise)",
-      "file_path": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/jcci/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsHomeAdvertiseController.java",
+      "file_path": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsHomeAdvertiseController.java",
       "new_start_line": 66,
       "old_start_line": null
     },
     {
       "change_type": "MODIFIED",
       "method_signature": "SmsHomeAdvertiseController.list(String,Integer,String,Integer,Integer)",
-      "file_path": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/jcci/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsHomeAdvertiseController.java",
+      "file_path": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsHomeAdvertiseController.java",
       "new_start_line": 76,
       "old_start_line": null
     },
     {
       "change_type": "MODIFIED",
       "method_signature": "SmsHomeNewProductController.create(List<com.macro.mall.model.SmsHomeNewProduct>)",
-      "file_path": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/jcci/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsHomeNewProductController.java",
+      "file_path": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsHomeNewProductController.java",
       "new_start_line": 28,
       "old_start_line": null
     },
     {
       "change_type": "MODIFIED",
       "method_signature": "SmsHomeRecommendSubjectController.create(List<com.macro.mall.model.SmsHomeRecommendSubject>)",
-      "file_path": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/jcci/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsHomeRecommendSubjectController.java",
+      "file_path": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsHomeRecommendSubjectController.java",
       "new_start_line": 28,
       "old_start_line": null
     },
     {
       "change_type": "MODIFIED",
       "method_signature": "UmsMenuController.list(Long,Integer,Integer)",
-      "file_path": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/jcci/mall/mall-admin/src/main/java/com/macro/mall/controller/UmsMenuController.java",
+      "file_path": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/UmsMenuController.java",
       "new_start_line": 75,
       "old_start_line": null
     },
     {
       "change_type": "MODIFIED",
       "method_signature": "UmsMenuController.updateHidden(Long,Integer)",
-      "file_path": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/jcci/mall/mall-admin/src/main/java/com/macro/mall/controller/UmsMenuController.java",
+      "file_path": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/UmsMenuController.java",
       "new_start_line": 93,
       "old_start_line": null
     },
     {
       "change_type": "MODIFIED",
       "method_signature": "UmsRoleController.listMenu(Long)",
-      "file_path": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/jcci/mall/mall-admin/src/main/java/com/macro/mall/controller/UmsRoleController.java",
+      "file_path": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/UmsRoleController.java",
       "new_start_line": 92,
       "old_start_line": null
     }
@@ -602,63 +602,63 @@
         "class_name": "SmsCouponController",
         "package_name": "com.macro.mall.controller",
         "class_type": "Class",
-        "filepath": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/jcci/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsCouponController.java",
+        "filepath": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsCouponController.java",
         "change_type": "MODIFIED"
       },
       {
         "class_name": "SmsFlashPromotionController",
         "package_name": "com.macro.mall.controller",
         "class_type": "Class",
-        "filepath": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/jcci/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsFlashPromotionController.java",
+        "filepath": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsFlashPromotionController.java",
         "change_type": "MODIFIED"
       },
       {
         "class_name": "SmsFlashPromotionProductRelationController",
         "package_name": "com.macro.mall.controller",
         "class_type": "Class",
-        "filepath": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/jcci/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsFlashPromotionProductRelationController.java",
+        "filepath": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsFlashPromotionProductRelationController.java",
         "change_type": "MODIFIED"
       },
       {
         "class_name": "SmsFlashPromotionSessionController",
         "package_name": "com.macro.mall.controller",
         "class_type": "Class",
-        "filepath": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/jcci/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsFlashPromotionSessionController.java",
+        "filepath": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsFlashPromotionSessionController.java",
         "change_type": "MODIFIED"
       },
       {
         "class_name": "SmsHomeAdvertiseController",
         "package_name": "com.macro.mall.controller",
         "class_type": "Class",
-        "filepath": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/jcci/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsHomeAdvertiseController.java",
+        "filepath": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsHomeAdvertiseController.java",
         "change_type": "MODIFIED"
       },
       {
         "class_name": "SmsHomeNewProductController",
         "package_name": "com.macro.mall.controller",
         "class_type": "Class",
-        "filepath": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/jcci/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsHomeNewProductController.java",
+        "filepath": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsHomeNewProductController.java",
         "change_type": "MODIFIED"
       },
       {
         "class_name": "SmsHomeRecommendSubjectController",
         "package_name": "com.macro.mall.controller",
         "class_type": "Class",
-        "filepath": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/jcci/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsHomeRecommendSubjectController.java",
+        "filepath": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsHomeRecommendSubjectController.java",
         "change_type": "MODIFIED"
       },
       {
         "class_name": "UmsMenuController",
         "package_name": "com.macro.mall.controller",
         "class_type": "Class",
-        "filepath": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/jcci/mall/mall-admin/src/main/java/com/macro/mall/controller/UmsMenuController.java",
+        "filepath": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/UmsMenuController.java",
         "change_type": "MODIFIED"
       },
       {
         "class_name": "UmsRoleController",
         "package_name": "com.macro.mall.controller",
         "class_type": "Class",
-        "filepath": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/jcci/mall/mall-admin/src/main/java/com/macro/mall/controller/UmsRoleController.java",
+        "filepath": "c:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/UmsRoleController.java",
         "change_type": "MODIFIED"
       }
     ],
@@ -779,5 +779,5 @@
   },
   "is_duplicate": false,
   "message": "New analysis completed (full result cached to JSON)",
-  "source_dir": "c:\\Users\\carpe\\VisualStudioProject\\TestPlatform\\jcci\\jcci\\mall"
+  "source_dir": "c:\\Users\\carpe\\VisualStudioProject\\TestPlatform\\jcci\\projects\\mall"
 }
