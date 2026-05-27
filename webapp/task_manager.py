@@ -523,12 +523,12 @@ class AsyncTaskManager:
             
             # 优先使用外部URL配置，如果没有则根据HOST自动生成
             if STREAMLIT_EXTERNAL_URL:
-                # 使用配置的外部URL
-                result_url = f"{STREAMLIT_EXTERNAL_URL}/?baseline={baseline_name}"
+                # 使用配置的外部URL，添加 tab=results 参数自动切换到分析结果页
+                result_url = f"{STREAMLIT_EXTERNAL_URL}/?baseline={baseline_name}&tab=results"
             else:
-                # 自动生成本地访问URL
+                # 自动生成本地访问URL，添加 tab=results 参数自动切换到分析结果页
                 host = "localhost" if STREAMLIT_HOST == "0.0.0.0" else STREAMLIT_HOST
-                result_url = f"http://{host}:{STREAMLIT_PORT}/?baseline={baseline_name}"
+                result_url = f"http://{host}:{STREAMLIT_PORT}/?baseline={baseline_name}&tab=results"
             
             # 更新状态为完成
             self._update_task_status(

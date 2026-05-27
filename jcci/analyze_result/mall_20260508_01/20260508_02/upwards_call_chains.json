@@ -11,7 +11,7 @@
     "successful_chains": 16,
     "failed_chains": 0,
     "output_file": "c:\\Users\\carpe\\VisualStudioProject\\TestPlatform\\jcci\\jcci\\analyze_result\\mall_20260508_01\\20260508_02\\upwards_call_chains.json",
-    "max_depth": 5,
+    "max_depth": 7,
     "features_enabled": {
       "class_hierarchy_analysis": true,
       "entry_detection": true

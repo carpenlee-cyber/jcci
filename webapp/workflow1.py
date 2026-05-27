@@ -337,8 +337,8 @@ def workflow1(
                 if auto_open_browser:
                     def open_browser():
                         time.sleep(2)
-                        # 使用baseline参数实现基线隔离
-                        webbrowser.open(f"http://localhost:{streamlit_port}/?baseline={project_name}_{commit_old}")
+                        # 使用baseline参数实现基线隔离，添加 tab=results 自动切换到分析结果页
+                        webbrowser.open(f"http://localhost:{streamlit_port}/?baseline={project_name}_{commit_old}&tab=results")
                     
                     # 启动浏览器打开线程
                     browser_thread = threading.Thread(target=open_browser, daemon=True)
