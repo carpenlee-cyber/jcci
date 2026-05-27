@@ -247,13 +247,13 @@ def render_task_submission_page():
         with col_meta1:
             project_code = st.text_input(
                 "项目编号",
-                value="",
-                placeholder="例如: PROJ-001",
+                value="PROJ-Example",
+                placeholder="例如: TT20260101001",
                 help="本次分析所属的项目编号"
             )
             user_name = st.text_input(
                 "用户名",
-                value="网页",
+                value="User1",
                 placeholder="您的用户名",
                 help="进行分析的用户名"
             )
@@ -261,8 +261,8 @@ def render_task_submission_page():
         with col_meta2:
             task_stage = st.text_input(
                 "子任务阶段",
-                value="",
-                placeholder="例如: Phase-1",
+                value="子任务阶段1",
+                placeholder="例如: 子任务阶段1",
                 help="当前分析的子任务阶段"
             )
             user_id = st.text_input(
@@ -322,19 +322,23 @@ def render_task_submission_page():
             
             save_params_to_cache(cache_params)
             
-            # 获取用户IP（尝试从 Streamlit context 获取）
+            # 获取用户IP（尝试多种方式）
             user_ip = ""
             try:
-                # Streamlit 1.40+ 支持 st.context.headers
+                # 方法1: 从 Streamlit context headers 获取
                 if hasattr(st, 'context') and hasattr(st.context, 'headers'):
                     forwarded_for = st.context.headers.get("X-Forwarded-For", "")
                     real_ip = st.context.headers.get("X-Real-IP", "")
                     user_ip = forwarded_for.split(",")[0].strip() if forwarded_for else real_ip
-            except:
-                pass
-            
-            if not user_ip:
-                user_ip = "unknown"
+                
+                # 方法2: 如果还是空，尝试从 session_state 或其他来源获取
+                if not user_ip:
+                    # 使用本地回环地址作为默认值
+                    user_ip = "127.0.0.1"
+                    
+            except Exception as e:
+                logger.warning(f"获取用户IP失败: {e}")
+                user_ip = "127.0.0.1"
             
             # 提交任务（显示加载动画）
             with st.spinner("⏳ 正在提交任务，请稍候..."):
@@ -508,7 +512,7 @@ def render_task_list_page():
             color = "gray"
         
         # 构建任务标题：用户ip_项目编号_子任务阶段
-        user_ip = task.get('user_ip', 'unknown')
+        user_ip = task.get('user_ip', '127.0.0.1')
         project_code = task.get('project_code', '')
         task_stage = task.get('task_stage', '')
         
@@ -517,7 +521,7 @@ def render_task_list_page():
         if user_ip and user_ip != 'unknown':
             title_parts.append(user_ip)
         else:
-            title_parts.append('unknown')
+            title_parts.append('127.0.0.1')
         
         if project_code:
             title_parts.append(project_code)
@@ -525,7 +529,7 @@ def render_task_list_page():
         if task_stage:
             title_parts.append(task_stage)
         
-        title_prefix = '_'.join(title_parts) if title_parts else 'unknown'
+        title_prefix = '_'.join(title_parts) if title_parts else '127.0.0.1'
         
         with st.expander(f"{icon} {title_prefix} - {task['task_id']} - {task.get('tag_old', '')} → {task.get('tag_new', '')}", expanded=False):
             col1, col2 = st.columns([3, 1])
