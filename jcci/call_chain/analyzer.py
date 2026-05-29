@@ -307,7 +307,8 @@ def build_upwards_call_chains(
     builder = UpwardsCallChainBuilder(
         reverse_index=reverse_index,
         entry_detector=entry_detector,
-        max_depth=max_depth
+        max_depth=max_depth,
+        unified_index=index
     )
     
     results = []

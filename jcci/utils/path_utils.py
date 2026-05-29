@@ -29,12 +29,6 @@ PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(_
 # 分析结果目录
 RESULT_DIR = os.path.join(PROJECT_ROOT, "jcci", "analyze_result")
 
-# Web 应用目录
-WEBAPP_DIR = os.path.join(PROJECT_ROOT, "webapp")
-
-# 任务管理器数据库路径
-TASK_MANAGER_DB_PATH = os.path.join(WEBAPP_DIR, "task_manager.db")
-
 
 # ==================== 路径计算函数 ====================
 
@@ -231,8 +225,6 @@ if __name__ == "__main__":
     
     print(f"\n📁 项目根目录: {PROJECT_ROOT}")
     print(f"📊 分析结果目录: {RESULT_DIR}")
-    print(f"🌐 Web 应用目录: {WEBAPP_DIR}")
-    print(f"💾 任务数据库: {TASK_MANAGER_DB_PATH}")
     
     # 测试示例
     project_name = "mall"

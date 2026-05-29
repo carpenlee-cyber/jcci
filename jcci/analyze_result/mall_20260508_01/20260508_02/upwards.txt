@@ -6,7 +6,7 @@
 Git URL: https://github.com/carpenlee-cyber/mall.git
 Commit范围: 20260508_01..20260508_02
 分析版本: 3.1
-最大深度: 7
+最大深度: 5
 总变更方法数: 16
 成功分析: 16
 失败分析: 0
@@ -75,49 +75,49 @@ Commit范围: 20260508_01..20260508_02
 ================================================================================
 
 调用链 1：MODIFIED方法 SmsCouponController.delete
-SmsCouponController.delete (UNKNOWN)(入口)
+SmsCouponController.delete (MODIFIED)(入口)
 
 调用链 2：MODIFIED方法 SmsCouponController.update
-SmsCouponController.update (UNKNOWN)(入口)
+SmsCouponController.update (MODIFIED)(入口)
 
 调用链 3：MODIFIED方法 SmsFlashPromotionController.getItem
-SmsFlashPromotionController.getItem (UNKNOWN)(入口)
+SmsFlashPromotionController.getItem (MODIFIED)(入口)
 
 调用链 4：MODIFIED方法 SmsFlashPromotionController.update
-SmsFlashPromotionController.update (UNKNOWN)(入口)
+SmsFlashPromotionController.update (MODIFIED)(入口)
 
 调用链 5：MODIFIED方法 SmsFlashPromotionProductRelationController.delete
-SmsFlashPromotionProductRelationController.delete (UNKNOWN)(入口)
+SmsFlashPromotionProductRelationController.delete (MODIFIED)(入口)
 
 调用链 6：MODIFIED方法 SmsFlashPromotionProductRelationController.update
-SmsFlashPromotionProductRelationController.update (UNKNOWN)(入口)
+SmsFlashPromotionProductRelationController.update (MODIFIED)(入口)
 
 调用链 7：MODIFIED方法 SmsFlashPromotionSessionController.updateStatus
-SmsFlashPromotionSessionController.updateStatus (UNKNOWN)(入口)
+SmsFlashPromotionSessionController.updateStatus (MODIFIED)(入口)
 
 调用链 8：MODIFIED方法 SmsHomeAdvertiseController.delete
-SmsHomeAdvertiseController.delete (UNKNOWN)(入口)
+SmsHomeAdvertiseController.delete (MODIFIED)(入口)
 
 调用链 9：MODIFIED方法 SmsHomeAdvertiseController.getItem
-SmsHomeAdvertiseController.getItem (UNKNOWN)(入口)
+SmsHomeAdvertiseController.getItem (MODIFIED)(入口)
 
 调用链 10：MODIFIED方法 SmsHomeAdvertiseController.list
-SmsHomeAdvertiseController.list (UNKNOWN)(入口)
+SmsHomeAdvertiseController.list (MODIFIED)(入口)
 
 调用链 11：MODIFIED方法 SmsHomeAdvertiseController.update
-SmsHomeAdvertiseController.update (UNKNOWN)(入口)
+SmsHomeAdvertiseController.update (MODIFIED)(入口)
 
 调用链 12：MODIFIED方法 SmsHomeNewProductController.create
-SmsHomeNewProductController.create (UNKNOWN)(入口)
+SmsHomeNewProductController.create (MODIFIED)(入口)
 
 调用链 13：MODIFIED方法 SmsHomeRecommendSubjectController.create
-SmsHomeRecommendSubjectController.create (UNKNOWN)(入口)
+SmsHomeRecommendSubjectController.create (MODIFIED)(入口)
 
 调用链 14：MODIFIED方法 UmsMenuController.list
-UmsMenuController.list (UNKNOWN)(入口)
+UmsMenuController.list (MODIFIED)(入口)
 
 调用链 15：MODIFIED方法 UmsMenuController.updateHidden
-UmsMenuController.updateHidden (UNKNOWN)(入口)
+UmsMenuController.updateHidden (MODIFIED)(入口)
 
 调用链 16：MODIFIED方法 UmsRoleController.listMenu
-UmsRoleController.listMenu (UNKNOWN)(入口)
+UmsRoleController.listMenu (MODIFIED)(入口)

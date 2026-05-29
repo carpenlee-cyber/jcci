@@ -103,6 +103,7 @@ class CallChainBuilder:
         
         # 3. 更新节点信息
         node.db_method_id = method_data.get('method_id')
+        node.documentation = method_data.get('documentation')
         
         # 4. 解析 method_invocation_map
         invocation_map_json = method_data.get('method_invocation_map', '{}')

@@ -30,6 +30,8 @@ class TaskResponse(BaseModel):
     message: str
     queue_position: Optional[int] = None
     estimated_wait_minutes: Optional[int] = None
+    duplicate: bool = False
+    result_url: Optional[str] = None
 
 
 class TaskStatus(BaseModel):

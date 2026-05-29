@@ -3,8 +3,6 @@
 from .path_utils import (
     PROJECT_ROOT,
     RESULT_DIR,
-    WEBAPP_DIR,
-    TASK_MANAGER_DB_PATH,
     get_baseline_dir,
     get_version_subdir,
     get_baseline_db_path,
@@ -21,8 +19,6 @@ from .path_utils import (
 __all__ = [
     'PROJECT_ROOT',
     'RESULT_DIR',
-    'WEBAPP_DIR',
-    'TASK_MANAGER_DB_PATH',
     'get_baseline_dir',
     'get_version_subdir',
     'get_baseline_db_path',

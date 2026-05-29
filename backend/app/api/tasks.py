@@ -14,17 +14,43 @@ task_service = TaskService(settings.DB_PATH)
 
 @router.post("/submit", response_model=TaskResponse)
 async def submit_task(request: TaskSubmitRequest):
-    """
-    提交分析任务
-    
-    Args:
-        request: 任务提交请求
-        
-    Returns:
-        任务响应
-    """
+    """提交分析任务（含去重检查）"""
     try:
-        # 创建任务
+        # 第一步：检查是否有相同参数的活跃任务（pending 或 running）
+        active = task_service.find_active_task(
+            git_url=request.git_url,
+            tag_old=request.tag_old,
+            tag_new=request.tag_new,
+            max_depth=request.max_depth
+        )
+        
+        if active and active.get('task_id'):
+            status_label = "排队中" if active['status'] == 'pending' else "执行中"
+            return TaskResponse(
+                task_id=active['task_id'],
+                status=active['status'],
+                message=f"相同的分析任务正在{status_label}（{active['task_id']}），请勿重复提交",
+                duplicate=True,
+                result_url=None
+            )
+        
+        # 第二步：检查是否有相同参数的已完成任务
+        duplicate = task_service.find_duplicate_task(
+            git_url=request.git_url,
+            tag_old=request.tag_old,
+            tag_new=request.tag_new,
+            max_depth=request.max_depth
+        )
+        
+        if duplicate and duplicate.get('result_url'):
+            return TaskResponse(
+                task_id=duplicate['task_id'],
+                status=duplicate['status'],
+                message="已存在相同的分析结果，可直接查看",
+                duplicate=True,
+                result_url=duplicate['result_url']
+            )
+        
         task_id = task_service.create_task(
             git_url=request.git_url,
             username=request.username,
@@ -50,36 +76,9 @@ async def submit_task(request: TaskSubmitRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/{task_id}", response_model=TaskStatusModel)
-async def get_task_status(task_id: str):
-    """
-    获取任务状态
-    
-    Args:
-        task_id: 任务 ID
-        
-    Returns:
-        任务状态
-    """
-    task = task_service.get_task(task_id)
-    if not task:
-        raise HTTPException(status_code=404, detail="Task not found")
-    
-    return TaskStatusModel(**task)
-
-
 @router.get("/", response_model=TaskListResponse)
 async def list_tasks(limit: int = 20, offset: int = 0):
-    """
-    获取任务列表
-    
-    Args:
-        limit: 返回数量限制
-        offset: 偏移量
-        
-    Returns:
-        任务列表
-    """
+    """获取任务列表"""
     tasks = task_service.list_tasks(limit=limit, offset=offset)
     total = task_service.count_tasks()
     
@@ -89,26 +88,26 @@ async def list_tasks(limit: int = 20, offset: int = 0):
     )
 
 
-@router.delete("/{task_id}")
-async def cancel_task(task_id: str):
-    """
-    取消任务
-    
-    Args:
-        task_id: 任务 ID
-        
-    Returns:
-        操作结果
-    """
+@router.get("/{task_id}", response_model=TaskStatusModel)
+async def get_task_status(task_id: str):
+    """获取任务状态"""
     task = task_service.get_task(task_id)
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
     
-    # 只能取消 pending 状态的任务
+    return TaskStatusModel(**task)
+
+
+@router.delete("/{task_id}")
+async def cancel_task(task_id: str):
+    """取消任务"""
+    task = task_service.get_task(task_id)
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
+    
     if task['status'] != TaskStatus.PENDING:
         raise HTTPException(status_code=400, detail="Can only cancel pending tasks")
     
-    # 更新状态为 failed
     task_service.update_task_status(
         task_id=task_id,
         status=TaskStatus.FAILED,

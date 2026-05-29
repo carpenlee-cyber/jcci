@@ -128,6 +128,9 @@ class CallChainNode:
     change_type: str = "UNKNOWN"
     dao_info: Optional[DaoInfo] = None
     
+    # v4.1 新增字段
+    documentation: Optional[str] = None  # 方法注释/文档说明
+    
     def to_dict(self) -> dict:
         """
         转换为字典（用于 JSON 序列化，v3.1 增强版）
@@ -154,6 +157,8 @@ class CallChainNode:
             # v4.0 新增
             "change_type": self.change_type,
             "dao_info": self.dao_info if isinstance(self.dao_info, dict) else (self.dao_info.to_dict() if self.dao_info else None),
+            # v4.1 新增
+            "documentation": self.documentation,
             "children": [child.to_dict() for child in self.children]
         }
         if self.entry_annotation:

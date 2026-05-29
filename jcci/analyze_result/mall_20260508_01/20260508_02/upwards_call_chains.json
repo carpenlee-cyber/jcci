@@ -10,8 +10,8 @@
     "total_methods": 16,
     "successful_chains": 16,
     "failed_chains": 0,
-    "output_file": "c:\\Users\\carpe\\VisualStudioProject\\TestPlatform\\jcci\\jcci\\analyze_result\\mall_20260508_01\\20260508_02\\upwards_call_chains.json",
-    "max_depth": 7,
+    "output_file": "C:\\Users\\carpe\\VisualStudioProject\\TestPlatform\\jcci\\jcci\\analyze_result\\mall_20260508_01\\20260508_02\\upwards_call_chains.json",
+    "max_depth": 5,
     "features_enabled": {
       "class_hierarchy_analysis": true,
       "entry_detection": true
@@ -51,15 +51,16 @@
         "invocation_lines": [],
         "is_cyclic": false,
         "is_leaf": true,
-        "db_method_id": null,
+        "db_method_id": 14557,
         "root_type": "HTTP_API",
         "call_type": "DIRECT",
         "has_multiple_call_sites": false,
         "api_paths": [
           "[POST]/coupon/delete/{id}"
         ],
-        "change_type": "UNKNOWN",
+        "change_type": "MODIFIED",
         "dao_info": null,
+        "documentation": null,
         "children": [],
         "_analysis_meta": {
           "coverage_stats": {
@@ -109,15 +110,16 @@
         "invocation_lines": [],
         "is_cyclic": false,
         "is_leaf": true,
-        "db_method_id": null,
+        "db_method_id": 14558,
         "root_type": "HTTP_API",
         "call_type": "DIRECT",
         "has_multiple_call_sites": false,
         "api_paths": [
           "[POST]/coupon/update/{id}"
         ],
-        "change_type": "UNKNOWN",
+        "change_type": "MODIFIED",
         "dao_info": null,
+        "documentation": null,
         "children": [],
         "_analysis_meta": {
           "coverage_stats": {
@@ -167,15 +169,16 @@
         "invocation_lines": [],
         "is_cyclic": false,
         "is_leaf": true,
-        "db_method_id": null,
+        "db_method_id": 14355,
         "root_type": "HTTP_API",
         "call_type": "DIRECT",
         "has_multiple_call_sites": false,
         "api_paths": [
           "[GET]/flash/list"
         ],
-        "change_type": "UNKNOWN",
+        "change_type": "MODIFIED",
         "dao_info": null,
+        "documentation": null,
         "children": [],
         "_analysis_meta": {
           "coverage_stats": {
@@ -225,15 +228,16 @@
         "invocation_lines": [],
         "is_cyclic": false,
         "is_leaf": true,
-        "db_method_id": null,
+        "db_method_id": 14353,
         "root_type": "HTTP_API",
         "call_type": "DIRECT",
         "has_multiple_call_sites": false,
         "api_paths": [
           "[POST]/flash/update/status/{id}"
         ],
-        "change_type": "UNKNOWN",
+        "change_type": "MODIFIED",
         "dao_info": null,
+        "documentation": null,
         "children": [],
         "_analysis_meta": {
           "coverage_stats": {
@@ -283,15 +287,16 @@
         "invocation_lines": [],
         "is_cyclic": false,
         "is_leaf": true,
-        "db_method_id": null,
+        "db_method_id": 14448,
         "root_type": "HTTP_API",
         "call_type": "DIRECT",
         "has_multiple_call_sites": false,
         "api_paths": [
           "[POST]/flashProductRelation/delete/{id}"
         ],
-        "change_type": "UNKNOWN",
+        "change_type": "MODIFIED",
         "dao_info": null,
+        "documentation": null,
         "children": [],
         "_analysis_meta": {
           "coverage_stats": {
@@ -341,15 +346,16 @@
         "invocation_lines": [],
         "is_cyclic": false,
         "is_leaf": true,
-        "db_method_id": null,
+        "db_method_id": 14447,
         "root_type": "HTTP_API",
         "call_type": "DIRECT",
         "has_multiple_call_sites": false,
         "api_paths": [
           "[POST]/flashProductRelation/update/{id}"
         ],
-        "change_type": "UNKNOWN",
+        "change_type": "MODIFIED",
         "dao_info": null,
+        "documentation": null,
         "children": [],
         "_analysis_meta": {
           "coverage_stats": {
@@ -399,15 +405,16 @@
         "invocation_lines": [],
         "is_cyclic": false,
         "is_leaf": true,
-        "db_method_id": null,
+        "db_method_id": 14407,
         "root_type": "HTTP_API",
         "call_type": "DIRECT",
         "has_multiple_call_sites": false,
         "api_paths": [
           "[POST]/flashSession/update/status/{id}"
         ],
-        "change_type": "UNKNOWN",
+        "change_type": "MODIFIED",
         "dao_info": null,
+        "documentation": null,
         "children": [],
         "_analysis_meta": {
           "coverage_stats": {
@@ -457,15 +464,16 @@
         "invocation_lines": [],
         "is_cyclic": false,
         "is_leaf": true,
-        "db_method_id": null,
+        "db_method_id": 14436,
         "root_type": "HTTP_API",
         "call_type": "DIRECT",
         "has_multiple_call_sites": false,
         "api_paths": [
           "[POST]/home/advertise/delete"
         ],
-        "change_type": "UNKNOWN",
+        "change_type": "MODIFIED",
         "dao_info": null,
+        "documentation": null,
         "children": [],
         "_analysis_meta": {
           "coverage_stats": {
@@ -515,15 +523,16 @@
         "invocation_lines": [],
         "is_cyclic": false,
         "is_leaf": true,
-        "db_method_id": null,
+        "db_method_id": 14438,
         "root_type": "HTTP_API",
         "call_type": "DIRECT",
         "has_multiple_call_sites": false,
         "api_paths": [
           "[GET]/home/advertise/{id}"
         ],
-        "change_type": "UNKNOWN",
+        "change_type": "MODIFIED",
         "dao_info": null,
+        "documentation": null,
         "children": [],
         "_analysis_meta": {
           "coverage_stats": {
@@ -573,15 +582,16 @@
         "invocation_lines": [],
         "is_cyclic": false,
         "is_leaf": true,
-        "db_method_id": null,
+        "db_method_id": 14440,
         "root_type": "HTTP_API",
         "call_type": "DIRECT",
         "has_multiple_call_sites": false,
         "api_paths": [
           "[GET]/home/advertise/list"
         ],
-        "change_type": "UNKNOWN",
+        "change_type": "MODIFIED",
         "dao_info": null,
+        "documentation": null,
         "children": [],
         "_analysis_meta": {
           "coverage_stats": {
@@ -631,15 +641,16 @@
         "invocation_lines": [],
         "is_cyclic": false,
         "is_leaf": true,
-        "db_method_id": null,
+        "db_method_id": 14439,
         "root_type": "HTTP_API",
         "call_type": "DIRECT",
         "has_multiple_call_sites": false,
         "api_paths": [
           "[POST]/home/advertise/update/{id}"
         ],
-        "change_type": "UNKNOWN",
+        "change_type": "MODIFIED",
         "dao_info": null,
+        "documentation": null,
         "children": [],
         "_analysis_meta": {
           "coverage_stats": {
@@ -689,15 +700,16 @@
         "invocation_lines": [],
         "is_cyclic": false,
         "is_leaf": true,
-        "db_method_id": null,
+        "db_method_id": 14470,
         "root_type": "HTTP_API",
         "call_type": "DIRECT",
         "has_multiple_call_sites": false,
         "api_paths": [
           "[POST]/home/newProduct/create"
         ],
-        "change_type": "UNKNOWN",
+        "change_type": "MODIFIED",
         "dao_info": null,
+        "documentation": null,
         "children": [],
         "_analysis_meta": {
           "coverage_stats": {
@@ -747,15 +759,16 @@
         "invocation_lines": [],
         "is_cyclic": false,
         "is_leaf": true,
-        "db_method_id": null,
+        "db_method_id": 14526,
         "root_type": "HTTP_API",
         "call_type": "DIRECT",
         "has_multiple_call_sites": false,
         "api_paths": [
           "[POST]/home/recommendSubject/create"
         ],
-        "change_type": "UNKNOWN",
+        "change_type": "MODIFIED",
         "dao_info": null,
+        "documentation": null,
         "children": [],
         "_analysis_meta": {
           "coverage_stats": {
@@ -805,15 +818,16 @@
         "invocation_lines": [],
         "is_cyclic": false,
         "is_leaf": true,
-        "db_method_id": null,
+        "db_method_id": 14535,
         "root_type": "HTTP_API",
         "call_type": "DIRECT",
         "has_multiple_call_sites": false,
         "api_paths": [
           "[GET]/menu/list/{parentId}"
         ],
-        "change_type": "UNKNOWN",
+        "change_type": "MODIFIED",
         "dao_info": null,
+        "documentation": null,
         "children": [],
         "_analysis_meta": {
           "coverage_stats": {
@@ -863,15 +877,16 @@
         "invocation_lines": [],
         "is_cyclic": false,
         "is_leaf": true,
-        "db_method_id": null,
+        "db_method_id": 14537,
         "root_type": "HTTP_API",
         "call_type": "DIRECT",
         "has_multiple_call_sites": false,
         "api_paths": [
           "[POST]/menu/updateHidden/{id}"
         ],
-        "change_type": "UNKNOWN",
+        "change_type": "MODIFIED",
         "dao_info": null,
+        "documentation": null,
         "children": [],
         "_analysis_meta": {
           "coverage_stats": {
@@ -921,15 +936,16 @@
         "invocation_lines": [],
         "is_cyclic": false,
         "is_leaf": true,
-        "db_method_id": null,
+        "db_method_id": 26447,
         "root_type": "HTTP_API",
         "call_type": "DIRECT",
         "has_multiple_call_sites": false,
         "api_paths": [
           "[GET]/role/listMenu/{roleId}"
         ],
-        "change_type": "UNKNOWN",
+        "change_type": "MODIFIED",
         "dao_info": null,
+        "documentation": null,
         "children": [],
         "_analysis_meta": {
           "coverage_stats": {

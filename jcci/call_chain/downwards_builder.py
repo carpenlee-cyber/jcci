@@ -70,6 +70,7 @@ class DownwardsCallChainBuilder(CallChainBuilder):
         
         # 3. 更新节点信息
         node.db_method_id = method_data.get('method_id')
+        node.documentation = method_data.get('documentation')
         
         # ✅ 修复：在解析invocation_map之前，先检查是否为接口调用
         # 如果是接口，即使没有invocation_map，也应该通过CHA解析实现类

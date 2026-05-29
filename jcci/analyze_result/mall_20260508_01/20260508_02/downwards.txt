@@ -6,7 +6,7 @@
 Git URL: https://github.com/carpenlee-cyber/mall.git
 Commit范围: 20260508_01..20260508_02
 分析版本: 3.1
-最大深度: 7
+最大深度: 5
 总变更方法数: 16
 成功分析: 16
 失败分析: 0

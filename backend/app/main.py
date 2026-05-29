@@ -29,8 +29,11 @@ def create_app() -> FastAPI:
     db_manager.init_db()
     
     # 注册路由
-    from app.api import tasks
+    from app.api import tasks, stats, analysis
+    
     app.include_router(tasks.router)
+    app.include_router(stats.router)
+    app.include_router(analysis.router)
     
     # 健康检查端点
     @app.get("/health")

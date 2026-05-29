@@ -4,9 +4,9 @@ import logging
 import time
 
 # 添加项目根目录到 Python 路径（jcci/）
-# 当前文件: jcci/webapp/workflow1.py
+# 当前文件: jcci/backend/app/core/workflow1.py
 # 需要添加到路径: jcci/
-project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
@@ -257,13 +257,11 @@ def workflow1(
             upwards_text = CallChainVisualizer.format_upwards_chains(
                 bidirectional_result['upwards']  # 提取upwards部分
             )
-            # logger.info(upwards_text)
             
             # 打印向下调用链（从双向结果中提取downwards部分）
             downwards_text = CallChainVisualizer.format_downwards_chains(
                 bidirectional_result['downwards']  # 提取downwards部分
             )
-            # logger.info(downwards_text)
             
             # 将结果写入文件（使用统一路径管理）
             from jcci.utils.path_utils import get_version_subdir, ensure_dir_exists, get_upwards_txt_path, get_downwards_txt_path
@@ -275,79 +273,17 @@ def workflow1(
             upwards_file = get_upwards_txt_path(project_name, commit_old, commit_new)
             with open(upwards_file, 'w', encoding='utf-8') as f:
                 f.write(upwards_text)
-            # logger.info(f"向上调用链已保存到: {upwards_file}")
             
             # 写入向下调用链
             downwards_file = get_downwards_txt_path(project_name, commit_old, commit_new)
             with open(downwards_file, 'w', encoding='utf-8') as f:
                 f.write(downwards_text)
-            # logger.info(f"向下调用链已保存到: {downwards_file}")
         
-        # 步骤5：启动Streamlit Web服务进行可视化展示和LLM分析
+        # 步骤5：启动Streamlit Web服务（已弃用，改用 FastAPI 后端）
         if enable_streamlit:
-            logger.info("\n")
-            logger.info("步骤5：启动Streamlit Web服务")
-            logger.info("=" * 80)
-            logger.info("  - 提供可视化的调用链展示界面")
-            logger.info("  - 支持点击方法/调用链进行AI智能分析")
-            logger.info("  - 自动查询数据库获取详细信息")
-            logger.info("  - 集成LLM生成测试建议和变更分析")
-            logger.info("=" * 80)
-            
-            import subprocess
-            import webbrowser
-            import threading
-            import socket
-            
-            streamlit_script = os.path.join(os.path.dirname(__file__), "streamlit_app.py")
-            
-            if os.path.exists(streamlit_script):
-                logger.info(f"启动Streamlit服务: {streamlit_script}")
-                logger.info(f"服务地址: http://{streamlit_host}:{streamlit_port}")
-                
-                # 获取本地IP用于分享
-                try:
-                    hostname = socket.gethostname()
-                    local_ip = socket.gethostbyname(hostname)
-                    logger.info(f"局域网访问: http://{local_ip}:{streamlit_port}")
-                except:
-                    pass
-                
-                logger.info("按 Ctrl+C 停止服务")
-                
-                # 在后台启动Streamlit（非阻塞）
-                def start_streamlit():
-                    with timer("Step 5: Start Streamlit Web Service"):
-                        subprocess.run([
-                            sys.executable, "-m", "streamlit", "run", 
-                            streamlit_script,
-                            "--server.port", str(streamlit_port),
-                            "--server.address", streamlit_host,
-                            "--server.headless", "true"
-                        ])
-                
-                # 启动Streamlit后台线程
-                streamlit_thread = threading.Thread(target=start_streamlit, daemon=True)
-                streamlit_thread.start()
-                
-                # 等待3秒让Streamlit启动
-                time.sleep(3)
-                
-                # 延迟2秒后自动打开浏览器
-                if auto_open_browser:
-                    def open_browser():
-                        time.sleep(2)
-                        # 使用baseline参数实现基线隔离，添加 tab=results 自动切换到分析结果页
-                        webbrowser.open(f"http://localhost:{streamlit_port}/?baseline={project_name}_{commit_old}&tab=results")
-                    
-                    # 启动浏览器打开线程
-                    browser_thread = threading.Thread(target=open_browser, daemon=True)
-                    browser_thread.start()
-                
-                logger.info("✓ Streamlit服务已在后台启动")
-            else:
-                logger.warning(f"Streamlit脚本不存在: {streamlit_script}")
-    
+            logger.warning("\n")
+            logger.warning("⚠️ Streamlit 模式已弃用，请使用 FastAPI 后端服务")
+        
         # ===== 打印性能报告 =====
         workflow_elapsed = time.time() - workflow_start_time
         logger.info("\n")

@@ -150,7 +150,8 @@ class UpwardsCallChainBuilder:
     def __init__(self, 
                  reverse_index: ReverseCallerIndex,
                  entry_detector=None,
-                 max_depth: int = 10):
+                 max_depth: int = 10,
+                 unified_index=None):
         """
         初始化向上调用链构建器
         
@@ -158,10 +159,12 @@ class UpwardsCallChainBuilder:
             reverse_index: ReverseCallerIndex 实例
             entry_detector: 可选的 AnnotationAwareEntryDetector 实例
             max_depth: 最大深度
+            unified_index: 可选的 UnifiedMethodIndex 实例（用于查询 documentation 等字段）
         """
         self.reverse_index = reverse_index
         self.entry_detector = entry_detector
         self.max_depth = max_depth
+        self.unified_index = unified_index
         self._coverage_stats = {
             'total_query_methods': 0,
             'methods_with_callers': 0,
@@ -277,7 +280,7 @@ class UpwardsCallChainBuilder:
         return 'UNKNOWN'
     
     def _create_node(self, package_class: str, method_signature: str, depth: int) -> CallChainNode:
-        """创建节点（增强字段）"""
+        """创建节点（增强字段，v4.1 新增 documentation）"""
         method_name = method_signature.split('(')[0]
         class_name = package_class.split('.')[-1]
         node_id = f"{depth}|{package_class}|{method_signature}"
@@ -292,10 +295,22 @@ class UpwardsCallChainBuilder:
         )
         node.root_type = 'UNKNOWN'
         node.has_multiple_call_sites = False
+        
+        # v4.1: 查询方法数据以填充 documentation
+        if self.unified_index:
+            method_data = self.unified_index.query_method(package_class, method_signature)
+            if method_data:
+                node.documentation = method_data.get('documentation')
+                node.db_method_id = method_data.get('method_id')
+                # 填充 change_type
+                from .models import ChangeType
+                raw_change_type = method_data.get('change_type')
+                node.change_type = ChangeType.from_raw(raw_change_type).value
+        
         return node
     
     def _create_node_from_caller(self, caller: dict, depth: int) -> CallChainNode:
-        """从调用者信息创建节点"""
+        """从调用者信息创建节点（v4.1 新增 documentation）"""
         node_id = f"{depth}|{caller['package_class']}|{caller['method_signature']}"
         
         node = CallChainNode(
@@ -310,4 +325,16 @@ class UpwardsCallChainBuilder:
         )
         node.call_type = caller.get('call_type', 'DIRECT')
         node.has_multiple_call_sites = caller.get('multi_call_sites', False)
+        
+        # v4.1: 查询方法数据以填充 documentation 和 change_type
+        if self.unified_index:
+            method_data = self.unified_index.query_method(
+                caller['package_class'], caller['method_signature']
+            )
+            if method_data:
+                node.documentation = method_data.get('documentation')
+                from .models import ChangeType
+                raw_change_type = method_data.get('change_type')
+                node.change_type = ChangeType.from_raw(raw_change_type).value
+        
         return node
