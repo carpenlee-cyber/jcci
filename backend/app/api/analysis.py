@@ -398,9 +398,44 @@ async def get_method_code(
     - project_id>0: 各差异版本代码 (commit_or_branch_new == version)
     """
     import sqlite3
+    import os as _os
+    
+    print(f"[method-code] 请求: baseline={baseline}, version={version}, class={class_name}, method={method_name}", flush=True)
     
     result_dir = settings.RESULT_DIR
-    base_db = os.path.join(result_dir, baseline, f"{baseline}_baseline.db")
+    
+    # 将完整 tag 或短标签映射到磁盘上的实际基线目录
+    # （复用 _resolve_data_path 的三级回退逻辑：直接路径 → 短标签 → 前缀扫描）
+    baseline_short = _extract_short_tag(baseline)
+    
+    # 1) 直接路径
+    candidate = os.path.join(result_dir, baseline)
+    if os.path.isdir(candidate):
+        baseline_dir = candidate
+        baseline_dirname = baseline
+    # 2) 短标签路径
+    elif os.path.isdir(os.path.join(result_dir, baseline_short)):
+        baseline_dir = os.path.join(result_dir, baseline_short)
+        baseline_dirname = baseline_short
+    # 3) 扫描带项目前缀的目录 (如 mall_SHAb42d_...)
+    else:
+        baseline_suffix = '_' + baseline_short
+        found = None
+        for item in sorted(os.listdir(result_dir)):
+            if item.endswith(baseline_suffix) and os.path.isdir(os.path.join(result_dir, item)):
+                found = item
+                break
+        if found:
+            baseline_dir = os.path.join(result_dir, found)
+            baseline_dirname = found
+        else:
+            baseline_dir = os.path.join(result_dir, baseline_short)
+            baseline_dirname = baseline_short
+    
+    base_db = os.path.join(baseline_dir, f"{baseline_dirname}_baseline.db")
+    print(f"[method-code] RESULT_DIR={result_dir}", flush=True)
+    print(f"[method-code] baseline_dir={baseline_dir}, baseline_dirname={baseline_dirname}", flush=True)
+    print(f"[method-code] base_db={base_db}, exists={os.path.exists(base_db)}", flush=True)
     
     baseline_code = ''
     current_code = ''
@@ -411,6 +446,7 @@ async def get_method_code(
     change_type_val = 'UNCHANGED'
     
     if not os.path.exists(base_db):
+        print(f"[method-code] DB 不存在: {base_db}", flush=True)
         return {
             'class_name': class_name,
             'method_name': method_name,
@@ -428,10 +464,21 @@ async def get_method_code(
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
     
-    # 从基线/版本名称中提取 commit 标识（如 mall_20260508_01 -> 20260508_01）
+    # class_name 可能是全限定名 (如 com.macro.mall.controller.PmsProductAttributeController)
+    # DB 中 class 表的 class_name 存储的是短类名，package_name 存储包名
+    short_class_name = class_name
+    package_name = ''
+    if '.' in class_name:
+        parts = class_name.rsplit('.', 1)
+        package_name = parts[0]
+        short_class_name = parts[1]
+    
+    # 从基线/版本名称中提取 commit 标识
     from app.core.workflow1 import extract_short_tag
     baseline_commit = extract_short_tag(baseline)
     version_commit = extract_short_tag(version)
+    print(f"[method-code] baseline_commit={baseline_commit}, version_commit={version_commit}", flush=True)
+    print(f"[method-code] short_class_name={short_class_name}, package_name={package_name}", flush=True)
     
     # 查找版本对应的 project_id
     cursor.execute('''
@@ -441,6 +488,7 @@ async def get_method_code(
     ''', (version_commit, baseline_commit))
     version_proj = cursor.fetchone()
     version_project_id = version_proj['project_id'] if version_proj else None
+    print(f"[method-code] version_project_id={version_project_id}", flush=True)
     
     # 查找基线 project_id (project_id=0，即 commit_or_branch_new==commit_or_branch_old==baseline)
     cursor.execute('''
@@ -450,17 +498,29 @@ async def get_method_code(
     ''', (baseline_commit, baseline_commit))
     baseline_proj = cursor.fetchone()
     baseline_project_id = baseline_proj['project_id'] if baseline_proj else 0
+    print(f"[method-code] baseline_project_id={baseline_project_id}", flush=True)
     
     # 获取基线版本代码（project_id == baseline_project_id）
-    cursor.execute('''
-        SELECT m.body, m.annotations, m.access_modifier,
-               m.return_type, m.parameters, m.change_type
-        FROM methods m
-        JOIN class c ON m.class_id = c.class_id
-        WHERE c.class_name = ? AND m.method_name = ? AND m.project_id = ?
-        LIMIT 1
-    ''', (class_name, method_name, baseline_project_id))
+    if package_name:
+        cursor.execute('''
+            SELECT m.body, m.annotations, m.access_modifier,
+                   m.return_type, m.parameters, m.change_type
+            FROM methods m
+            JOIN class c ON m.class_id = c.class_id
+            WHERE c.class_name = ? AND c.package_name = ? AND m.method_name = ? AND m.project_id = ?
+            LIMIT 1
+        ''', (short_class_name, package_name, method_name, baseline_project_id))
+    else:
+        cursor.execute('''
+            SELECT m.body, m.annotations, m.access_modifier,
+                   m.return_type, m.parameters, m.change_type
+            FROM methods m
+            JOIN class c ON m.class_id = c.class_id
+            WHERE c.class_name = ? AND m.method_name = ? AND m.project_id = ?
+            LIMIT 1
+        ''', (short_class_name, method_name, baseline_project_id))
     baseline_row = cursor.fetchone()
+    print(f"[method-code] baseline_row found={baseline_row is not None}, baseline_project_id={baseline_project_id}", flush=True)
     
     if baseline_row:
         body_lines = _parse_body_to_lines(baseline_row['body'])
@@ -473,14 +533,24 @@ async def get_method_code(
     
     # 获取版本代码（project_id == version_project_id，如果版本!=基线）
     if version_project_id is not None and version_project_id != baseline_project_id:
-        cursor.execute('''
-            SELECT m.body, m.change_type
-            FROM methods m
-            JOIN class c ON m.class_id = c.class_id
-            WHERE c.class_name = ? AND m.method_name = ? AND m.project_id = ?
-            LIMIT 1
-        ''', (class_name, method_name, version_project_id))
+        if package_name:
+            cursor.execute('''
+                SELECT m.body, m.change_type
+                FROM methods m
+                JOIN class c ON m.class_id = c.class_id
+                WHERE c.class_name = ? AND c.package_name = ? AND m.method_name = ? AND m.project_id = ?
+                LIMIT 1
+            ''', (short_class_name, package_name, method_name, version_project_id))
+        else:
+            cursor.execute('''
+                SELECT m.body, m.change_type
+                FROM methods m
+                JOIN class c ON m.class_id = c.class_id
+                WHERE c.class_name = ? AND m.method_name = ? AND m.project_id = ?
+                LIMIT 1
+            ''', (short_class_name, method_name, version_project_id))
         version_row = cursor.fetchone()
+        print(f"[method-code] version_row found={version_row is not None}, version_project_id={version_project_id}", flush=True)
         
         if version_row:
             version_body_lines = _parse_body_to_lines(version_row['body'])
@@ -1020,6 +1090,47 @@ async def get_nodes_status(request: NodeStatusRequest):
     return {'nodes': nodes_status}
 
 
+# ── 入口节点提取辅助函数 ──────────────────────────────────
+
+_ENTRY_ROOT_TYPES = {'HTTP_API', 'SCHEDULED_TASK', 'EVENT_LISTENER', 'MESSAGE_CONSUMER', 'CONTROLLER_BY_CONVENTION'}
+
+
+def _find_endpoint_nodes(children: list, direction: str) -> list:
+    """
+    递归查找端点节点。
+    - upwards: 查找 root_type 为入口类型 (HTTP_API 等) 的节点
+    - downwards: 查找叶子节点（含 dao_info 或 is_leaf=True）
+    """
+    endpoints = []
+    for child in children:
+        if direction == 'upwards':
+            if child.get('root_type') in _ENTRY_ROOT_TYPES:
+                endpoints.append({
+                    'class_name': child.get('class_name', ''),
+                    'method_name': child.get('method_name', ''),
+                    'api_paths': child.get('api_paths', []),
+                    'documentation': child.get('documentation', ''),
+                    'root_type': child.get('root_type', '')
+                })
+        else:
+            # downwards: 叶子节点
+            grand_children = child.get('children', [])
+            if not grand_children or child.get('is_leaf'):
+                di = child.get('dao_info')
+                endpoints.append({
+                    'class_name': child.get('class_name', ''),
+                    'method_name': child.get('method_name', ''),
+                    'api_paths': [],
+                    'documentation': child.get('documentation', ''),
+                    'dao_sql_type': di.get('sql_type', '') if di else '',
+                    'dao_tables': di.get('tables', []) if di else []
+                })
+        # 继续递归
+        if child.get('children'):
+            endpoints.extend(_find_endpoint_nodes(child['children'], direction))
+    return endpoints
+
+
 @router.get("/{baseline}/{version}/chain-methods")
 async def get_chain_methods(baseline: str, version: str, direction: str = 'upwards'):
     """
@@ -1115,6 +1226,40 @@ async def get_chain_methods(baseline: str, version: str, direction: str = 'upwar
         except Exception:
             pass
         
+        # 提取端点节点（入口或出口）
+        # 1) 优先使用 chain 顶层 entry_points（最准确）
+        raw_entry_points = chain.get('entry_points', [])
+        if raw_entry_points:
+            endpoints = []
+            for ep in raw_entry_points:
+                # 从 package_class 提取短类名
+                pkg = ep.get('package_class', '')
+                short_cls = pkg.split('.')[-1] if '.' in pkg else pkg
+                # 从 method_signature 提取方法名（去掉参数部分）
+                sig = ep.get('method_signature', '')
+                short_mth = sig.split('(')[0] if '(' in sig else sig
+                endpoints.append({
+                    'class_name': short_cls,
+                    'method_name': short_mth,
+                    'api_paths': ep.get('api_paths', []),
+                    'documentation': ep.get('documentation', ''),
+                    'root_type': ep.get('root_type', '')
+                })
+        # 2) 否则检查链根节点自身是否为入口
+        elif chain.get('chain', {}).get('root_type') in _ENTRY_ROOT_TYPES:
+            cr = chain['chain']
+            endpoints = [{
+                'class_name': cr.get('class_name', ''),
+                'method_name': cr.get('method_name', ''),
+                'api_paths': cr.get('api_paths', []),
+                'documentation': cr.get('documentation', ''),
+                'root_type': cr.get('root_type', '')
+            }]
+        # 3) 否则递归遍历 children 树
+        else:
+            chain_children = chain.get('chain', {}).get('children', [])
+            endpoints = _find_endpoint_nodes(chain_children, direction)
+
         methods_with_cache.append({
             'class_name': class_name,
             'method_name': method_name,
@@ -1125,7 +1270,8 @@ async def get_chain_methods(baseline: str, version: str, direction: str = 'upwar
             'documentation': mi.get('documentation', ''),
             'method_status': method_status,
             'upwards_chain_status': upwards_chain_status,
-            'downwards_chain_status': downwards_chain_status
+            'downwards_chain_status': downwards_chain_status,
+            'endpoints': endpoints
         })
     
     conn.close()

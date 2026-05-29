@@ -49,10 +49,6 @@
         <div class="code-compare-section">
           <div class="code-header-bar">
             <h3>📝 代码版本对比</h3>
-            <div>
-              <el-tag size="small" type="info">{{ baseline_label }} (变更前)</el-tag>
-              <el-tag size="small" type="warning" style="margin-left: 8px">{{ version_label }} (变更后)</el-tag>
-            </div>
           </div>
 
           <el-collapse v-model="codeCompareActive">
@@ -138,45 +134,6 @@
 
       <el-divider />
 
-      <!-- 系统提示词 -->
-      <h3>📝 系统提示词
-        <span class="editable-badge">可编辑</span>
-        <el-button size="small" text type="warning" @click="restoreDefaultPrompt('system')" style="margin-left: 8px">
-          [恢复默认]
-        </el-button>
-      </h3>
-      <el-input
-        v-model="store.customSystemPrompt"
-        type="textarea"
-        :rows="4"
-        placeholder="输入自定义系统提示词，留空则使用默认模板"
-      />
-
-      <!-- 分析提示词 -->
-      <h3 style="margin-top: 16px">📝 分析提示词
-        <span class="editable-badge">可编辑</span>
-        <el-button size="small" text type="warning" @click="restoreDefaultPrompt('analysis')" style="margin-left: 8px">
-          [恢复默认]
-        </el-button>
-      </h3>
-      <el-input
-        v-model="store.customAnalysisPrompt"
-        type="textarea"
-        :rows="6"
-        :placeholder="analysisScope === 'method'
-          ? '输入自定义分析提示词，留空则自动填充方法信息...'
-          : '输入自定义分析提示词，留空则自动填充链路上所有方法信息...'"
-      />
-
-      <!-- 预览按钮 -->
-      <div style="margin-top: 12px">
-        <el-button @click="buildPreviewContent(); showPreview = true">
-          👁️ 预览完整提示词
-        </el-button>
-      </div>
-
-      <el-divider />
-
       <!-- 操作栏 -->
       <div class="action-bar">
         <el-checkbox v-model="store.forceFresh">🔄 强制全新分析（忽略缓存）</el-checkbox>
@@ -193,33 +150,6 @@
         </div>
       </div>
     </el-card>
-
-    <!-- 预览模态框 -->
-    <el-dialog v-model="showPreview" title="完整提示词预览" width="750px" top="5vh">
-      <template v-if="previewContent">
-        <h4>【系统提示词】</h4>
-        <pre class="code-block" style="max-height: 200px; margin-bottom: 16px">{{ previewContent.system }}</pre>
-        
-        <el-divider />
-        
-        <h4>【分析提示词】</h4>
-        <pre class="code-block" style="max-height: 300px; margin-bottom: 16px">{{ previewContent.analysis }}</pre>
-        
-        <template v-if="methodCode">
-          <el-divider />
-          <h4>【变更代码对比】</h4>
-          <p style="color: #909399; font-size: 13px">{{ baseline_label }} (v1.2.3):</p>
-          <pre class="code-block" style="max-height: 150px; margin-bottom: 12px">{{ methodCode.baseline_code || '(无)' }}</pre>
-          
-          <p style="color: #909399; font-size: 13px">{{ version_label }} (v1.2.4):</p>
-          <pre class="code-block" style="max-height: 150px">{{ methodCode.current_code || '(无)' }}</pre>
-        </template>
-      </template>
-      <template #footer>
-        <el-button @click="copyPrompts" type="primary">📋 复制到剪贴板</el-button>
-        <el-button @click="showPreview = false">关闭</el-button>
-      </template>
-    </el-dialog>
   </div>
 </template>
 
@@ -241,64 +171,9 @@ const submitting = ref(false)
 const methodsLoading = ref(false)
 const methodCode = ref<any>(null)
 const codeCompareActive = ref<string[]>(['current'])
-const showPreview = ref(false)
-const previewContent = ref<{ system: string; analysis: string } | null>(null)
 
 const baseline_label = computed(() => route.query.baseline as string || '基线版本')
 const version_label = computed(() => route.query.version as string || '当前版本')
-
-/**
- * 构建预览内容
- */
-const buildPreviewContent = () => {
-  previewContent.value = {
-    system: store.customSystemPrompt || '(系统提示词为空，将使用默认模板)',
-    analysis: store.customAnalysisPrompt || '(分析提示词为空，将自动填充方法信息)'
-  }
-}
-
-/**
- * 恢复默认提示词
- */
-const restoreDefaultPrompt = async (type: 'system' | 'analysis') => {
-  const direction = analysisScope.value === 'chain' ? chainDirection.value : (route.query.direction as string) || 'upwards'
-  await store.loadDefaultPrompts(
-    analysisScope.value,
-    currentMethod.value.class_name,
-    currentMethod.value.method_name,
-    currentMethod.value.change_type,
-    direction
-  )
-  if (type === 'system') {
-    ElMessage.success('系统提示词已恢复为默认值')
-  } else {
-    ElMessage.success('分析提示词已恢复为默认值')
-  }
-}
-
-/**
- * 复制提示词到剪贴板
- */
-const copyPrompts = async () => {
-  let text = ''
-  if (previewContent.value) {
-    text += '【系统提示词】\n' + previewContent.value.system + '\n\n'
-    text += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n'
-    text += '【分析提示词】\n' + previewContent.value.analysis
-    if (methodCode.value) {
-      text += '\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n'
-      text += '【变更代码对比】\n'
-      text += baseline_label.value + ':\n' + (methodCode.value.baseline_code || '(无)') + '\n\n'
-      text += version_label.value + ':\n' + (methodCode.value.current_code || '(无)')
-    }
-  }
-  try {
-    await navigator.clipboard.writeText(text)
-    ElMessage.success('已复制到剪贴板')
-  } catch {
-    ElMessage.error('复制失败')
-  }
-}
 
 const currentMethod = computed(() => ({
   class_name: (route.query.class_name as string) || '',
@@ -530,12 +405,6 @@ watch(analysisScope, async (newScope) => {
 .detail-label {
   font-weight: 600;
   color: #606266;
-}
-
-.editable-badge {
-  font-size: 11px;
-  color: #E6A23C;
-  font-weight: normal;
 }
 
 /* 代码对比区域 */

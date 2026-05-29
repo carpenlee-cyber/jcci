@@ -14,12 +14,14 @@ def extract_short_tag(tag: str) -> str:
 
     规则：
     - 已经是短标识符格式: 直接返回（幂等，防止二次转换）
+    - 包含短标识符: 提取内嵌的 SHA{4hex}_{11chars} 返回（处理项目前缀如 mall_）
     - Commit Hash (40位十六进制): 保持旧行为，截取前8位（已唯一）
     - Git Tag: SHA256 前4位 + '_' + 后11位
       4位 hex 提供 65536 种区分，足以消除同一基线下的版本碰撞。
 
     示例：
     - SHAb42d_20231225_01 → SHAb42d_20231225_01 (幂等，不变)
+    - mall_SHAb42d_20231225_01 → SHAb42d_20231225_01 (提取内嵌短标识符)
     - dd6569c3558f79af5b21aad601349e0f029b9a6d → dd6569c3 (commit)
     - MIX_LJ01.ONB_ONB4_pipe_st_2_ST_00.03.05_SUMMER_20260506_01 → SHA3afe_20260506_01 (v1)
     - MIX_LJ01.ONB_ONB4_pipe_st_2_ST_00.03.06_SUMMER_20260506_01 → SHA6436_20260506_01 (v2)
@@ -36,6 +38,12 @@ def extract_short_tag(tag: str) -> str:
         return tag
     if len(tag) == 8 and re.match(r'^[0-9a-f]{8}$', tag, re.IGNORECASE):
         return tag
+
+    # 包含短标识符: 提取内嵌的 SHA{4hex}_{11chars}
+    # 处理带前缀的格式，如 mall_SHAb42d_20231225_01 → SHAb42d_20231225_01
+    m = re.search(r'SHA[0-9a-f]{4}_[\w\.\-]{11}', tag, re.IGNORECASE)
+    if m:
+        return m.group(0)
 
     # Commit hash (40位十六进制)：保持旧行为，截取前8位
     if len(tag) == 40 and re.match(r'^[0-9a-f]{40}$', tag, re.IGNORECASE):

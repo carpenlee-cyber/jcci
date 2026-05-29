@@ -10,15 +10,15 @@
           </el-button>
         </div>
       </template>
-      
+
       <!-- 基线选择器 -->
-      <BaselineSelector 
+      <BaselineSelector
         :initialBaseline="lockedBaseline || sessionStore.selectedBaseline"
         :initialVersion="sessionStore.selectedVersion"
         :lockedBaseline="!!lockedBaseline"
-        @change="handleBaselineChange" 
+        @change="handleBaselineChange"
       />
-      
+
       <!-- 任务信息 -->
       <el-descriptions :column="3" border v-if="taskInfo">
         <el-descriptions-item label="任务ID">{{ taskInfo.task_id }}</el-descriptions-item>
@@ -31,37 +31,53 @@
         <el-descriptions-item label="Git仓库" :span="2">{{ taskInfo.git_url }}</el-descriptions-item>
         <el-descriptions-item label="基线 → 目标">{{ taskInfo.tag_old }} → {{ taskInfo.tag_new }}</el-descriptions-item>
       </el-descriptions>
-      
+
       <el-divider />
-      
-      <!-- 视图切换 -->
-      <el-tabs v-model="activeTab" type="border-card" v-loading="loading">
-        <el-tab-pane label="向上调用链" name="upstream">
-          <CallChainTree 
-            :data="upstreamData" 
-            title="向上调用链（谁调用了这个方法）"
-            :loading="loading"
-            :showBulkAnalysis="true"
-            direction="upwards"
-          />
-        </el-tab-pane>
-        
-        <el-tab-pane label="向下调用链" name="downstream">
-          <CallChainTree 
-            :data="downstreamData" 
-            title="向下调用链（这个方法调用了谁）"
-            :loading="loading"
-          />
-        </el-tab-pane>
-        
+
+      <!-- 方向切换 + 方法摘要表格 -->
+      <div class="direction-bar">
+        <el-radio-group v-model="chainDirection" size="small" @change="handleDirectionChange">
+          <el-radio-button value="upwards">⬆ 向上调用链（谁调用了我）</el-radio-button>
+          <el-radio-button value="downwards">⬇ 向下调用链（我调用了谁）</el-radio-button>
+        </el-radio-group>
+      </div>
+
+      <MethodSummaryTable
+        :methods="chainMethods"
+        :total="chainMethodsTotal"
+        :loading="summaryLoading"
+        :selectedKey="selectedMethodKey"
+        @select="handleMethodSelect"
+      />
+
+      <!-- 选中方法的调用链详情 -->
+      <div v-if="selectedChainData.length > 0" class="chain-detail">
+        <el-divider />
+        <div class="detail-header">
+          <h4>{{ chainDirection === 'upwards' ? '⬆ 向上调用链' : '⬇ 向下调用链' }} 详情</h4>
+          <el-button size="small" text @click="clearSelection">✕ 关闭</el-button>
+        </div>
+        <CallChainTree
+          :data="selectedChainData"
+          :title="selectedMethodKey || ''"
+          :loading="chainLoading"
+          :showBulkAnalysis="chainDirection === 'upwards'"
+          :direction="chainDirection"
+        />
+      </div>
+
+      <el-divider />
+
+      <!-- 文本视图 + SQL -->
+      <el-tabs v-model="activeTab" type="border-card" v-loading="textLoading">
         <el-tab-pane label="文本视图" name="text">
-          <TextViewer 
+          <TextViewer
             :upwardsContent="upwardsText"
             :downwardsContent="downwardsText"
-            :loading="loading" 
+            :loading="textLoading"
           />
         </el-tab-pane>
-        
+
         <el-tab-pane label="SQL分析" name="sql">
           <SqlAnalysisView />
         </el-tab-pane>
@@ -76,27 +92,45 @@ import { useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { Back } from '@element-plus/icons-vue'
 import { taskApi } from '@/api/task'
-import { getUpwardsChains, getDownwardsChains, getUpwardsText, getDownwardsText } from '@/api/analysis'
+import {
+  getUpwardsChains,
+  getDownwardsChains,
+  getUpwardsText,
+  getDownwardsText,
+  getChainMethods,
+  type ChainMethodSummary
+} from '@/api/analysis'
 import { useSessionStore } from '@/stores/session'
 import BaselineSelector from '@/components/BaselineSelector.vue'
 import CallChainTree from '@/components/CallChainTree.vue'
 import TextViewer from '@/components/TextViewer.vue'
 import SqlAnalysisView from '@/components/SqlAnalysisView.vue'
+import MethodSummaryTable from '@/components/MethodSummaryTable.vue'
 
 const route = useRoute()
 const taskId = route.params.taskId as string
 const sessionStore = useSessionStore()
 
 const taskInfo = ref<any>(null)
-const loading = ref(false)
-const activeTab = ref('upstream')
+const activeTab = ref('text')
 const lockedBaseline = ref('')
 
-// 分析结果数据
-const upstreamData = ref<any[]>([])
-const downstreamData = ref<any[]>([])
+// ── 调用链摘要 & 详情 ──
+const chainDirection = ref<'upwards' | 'downwards'>('upwards')
+const chainMethods = ref<ChainMethodSummary[]>([])
+const chainMethodsTotal = ref(0)
+const summaryLoading = ref(false)
+const selectedMethodKey = ref('')
+const selectedChainData = ref<any[]>([])
+const chainLoading = ref(false)
+
+// 缓存全量链数据，避免重复请求
+const cachedChains = ref<Record<string, any[]>>({})
+
+// ── 文本视图 ──
 const upwardsText = ref('')
 const downwardsText = ref('')
+const textLoading = ref(false)
 
 const getStatusType = (status: string) => {
   const typeMap: Record<string, any> = {
@@ -108,71 +142,122 @@ const getStatusType = (status: string) => {
   return typeMap[status] || 'info'
 }
 
-// 基线变化处理
+// 基线变化处理 → 重新加载摘要
 const handleBaselineChange = async (baseline: string, version: string) => {
   sessionStore.setBaselineAndVersion(baseline, version)
-  await loadAnalysisData(baseline, version)
+  clearSelection()
+  cachedChains.value = {}
+  await loadSummary(baseline, version)
+  loadTexts(baseline, version)
 }
 
-// 加载分析数据
-const loadAnalysisData = async (baseline: string, version: string) => {
-  loading.value = true
-  // 先清空旧数据，避免切换版本时残留
-  upstreamData.value = []
-  downstreamData.value = []
-  upwardsText.value = ''
-  downwardsText.value = ''
-  
+// ── 加载变更方法摘要（仅元信息，极轻量） ──
+const loadSummary = async (baseline: string, version: string) => {
+  summaryLoading.value = true
+  chainMethods.value = []
+  chainMethodsTotal.value = 0
+
   try {
-    // 并行加载所有数据
-    const [upwardsRes, downwardsRes, upwardsTextRes, downwardsTextRes] = await Promise.all([
-      getUpwardsChains(baseline, version).catch(() => null),
-      getDownwardsChains(baseline, version).catch(() => null),
-      getUpwardsText(baseline, version).catch(() => null),
-      getDownwardsText(baseline, version).catch(() => null)
-    ])
-    
-    let hasData = false
-    
-    // 处理向上调用链（入口展开）
-    if (upwardsRes?.data) {
-      upstreamData.value = convertUpwardsChainsToTree(upwardsRes.data.impact_chains || [])
-      hasData = true
+    const dir = chainDirection.value
+    const res = await getChainMethods(baseline, version, dir)
+    if (res?.data) {
+      chainMethods.value = res.data.methods || []
+      chainMethodsTotal.value = res.data.total || chainMethods.value.length
     }
-    
-    // 处理向下调用链（递归展开完整链结构）
-    if (downwardsRes?.data) {
-      downstreamData.value = convertDownwardsChainsToTree(downwardsRes.data.call_chains || [])
-      hasData = true
-    }
-    
-    // 处理文本视图
-    if (upwardsTextRes?.data) {
-      upwardsText.value = upwardsTextRes.data.content || ''
-      hasData = true
-    }
-    if (downwardsTextRes?.data) {
-      downwardsText.value = downwardsTextRes.data.content || ''
-      hasData = true
-    }
-    
-    if (hasData) {
-      ElMessage.success('数据加载成功')
+    if (chainMethods.value.length > 0) {
+      ElMessage.success(`已加载 ${chainMethodsTotal.value} 个变更方法`)
     } else {
-      ElMessage.warning('该版本暂无分析数据')
+      ElMessage.warning('该版本暂无变更方法数据')
     }
   } catch (error) {
-    console.error('加载分析数据失败:', error)
-    ElMessage.error('加载分析数据失败')
+    console.error('加载方法摘要失败:', error)
+    ElMessage.error('加载方法摘要失败')
   } finally {
-    loading.value = false
+    summaryLoading.value = false
   }
 }
 
-// 构建树节点标签（v4.1：含 documentation 摘要）
+// ── 方向切换 ──
+const handleDirectionChange = () => {
+  const baseline = sessionStore.selectedBaseline
+  const version = sessionStore.selectedVersion
+  if (baseline && version) {
+    clearSelection()
+    loadSummary(baseline, version)
+  }
+}
+
+// ── 选择方法 → 加载该方法的完整调用链详情 ──
+const handleMethodSelect = async (method: ChainMethodSummary) => {
+  const key = `${method.class_name}.${method.method_name}`
+  if (selectedMethodKey.value === key) return // 已选中
+
+  const baseline = sessionStore.selectedBaseline
+  const version = sessionStore.selectedVersion
+  if (!baseline || !version) return
+
+  selectedMethodKey.value = key
+  chainLoading.value = true
+  selectedChainData.value = []
+
+  try {
+    // 优先从缓存取全量链数据
+    const cacheKey = `${baseline}:${version}:${chainDirection.value}`
+    let chains: any[]
+    if (cachedChains.value[cacheKey]) {
+      chains = cachedChains.value[cacheKey]
+    } else {
+      const res = chainDirection.value === 'upwards'
+        ? await getUpwardsChains(baseline, version)
+        : await getDownwardsChains(baseline, version)
+      chains = chainDirection.value === 'upwards'
+        ? (res?.data?.impact_chains || [])
+        : (res?.data?.call_chains || [])
+      cachedChains.value[cacheKey] = chains
+    }
+
+    // 找到匹配的单条链并转为树（仅 1 条！）
+    const matched = chains.find((c: any) => {
+      const mi = c.method_info || {}
+      return mi.class_name === method.class_name && mi.method_name === method.method_name
+    })
+
+    if (matched) {
+      selectedChainData.value = chainDirection.value === 'upwards'
+        ? [convertSingleUpwardsChain(matched, 0)]
+        : [convertSingleDownwardsChain(matched, 0)]
+    } else {
+      ElMessage.warning('未找到该方法调用链数据')
+    }
+  } catch (error) {
+    console.error('加载调用链详情失败:', error)
+    ElMessage.error('加载调用链详情失败')
+  } finally {
+    chainLoading.value = false
+  }
+}
+
+const clearSelection = () => {
+  selectedMethodKey.value = ''
+  selectedChainData.value = []
+}
+
+// ── 文本视图（独立加载，不阻塞摘要） ──
+const loadTexts = async (baseline: string, version: string) => {
+  textLoading.value = true
+  const [upRes, downRes] = await Promise.all([
+    getUpwardsText(baseline, version).catch(() => null),
+    getDownwardsText(baseline, version).catch(() => null)
+  ])
+  upwardsText.value = upRes?.data?.content || ''
+  downwardsText.value = downRes?.data?.content || ''
+  textLoading.value = false
+}
+
+// ── 树构建（与原逻辑一致，但每次只构建 1 条链） ──
 const buildTreeNodeLabel = (
-  className: string, 
-  methodName: string, 
+  className: string,
+  methodName: string,
   signature: string,
   changeType: string,
   documentation?: string,
@@ -181,46 +266,16 @@ const buildTreeNodeLabel = (
   const cls = className || '?'
   const mName = methodName || '?'
   const sig = signature || `${mName}()`
-  
   let label = `${cls}.${sig}`
-  
-  // 添加 documentation 摘要（截取前60字符）
   const doc = documentation || altDocumentation || ''
   if (doc && typeof doc === 'string' && doc.trim() && doc.trim() !== 'None') {
     const docShort = doc.trim().replace(/\n/g, ' ').substring(0, 60)
     label += `  📝${docShort}${doc.trim().length > 60 ? '...' : ''}`
-  } else {
-    // documentation 为 None 或空时，显示提示
-    label += `  ⚠️开发未对函数做注解`
   }
-  
+  // ⚠️提示已由 CallChainTree tooltip 处理，不追加内联文本
   return label
 }
 
-// 向上调用链：递归展开 chain 树结构，完整展示谁调用了谁
-const convertUpwardsChainsToTree = (chains: any[]) => {
-  return chains.map((chain, index) => {
-    const mi = chain.method_info || {}
-    const ch = chain.chain || {}
-    
-    // 根节点：变更方法
-    const rootLabel = buildTreeNodeLabel(
-      mi.class_name, mi.method_name, 
-      (ch.children || []).length > 0 ? ch.method_signature : mi.method_signature,
-      mi.change_type, mi.documentation, ch.documentation
-    )
-    
-    return {
-      id: `up-${index}`,
-      label: rootLabel,
-      changeType: mi.change_type,
-      documentation: mi.documentation || ch.documentation || '',
-      children: buildUpwardsChildren(ch.children || [], true)
-    }
-  })
-}
-
-// 向上链递归构建子节点（调用者）
 const buildUpwardsChildren = (children: any[], isFirstLevel: boolean = false): any[] => {
   if (!children || !Array.isArray(children)) return []
   return children.map((child: any) => {
@@ -228,21 +283,17 @@ const buildUpwardsChildren = (children: any[], isFirstLevel: boolean = false): a
       'HTTP_API', 'SCHEDULED_TASK', 'EVENT_LISTENER',
       'MESSAGE_CONSUMER', 'CONTROLLER_BY_CONVENTION'
     ].includes(child.root_type)
-    
     const label = buildTreeNodeLabel(
       child.class_name, child.method_name,
       child.method_signature, child.change_type,
       child.documentation
     )
-    
-    // 入口节点：添加 API 路径标记
     let finalLabel = label
     if (isEntry && child.api_paths && child.api_paths.length > 0) {
       finalLabel += `  [${child.api_paths.join(', ')}] 🚪`
     } else if (isEntry) {
       finalLabel += `  [${child.root_type}] 🚪`
     }
-    
     return {
       id: child.node_id || `up-node-${Math.random()}`,
       label: finalLabel,
@@ -256,26 +307,21 @@ const buildUpwardsChildren = (children: any[], isFirstLevel: boolean = false): a
   })
 }
 
-// 向下调用链：递归展开 chain.children 结构，保留 dao_info
-const convertDownwardsChainsToTree = (chains: any[]) => {
-  return chains.map((chain, index) => {
-    const mi = chain.method_info || {}
-    const ch = chain.chain || {}
-    
-    const rootLabel = buildTreeNodeLabel(
-      mi.class_name, mi.method_name,
-      (ch.children || []).length > 0 ? ch.method_signature : mi.method_signature,
-      mi.change_type, mi.documentation, ch.documentation
-    )
-    
-    return {
-      id: `down-${index}`,
-      label: rootLabel,
-      changeType: mi.change_type,
-      documentation: mi.documentation || ch.documentation || '',
-      children: buildDownwardsChildren(ch.children || [])
-    }
-  })
+const convertSingleUpwardsChain = (chain: any, index: number) => {
+  const mi = chain.method_info || {}
+  const ch = chain.chain || {}
+  const rootLabel = buildTreeNodeLabel(
+    mi.class_name, mi.method_name,
+    (ch.children || []).length > 0 ? ch.method_signature : mi.method_signature,
+    mi.change_type, mi.documentation, ch.documentation
+  )
+  return {
+    id: `up-${index}`,
+    label: rootLabel,
+    changeType: mi.change_type,
+    documentation: mi.documentation || ch.documentation || '',
+    children: buildUpwardsChildren(ch.children || [], true)
+  }
 }
 
 const buildDownwardsChildren = (children: any[]): any[] => {
@@ -286,16 +332,11 @@ const buildDownwardsChildren = (children: any[]): any[] => {
       child.method_signature, child.change_type,
       child.documentation
     )
-    
-    // 环检测标记
     if (child.is_cyclic) {
       label += '  🔄循环'
     }
-    
     const di = child.dao_info
     const grandChildren = buildDownwardsChildren(child.children || [])
-    
-    // 若当前节点有 dao_info，合成一个 SQL 摘要子节点插在最前面
     if (di && di.sql_type) {
       const baseId = (child.node_id || `node-${Math.random()}`) + '-sql'
       const sqlContent = di.sql_statement || di.sql_content || ''
@@ -307,7 +348,6 @@ const buildDownwardsChildren = (children: any[]): any[] => {
         const table = (di.tables || [])[0] || di.table_name || ''
         sqlLabel = `→ 🗄️${di.sql_type}${table ? ' on ' + table : ''}`
       }
-      // 构建标签子节点（类型、表名、风险等级合并为一行）
       const tagParts: string[] = []
       if (di.sql_type) tagParts.push(`🏷️${di.sql_type}`)
       const tableName = (di.tables || [])[0] || di.table_name || ''
@@ -331,7 +371,6 @@ const buildDownwardsChildren = (children: any[]): any[] => {
         children: tagChildren
       })
     }
-    
     return {
       id: child.node_id || `node-${Math.random()}`,
       label,
@@ -344,18 +383,31 @@ const buildDownwardsChildren = (children: any[]): any[] => {
   })
 }
 
+const convertSingleDownwardsChain = (chain: any, index: number) => {
+  const mi = chain.method_info || {}
+  const ch = chain.chain || {}
+  const rootLabel = buildTreeNodeLabel(
+    mi.class_name, mi.method_name,
+    (ch.children || []).length > 0 ? ch.method_signature : mi.method_signature,
+    mi.change_type, mi.documentation, ch.documentation
+  )
+  return {
+    id: `down-${index}`,
+    label: rootLabel,
+    changeType: mi.change_type,
+    documentation: mi.documentation || ch.documentation || '',
+    children: buildDownwardsChildren(ch.children || [])
+  }
+}
+
+// ── 任务信息 ──
 const loadTaskInfo = async () => {
   if (!taskId) return
-  
-  loading.value = true
   try {
     const response = await taskApi.getTask(taskId)
     taskInfo.value = response.data
-    
-    // 从任务锁定基线版本，允许多版本切换（使用完整标签，后端自动映射）
     if (taskInfo.value?.tag_old) {
       lockedBaseline.value = taskInfo.value.tag_old
-      // 若 session 中无基线/版本，用任务的完整标签填充
       if (!sessionStore.selectedBaseline) {
         sessionStore.setBaselineAndVersion(
           taskInfo.value.tag_old,
@@ -365,26 +417,24 @@ const loadTaskInfo = async () => {
     }
   } catch (error) {
     console.error('加载任务信息失败:', error)
-  } finally {
-    loading.value = false
   }
 }
 
-// Tab 切换时同步到会话
+// Tab 切换同步到会话
 watch(activeTab, (newTab) => {
   sessionStore.setActiveTab(newTab)
 })
 
-onMounted(() => {
-  loadTaskInfo()
+onMounted(async () => {
+  await loadTaskInfo()
   sessionStore.initFromUrl()
-  
-  // 如果会话中已有基线和版本，自动加载数据
+
   if (sessionStore.selectedBaseline && sessionStore.selectedVersion) {
-    loadAnalysisData(sessionStore.selectedBaseline, sessionStore.selectedVersion)
+    // 优先加载摘要（秒级响应），文本在后台加载
+    await loadSummary(sessionStore.selectedBaseline, sessionStore.selectedVersion)
+    loadTexts(sessionStore.selectedBaseline, sessionStore.selectedVersion)
   }
-  
-  // 恢复上次的 Tab
+
   if (sessionStore.activeTab) {
     activeTab.value = sessionStore.activeTab
   }
@@ -405,5 +455,25 @@ onMounted(() => {
 
 .card-header h2 {
   margin: 0;
+}
+
+.direction-bar {
+  margin-bottom: 12px;
+}
+
+.chain-detail {
+  margin-top: 4px;
+}
+
+.detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.detail-header h4 {
+  margin: 0;
+  color: #409EFF;
 }
 </style>

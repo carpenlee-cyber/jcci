@@ -57,3 +57,39 @@ export function getUpwardsText(baseline: string, version: string) {
 export function getDownwardsText(baseline: string, version: string) {
   return apiClient.get<{ content: string }>(`/analysis/${baseline}/${version}/text/downwards`)
 }
+
+/** 端点节点（入口或出口） */
+export interface EndpointNode {
+  class_name: string
+  method_name: string
+  api_paths: string[]
+  documentation: string
+  root_type?: string
+  dao_sql_type?: string
+  dao_tables?: string[]
+}
+
+/** 变更方法摘要项 */
+export interface ChainMethodSummary {
+  class_name: string
+  method_name: string
+  signature: string
+  change_type: string
+  parameters: string
+  return_type: string
+  documentation: string
+  method_status: string
+  upwards_chain_status: string
+  downwards_chain_status: string
+  endpoints: EndpointNode[]
+}
+
+/**
+ * 获取变更方法摘要列表（极轻量，仅方法元信息）
+ */
+export function getChainMethods(baseline: string, version: string, direction: string = 'upwards') {
+  return apiClient.get<{ methods: ChainMethodSummary[]; total: number }>(
+    `/analysis/${baseline}/${version}/chain-methods`,
+    { params: { direction } }
+  )
+}
