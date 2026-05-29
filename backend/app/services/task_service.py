@@ -19,6 +19,8 @@ if project_root not in sys.path:
 
 logger = logging.getLogger(__name__)
 
+from jcci.utils.tag_utils import extract_short_tag
+
 
 class TaskStatus:
     """任务状态枚举"""
@@ -353,17 +355,8 @@ class TaskService:
             self._update_task_status(task_id, TaskStatus.RUNNING, progress=90.0)
             
             # 构造结果 URL（同时包含 baseline 和 version）
-            # 使用与 workflow1 一致的 extract_short_tag 逻辑
-            def _extract_short(tag: str) -> str:
-                if len(tag) == 40 and re.match(r'^[0-9a-f]{40}$', tag, re.IGNORECASE):
-                    return tag[:8]
-                elif '_' in tag or len(tag) > 11:
-                    return tag[-11:]
-                else:
-                    return tag
-            
-            short_old = _extract_short(tag_old)
-            short_new = _extract_short(tag_new)
+            short_old = extract_short_tag(tag_old)
+            short_new = extract_short_tag(tag_new)
             baseline_name = f"{project_name}_{short_old}"
             result_url = f"/analysis/?baseline={baseline_name}&version={short_new}"
             

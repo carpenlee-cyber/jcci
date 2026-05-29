@@ -17,6 +17,7 @@ from jcci.utils.performance_monitor import (
     print_performance_report,
     get_performance_summary
 )
+from jcci.utils.tag_utils import extract_short_tag
 
 # 配置日志
 logging.basicConfig(
@@ -25,40 +26,6 @@ logging.basicConfig(
     datefmt='%Y-%m-%d %H:%M:%S'
 )
 logger = logging.getLogger(__name__)
-
-
-def extract_short_tag(tag: str) -> str:
-    """
-    从tag或commit hash中提取短标识符
-    
-    规则：
-    - Commit Hash (40位十六进制): 截取前8位
-    - Git Tag (长度>11): 截取后11位
-    - 短标识符 (长度<=11): 保持不变
-    
-    例如：
-    - dd6569c3558f79af5b21aad601349e0f029b9a6d -> dd6569c3 (commit hash)
-    - MIX_LJ01.BUP_BUP3_UAT_UAT_00.00.01_SUMMER_20260403_01 -> 20260403_01 (tag)
-    - d9501e9 -> d9501e9 (短标识符)
-    
-    Args:
-        tag: 完整的tag或commit hash字符串
-        
-    Returns:
-        短标识符
-    """
-    import re
-    
-    # 判断是否为40位commit hash（十六进制字符串）
-    if len(tag) == 40 and re.match(r'^[0-9a-f]{40}$', tag, re.IGNORECASE):
-        # Commit hash：截取前8位
-        return tag[:8]
-    elif '_' in tag or len(tag) > 11:
-        # Git Tag（包含下划线或长度>11）：取最后11个字符
-        return tag[-11:]
-    else:
-        # 短标识符：保持不变
-        return tag
 
 
 def workflow1(
@@ -204,8 +171,8 @@ def workflow1(
                         raise FileNotFoundError(f"基线数据库不存在: {db_path}")
                     
                     db = SqliteHelper(db_path)
-                    result = db.select_data("SELECT project_id FROM project")
-                    project_ids = [row['project_id'] for row in result]
+                    project_rows = db.select_data("SELECT project_id FROM project")
+                    project_ids = [row['project_id'] for row in project_rows]
                     
                     class_hierarchy = ClassHierarchyIndex(db.connect(), project_ids)
                     logger.info(f"✓ 类层次索引构建完成：{len(class_hierarchy._class_hierarchy)} 个类，{len(class_hierarchy._interface_impls)} 个接口")
@@ -248,36 +215,37 @@ def workflow1(
                            f"失败: {bidirectional_result['downwards']['metadata']['failed_chains']}")
         
         # 步骤4：可视化展示调用链
-        with timer("Step 4: Visualization and File Output"):
-            logger.info("步骤4：调用链可视化展示")
-            
-            from jcci.call_chain.visualizer import CallChainVisualizer
-            
-            # 打印向上调用链（从双向结果中提取upwards部分）
-            upwards_text = CallChainVisualizer.format_upwards_chains(
-                bidirectional_result['upwards']  # 提取upwards部分
-            )
-            
-            # 打印向下调用链（从双向结果中提取downwards部分）
-            downwards_text = CallChainVisualizer.format_downwards_chains(
-                bidirectional_result['downwards']  # 提取downwards部分
-            )
-            
-            # 将结果写入文件（使用统一路径管理）
-            from jcci.utils.path_utils import get_version_subdir, ensure_dir_exists, get_upwards_txt_path, get_downwards_txt_path
-            
-            version_subdir = get_version_subdir(project_name, commit_old, commit_new)
-            ensure_dir_exists(version_subdir)
-            
-            # 写入向上调用链
-            upwards_file = get_upwards_txt_path(project_name, commit_old, commit_new)
-            with open(upwards_file, 'w', encoding='utf-8') as f:
-                f.write(upwards_text)
-            
-            # 写入向下调用链
-            downwards_file = get_downwards_txt_path(project_name, commit_old, commit_new)
-            with open(downwards_file, 'w', encoding='utf-8') as f:
-                f.write(downwards_text)
+        if changed_methods:
+            with timer("Step 4: Visualization and File Output"):
+                logger.info("步骤4：调用链可视化展示")
+                
+                from jcci.call_chain.visualizer import CallChainVisualizer
+                
+                # 打印向上调用链（从双向结果中提取upwards部分）
+                upwards_text = CallChainVisualizer.format_upwards_chains(
+                    bidirectional_result['upwards']  # 提取upwards部分
+                )
+                
+                # 打印向下调用链（从双向结果中提取downwards部分）
+                downwards_text = CallChainVisualizer.format_downwards_chains(
+                    bidirectional_result['downwards']  # 提取downwards部分
+                )
+                
+                # 将结果写入文件（使用统一路径管理）
+                from jcci.utils.path_utils import get_version_subdir, ensure_dir_exists, get_upwards_txt_path, get_downwards_txt_path
+                
+                version_subdir = get_version_subdir(project_name, commit_old, commit_new)
+                ensure_dir_exists(version_subdir)
+                
+                # 写入向上调用链
+                upwards_file = get_upwards_txt_path(project_name, commit_old, commit_new)
+                with open(upwards_file, 'w', encoding='utf-8') as f:
+                    f.write(upwards_text)
+                
+                # 写入向下调用链
+                downwards_file = get_downwards_txt_path(project_name, commit_old, commit_new)
+                with open(downwards_file, 'w', encoding='utf-8') as f:
+                    f.write(downwards_text)
         
         # 步骤5：启动Streamlit Web服务（已弃用，改用 FastAPI 后端）
         if enable_streamlit:
@@ -304,4 +272,4 @@ def workflow1(
         logger.info(f"   平均耗时: {summary['average_time']:.3f}s")
         logger.info("=" * 80)
         
-        return result
+        return result1

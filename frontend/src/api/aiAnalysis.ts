@@ -1,15 +1,10 @@
 /**
  * AI 分析 API 封装
  */
-import axios from 'axios'
+import apiClient from './client'
 
-const apiClient = axios.create({
-  baseURL: 'http://127.0.0.1:8000/api',
-  timeout: 300000,
-  headers: {
-    'Content-Type': 'application/json'
-  }
-})
+// AI 分析任务可能耗时较长，单独设置超时
+apiClient.defaults.timeout = 300000
 
 export interface CreateTaskRequest {
   analysis_type: 'method' | 'chain'

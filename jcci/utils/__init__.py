@@ -16,6 +16,8 @@ from .path_utils import (
     list_version_subdirs,
 )
 
+from .tag_utils import extract_short_tag
+
 __all__ = [
     'PROJECT_ROOT',
     'RESULT_DIR',
@@ -30,4 +32,5 @@ __all__ = [
     'ensure_dir_exists',
     'list_baseline_dirs',
     'list_version_subdirs',
+    'extract_short_tag',
 ]

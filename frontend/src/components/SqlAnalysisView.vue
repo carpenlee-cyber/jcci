@@ -105,7 +105,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import axios from 'axios'
+import apiClient from '@/api/client'
 import { useRoute } from 'vue-router'
 
 const route = useRoute()
@@ -124,12 +124,6 @@ const minScore = ref(0)
 const sqlTypes = computed(() => {
   if (!summary.value) return []
   return Object.keys(summary.value.sql_type_distribution || {})
-})
-
-const apiClient = axios.create({
-  baseURL: 'http://127.0.0.1:8000/api',
-  timeout: 30000,
-  headers: { 'Content-Type': 'application/json' }
 })
 
 const loadSqlSummary = async () => {

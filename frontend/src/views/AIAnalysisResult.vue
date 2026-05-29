@@ -192,15 +192,21 @@ const loadResultForType = async (type: string) => {
   const rid = resultIds[type as keyof typeof resultIds]
   if (!rid) {
     result.value = null
+    subResults.value = []
+    activeSubTab.value = 'aggregation'
     return
   }
   loading.value = true
   try {
     const res = await fetchResult(rid)
     result.value = res.data
+    // 填充子结果列表（用于链分析的聚合/子方法切换）
+    subResults.value = res.data.sub_results || []
+    activeSubTab.value = 'aggregation'
   } catch (err) {
     console.error('加载结果失败:', err)
     result.value = null
+    subResults.value = []
   } finally {
     loading.value = false
   }

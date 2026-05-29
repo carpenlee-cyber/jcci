@@ -79,8 +79,8 @@
           </template>
         </el-table-column>
         <el-table-column prop="git_url" label="Git仓库" min-width="200" show-overflow-tooltip />
-        <el-table-column prop="tag_old" label="旧版本" width="150" />
-        <el-table-column prop="tag_new" label="新版本" width="150" />
+        <el-table-column prop="tag_old" label="基线版本" width="150" />
+        <el-table-column prop="tag_new" label="目标版本" width="150" />
         <el-table-column prop="progress" label="进度" width="120">
           <template #default="{ row }">
             <el-progress :percentage="row.progress" />
@@ -192,7 +192,11 @@ const handlePageChange = (page: number) => {
 }
 
 const viewAnalysis = (taskId: string) => {
-  router.push(`/analysis/${taskId}`)
+  const task = tasks.value.find((t: any) => t.task_id === taskId)
+  const baseline = task?.tag_old || ''
+  const version = task?.tag_new || ''
+  const query = `?baseline=${encodeURIComponent(baseline)}&version=${encodeURIComponent(version)}`
+  router.push(`/analysis/${taskId}${query}`)
 }
 
 onMounted(() => {

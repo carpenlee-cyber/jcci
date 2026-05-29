@@ -15,6 +15,7 @@
             style="width: 100%"
             @change="handleBaselineChange"
             :loading="loadingBaselines"
+            :disabled="props.lockedBaseline"
           >
             <el-option
               v-for="baseline in baselines"
@@ -63,6 +64,7 @@ import type { BaselineInfo } from '@/api/analysis'
 const props = defineProps<{
   initialBaseline?: string
   initialVersion?: string
+  lockedBaseline?: boolean
 }>()
 
 const emit = defineEmits<{

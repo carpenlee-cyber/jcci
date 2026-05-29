@@ -1,0 +1,3615 @@
+{
+  "metadata": {
+    "direction": "upwards",
+    "analysis_version": "3.1",
+    "username": "carpenlee-cyber",
+    "git_url": "https://github.com/carpenlee-cyber/mall.git",
+    "project_name": "mall",
+    "baseline_commit": "SHAb42d_20231225_01",
+    "target_commit": "SHA3afe_20260506_01",
+    "total_methods": 47,
+    "successful_chains": 47,
+    "failed_chains": 0,
+    "output_file": "C:\\Users\\carpe\\VisualStudioProject\\TestPlatform\\jcci\\jcci\\analyze_result\\mall_SHAb42d_20231225_01\\SHA3afe_20260506_01\\upwards_call_chains.json",
+    "max_depth": 5,
+    "features_enabled": {
+      "class_hierarchy_analysis": true,
+      "entry_detection": true
+    },
+    "coverage_stats": {
+      "total_methods": 0,
+      "methods_with_callers": 803,
+      "methods_without_callers": 1360,
+      "cha_resolved_calls": 717,
+      "direct_calls": 318,
+      "cyclic_paths": 0,
+      "depth_limited_paths": 0,
+      "entry_points_found": 51,
+      "coverage_rate_percent": 0.0,
+      "interpretation": "覆盖率表示成功找到至少一个调用者的方法比例。低覆盖率可能意味着大量调用通过动态绑定/框架发起。"
+    }
+  },
+  "impact_chains": [
+    {
+      "direction": "upwards",
+      "method_info": {
+        "class_name": "PortalOrderDao",
+        "method_name": "lockStockBySkuId",
+        "parameters": "[{\"parameter_type\": \"Long\", \"parameter_name\": \"productSkuId\", \"parameter_varargs\": false}, {\"parameter_type\": \"Integer\", \"parameter_name\": \"quantity\", \"parameter_varargs\": false}]",
+        "return_type": "int",
+        "change_type": "ADDED"
+      },
+      "package_class": "com.macro.mall.portal.dao.PortalOrderDao",
+      "method_signature": "lockStockBySkuId(Long,Integer)",
+      "chain": {
+        "node_id": "0|com.macro.mall.portal.dao.PortalOrderDao|lockStockBySkuId(Long,Integer)",
+        "package_class": "com.macro.mall.portal.dao.PortalOrderDao",
+        "method_signature": "lockStockBySkuId(Long,Integer)",
+        "method_name": "lockStockBySkuId",
+        "class_name": "PortalOrderDao",
+        "depth": 0,
+        "invocation_lines": [],
+        "is_cyclic": false,
+        "is_leaf": false,
+        "db_method_id": 27562,
+        "root_type": "NO_STATIC_CALLER",
+        "call_type": "DIRECT",
+        "has_multiple_call_sites": false,
+        "api_paths": [],
+        "change_type": "ADDED",
+        "dao_info": null,
+        "documentation": null,
+        "children": [
+          {
+            "node_id": "1|com.macro.mall.portal.service.impl.OmsPortalOrderServiceImpl|lockStock(List<com.macro.mall.portal.domain.CartPromotionItem>)",
+            "package_class": "com.macro.mall.portal.service.impl.OmsPortalOrderServiceImpl",
+            "method_signature": "lockStock(List<com.macro.mall.portal.domain.CartPromotionItem>)",
+            "method_name": "lockStock",
+            "class_name": "OmsPortalOrderServiceImpl",
+            "depth": 1,
+            "invocation_lines": [
+              754
+            ],
+            "is_cyclic": false,
+            "is_leaf": false,
+            "db_method_id": 27740,
+            "root_type": "UNKNOWN",
+            "call_type": "CHA_RESOLVED",
+            "has_multiple_call_sites": false,
+            "api_paths": [],
+            "change_type": "MODIFIED",
+            "dao_info": null,
+            "documentation": null,
+            "children": [
+              {
+                "node_id": "2|com.macro.mall.portal.service.impl.OmsPortalOrderServiceImpl|generateOrder(com.macro.mall.portal.domain.OrderParam)",
+                "package_class": "com.macro.mall.portal.service.impl.OmsPortalOrderServiceImpl",
+                "method_signature": "generateOrder(com.macro.mall.portal.domain.OrderParam)",
+                "method_name": "generateOrder",
+                "class_name": "OmsPortalOrderServiceImpl",
+                "depth": 2,
+                "invocation_lines": [
+                  167
+                ],
+                "is_cyclic": false,
+                "is_leaf": false,
+                "db_method_id": 27713,
+                "root_type": "UNKNOWN",
+                "call_type": "DIRECT",
+                "has_multiple_call_sites": false,
+                "api_paths": [],
+                "change_type": "UNCHANGED",
+                "dao_info": null,
+                "documentation": null,
+                "children": [
+                  {
+                    "node_id": "3|com.macro.mall.portal.controller.OmsPortalOrderController|generateOrder(com.macro.mall.portal.domain.OrderParam)",
+                    "package_class": "com.macro.mall.portal.controller.OmsPortalOrderController",
+                    "method_signature": "generateOrder(com.macro.mall.portal.domain.OrderParam)",
+                    "method_name": "generateOrder",
+                    "class_name": "OmsPortalOrderController",
+                    "depth": 3,
+                    "invocation_lines": [
+                      44
+                    ],
+                    "is_cyclic": false,
+                    "is_leaf": true,
+                    "db_method_id": 13851,
+                    "root_type": "HTTP_API",
+                    "call_type": "CHA_RESOLVED",
+                    "has_multiple_call_sites": false,
+                    "api_paths": [],
+                    "change_type": "UNCHANGED",
+                    "dao_info": null,
+                    "documentation": null,
+                    "children": []
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "_analysis_meta": {
+          "coverage_stats": {
+            "total_query_methods": 4,
+            "methods_with_callers": 3,
+            "methods_without_callers": 1,
+            "cha_resolved_calls": 2,
+            "direct_calls": 1,
+            "cyclic_paths": 0,
+            "depth_limited_paths": 0
+          },
+          "limitations": [],
+          "is_complete": true
+        }
+      },
+      "entry_points": [
+        {
+          "package_class": "com.macro.mall.portal.controller.OmsPortalOrderController",
+          "method_signature": "generateOrder(com.macro.mall.portal.domain.OrderParam)",
+          "root_type": "HTTP_API",
+          "depth_from_change": 3,
+          "api_paths": []
+        }
+      ],
+      "has_incomplete_paths": false
+    },
+    {
+      "direction": "upwards",
+      "method_info": {
+        "class_name": "PortalOrderDao",
+        "method_name": "reduceSkuStock",
+        "parameters": "[{\"parameter_type\": \"Long\", \"parameter_name\": \"productSkuId\", \"parameter_varargs\": false}, {\"parameter_type\": \"Integer\", \"parameter_name\": \"quantity\", \"parameter_varargs\": false}]",
+        "return_type": "int",
+        "change_type": "ADDED"
+      },
+      "package_class": "com.macro.mall.portal.dao.PortalOrderDao",
+      "method_signature": "reduceSkuStock(Long,Integer)",
+      "chain": {
+        "node_id": "0|com.macro.mall.portal.dao.PortalOrderDao|reduceSkuStock(Long,Integer)",
+        "package_class": "com.macro.mall.portal.dao.PortalOrderDao",
+        "method_signature": "reduceSkuStock(Long,Integer)",
+        "method_name": "reduceSkuStock",
+        "class_name": "PortalOrderDao",
+        "depth": 0,
+        "invocation_lines": [],
+        "is_cyclic": false,
+        "is_leaf": false,
+        "db_method_id": 27563,
+        "root_type": "NO_STATIC_CALLER",
+        "call_type": "DIRECT",
+        "has_multiple_call_sites": false,
+        "api_paths": [],
+        "change_type": "ADDED",
+        "dao_info": null,
+        "documentation": null,
+        "children": [
+          {
+            "node_id": "1|com.macro.mall.portal.service.impl.OmsPortalOrderServiceImpl|paySuccess(Long,Integer)",
+            "package_class": "com.macro.mall.portal.service.impl.OmsPortalOrderServiceImpl",
+            "method_signature": "paySuccess(Long,Integer)",
+            "method_name": "paySuccess",
+            "class_name": "OmsPortalOrderServiceImpl",
+            "depth": 1,
+            "invocation_lines": [
+              276
+            ],
+            "is_cyclic": false,
+            "is_leaf": false,
+            "db_method_id": 27714,
+            "root_type": "UNKNOWN",
+            "call_type": "CHA_RESOLVED",
+            "has_multiple_call_sites": false,
+            "api_paths": [],
+            "change_type": "MODIFIED",
+            "dao_info": null,
+            "documentation": null,
+            "children": [
+              {
+                "node_id": "2|com.macro.mall.portal.controller.OmsPortalOrderController|paySuccess(Long,Integer)",
+                "package_class": "com.macro.mall.portal.controller.OmsPortalOrderController",
+                "method_signature": "paySuccess(Long,Integer)",
+                "method_name": "paySuccess",
+                "class_name": "OmsPortalOrderController",
+                "depth": 2,
+                "invocation_lines": [
+                  52
+                ],
+                "is_cyclic": false,
+                "is_leaf": true,
+                "db_method_id": 13852,
+                "root_type": "HTTP_API",
+                "call_type": "CHA_RESOLVED",
+                "has_multiple_call_sites": false,
+                "api_paths": [],
+                "change_type": "UNCHANGED",
+                "dao_info": null,
+                "documentation": null,
+                "children": []
+              },
+              {
+                "node_id": "2|com.macro.mall.portal.service.impl.OmsPortalOrderServiceImpl|paySuccessByOrderSn(String,Integer)",
+                "package_class": "com.macro.mall.portal.service.impl.OmsPortalOrderServiceImpl",
+                "method_signature": "paySuccessByOrderSn(String,Integer)",
+                "method_name": "paySuccessByOrderSn",
+                "class_name": "OmsPortalOrderServiceImpl",
+                "depth": 2,
+                "invocation_lines": [
+                  455
+                ],
+                "is_cyclic": false,
+                "is_leaf": true,
+                "db_method_id": 27722,
+                "root_type": "NO_STATIC_CALLER",
+                "call_type": "DIRECT",
+                "has_multiple_call_sites": false,
+                "api_paths": [],
+                "change_type": "UNCHANGED",
+                "dao_info": null,
+                "documentation": null,
+                "children": []
+              }
+            ]
+          }
+        ],
+        "_analysis_meta": {
+          "coverage_stats": {
+            "total_query_methods": 8,
+            "methods_with_callers": 5,
+            "methods_without_callers": 3,
+            "cha_resolved_calls": 4,
+            "direct_calls": 2,
+            "cyclic_paths": 0,
+            "depth_limited_paths": 0
+          },
+          "limitations": [],
+          "is_complete": true
+        }
+      },
+      "entry_points": [
+        {
+          "package_class": "com.macro.mall.portal.controller.OmsPortalOrderController",
+          "method_signature": "paySuccess(Long,Integer)",
+          "root_type": "HTTP_API",
+          "depth_from_change": 2,
+          "api_paths": []
+        }
+      ],
+      "has_incomplete_paths": false
+    },
+    {
+      "direction": "upwards",
+      "method_info": {
+        "class_name": "PortalOrderDao",
+        "method_name": "releaseStockBySkuId",
+        "parameters": "[{\"parameter_type\": \"Long\", \"parameter_name\": \"productSkuId\", \"parameter_varargs\": false}, {\"parameter_type\": \"Integer\", \"parameter_name\": \"quantity\", \"parameter_varargs\": false}]",
+        "return_type": "int",
+        "change_type": "ADDED"
+      },
+      "package_class": "com.macro.mall.portal.dao.PortalOrderDao",
+      "method_signature": "releaseStockBySkuId(Long,Integer)",
+      "chain": {
+        "node_id": "0|com.macro.mall.portal.dao.PortalOrderDao|releaseStockBySkuId(Long,Integer)",
+        "package_class": "com.macro.mall.portal.dao.PortalOrderDao",
+        "method_signature": "releaseStockBySkuId(Long,Integer)",
+        "method_name": "releaseStockBySkuId",
+        "class_name": "PortalOrderDao",
+        "depth": 0,
+        "invocation_lines": [],
+        "is_cyclic": false,
+        "is_leaf": false,
+        "db_method_id": 27564,
+        "root_type": "NO_STATIC_CALLER",
+        "call_type": "DIRECT",
+        "has_multiple_call_sites": false,
+        "api_paths": [],
+        "change_type": "ADDED",
+        "dao_info": null,
+        "documentation": null,
+        "children": [
+          {
+            "node_id": "1|com.macro.mall.portal.service.impl.OmsPortalOrderServiceImpl|cancelOrder(Long)",
+            "package_class": "com.macro.mall.portal.service.impl.OmsPortalOrderServiceImpl",
+            "method_signature": "cancelOrder(Long)",
+            "method_name": "cancelOrder",
+            "class_name": "OmsPortalOrderServiceImpl",
+            "depth": 1,
+            "invocation_lines": [
+              334
+            ],
+            "is_cyclic": false,
+            "is_leaf": false,
+            "db_method_id": 27716,
+            "root_type": "UNKNOWN",
+            "call_type": "CHA_RESOLVED",
+            "has_multiple_call_sites": false,
+            "api_paths": [],
+            "change_type": "MODIFIED",
+            "dao_info": null,
+            "documentation": null,
+            "children": [
+              {
+                "node_id": "2|com.macro.mall.portal.component.CancelOrderReceiver|handle(Long)",
+                "package_class": "com.macro.mall.portal.component.CancelOrderReceiver",
+                "method_signature": "handle(Long)",
+                "method_name": "handle",
+                "class_name": "CancelOrderReceiver",
+                "depth": 2,
+                "invocation_lines": [
+                  23
+                ],
+                "is_cyclic": false,
+                "is_leaf": true,
+                "db_method_id": 27526,
+                "root_type": "NO_STATIC_CALLER",
+                "call_type": "CHA_RESOLVED",
+                "has_multiple_call_sites": false,
+                "api_paths": [],
+                "change_type": "UNCHANGED",
+                "dao_info": null,
+                "documentation": null,
+                "children": []
+              },
+              {
+                "node_id": "2|com.macro.mall.portal.controller.OmsPortalOrderController|cancelUserOrder(Long)",
+                "package_class": "com.macro.mall.portal.controller.OmsPortalOrderController",
+                "method_signature": "cancelUserOrder(Long)",
+                "method_name": "cancelUserOrder",
+                "class_name": "OmsPortalOrderController",
+                "depth": 2,
+                "invocation_lines": [
+                  96
+                ],
+                "is_cyclic": false,
+                "is_leaf": true,
+                "db_method_id": 13857,
+                "root_type": "HTTP_API",
+                "call_type": "CHA_RESOLVED",
+                "has_multiple_call_sites": false,
+                "api_paths": [],
+                "change_type": "UNCHANGED",
+                "dao_info": null,
+                "documentation": null,
+                "children": []
+              }
+            ]
+          }
+        ],
+        "_analysis_meta": {
+          "coverage_stats": {
+            "total_query_methods": 12,
+            "methods_with_callers": 7,
+            "methods_without_callers": 5,
+            "cha_resolved_calls": 7,
+            "direct_calls": 2,
+            "cyclic_paths": 0,
+            "depth_limited_paths": 0
+          },
+          "limitations": [],
+          "is_complete": true
+        }
+      },
+      "entry_points": [
+        {
+          "package_class": "com.macro.mall.portal.controller.OmsPortalOrderController",
+          "method_signature": "cancelUserOrder(Long)",
+          "root_type": "HTTP_API",
+          "depth_from_change": 2,
+          "api_paths": []
+        }
+      ],
+      "has_incomplete_paths": false
+    },
+    {
+      "direction": "upwards",
+      "method_info": {
+        "class_name": "UmsAdminService",
+        "method_name": "logout",
+        "parameters": "[{\"parameter_type\": \"String\", \"parameter_name\": \"username\", \"parameter_varargs\": false}]",
+        "return_type": "None",
+        "change_type": "ADDED"
+      },
+      "package_class": "com.macro.mall.service.UmsAdminService",
+      "method_signature": "logout(String)",
+      "chain": {
+        "node_id": "0|com.macro.mall.service.UmsAdminService|logout(String)",
+        "package_class": "com.macro.mall.service.UmsAdminService",
+        "method_signature": "logout(String)",
+        "method_name": "logout",
+        "class_name": "UmsAdminService",
+        "depth": 0,
+        "invocation_lines": [],
+        "is_cyclic": false,
+        "is_leaf": false,
+        "db_method_id": 15214,
+        "root_type": "NO_STATIC_CALLER",
+        "call_type": "DIRECT",
+        "has_multiple_call_sites": false,
+        "api_paths": [],
+        "change_type": "ADDED",
+        "dao_info": null,
+        "documentation": null,
+        "children": [
+          {
+            "node_id": "1|com.macro.mall.controller.UmsAdminController|logout(Principal)",
+            "package_class": "com.macro.mall.controller.UmsAdminController",
+            "method_signature": "logout(Principal)",
+            "method_name": "logout",
+            "class_name": "UmsAdminController",
+            "depth": 1,
+            "invocation_lines": [
+              112
+            ],
+            "is_cyclic": false,
+            "is_leaf": true,
+            "db_method_id": 15411,
+            "root_type": "HTTP_API",
+            "call_type": "CHA_RESOLVED",
+            "has_multiple_call_sites": false,
+            "api_paths": [],
+            "change_type": "MODIFIED",
+            "dao_info": null,
+            "documentation": null,
+            "children": []
+          }
+        ],
+        "_analysis_meta": {
+          "coverage_stats": {
+            "total_query_methods": 14,
+            "methods_with_callers": 8,
+            "methods_without_callers": 6,
+            "cha_resolved_calls": 8,
+            "direct_calls": 2,
+            "cyclic_paths": 0,
+            "depth_limited_paths": 0
+          },
+          "limitations": [],
+          "is_complete": true
+        }
+      },
+      "entry_points": [
+        {
+          "package_class": "com.macro.mall.controller.UmsAdminController",
+          "method_signature": "logout(Principal)",
+          "root_type": "HTTP_API",
+          "depth_from_change": 1,
+          "api_paths": []
+        }
+      ],
+      "has_incomplete_paths": false
+    },
+    {
+      "direction": "upwards",
+      "method_info": {
+        "class_name": "UmsAdminServiceImpl",
+        "method_name": "logout",
+        "parameters": "[{\"parameter_type\": \"String\", \"parameter_name\": \"username\", \"parameter_varargs\": false}]",
+        "return_type": "None",
+        "change_type": "ADDED"
+      },
+      "package_class": "com.macro.mall.service.impl.UmsAdminServiceImpl",
+      "method_signature": "logout(String)",
+      "chain": {
+        "node_id": "0|com.macro.mall.service.impl.UmsAdminServiceImpl|logout(String)",
+        "package_class": "com.macro.mall.service.impl.UmsAdminServiceImpl",
+        "method_signature": "logout(String)",
+        "method_name": "logout",
+        "class_name": "UmsAdminServiceImpl",
+        "depth": 0,
+        "invocation_lines": [],
+        "is_cyclic": false,
+        "is_leaf": false,
+        "db_method_id": 27507,
+        "root_type": "NO_STATIC_CALLER",
+        "call_type": "DIRECT",
+        "has_multiple_call_sites": false,
+        "api_paths": [],
+        "change_type": "ADDED",
+        "dao_info": null,
+        "documentation": null,
+        "children": [
+          {
+            "node_id": "1|com.macro.mall.controller.UmsAdminController|logout(Principal)",
+            "package_class": "com.macro.mall.controller.UmsAdminController",
+            "method_signature": "logout(Principal)",
+            "method_name": "logout",
+            "class_name": "UmsAdminController",
+            "depth": 1,
+            "invocation_lines": [
+              112
+            ],
+            "is_cyclic": false,
+            "is_leaf": true,
+            "db_method_id": 15411,
+            "root_type": "HTTP_API",
+            "call_type": "CHA_RESOLVED",
+            "has_multiple_call_sites": false,
+            "api_paths": [],
+            "change_type": "MODIFIED",
+            "dao_info": null,
+            "documentation": null,
+            "children": []
+          }
+        ],
+        "_analysis_meta": {
+          "coverage_stats": {
+            "total_query_methods": 16,
+            "methods_with_callers": 9,
+            "methods_without_callers": 7,
+            "cha_resolved_calls": 9,
+            "direct_calls": 2,
+            "cyclic_paths": 0,
+            "depth_limited_paths": 0
+          },
+          "limitations": [],
+          "is_complete": true
+        }
+      },
+      "entry_points": [
+        {
+          "package_class": "com.macro.mall.controller.UmsAdminController",
+          "method_signature": "logout(Principal)",
+          "root_type": "HTTP_API",
+          "depth_from_change": 1,
+          "api_paths": []
+        }
+      ],
+      "has_incomplete_paths": false
+    },
+    {
+      "direction": "upwards",
+      "method_info": {
+        "class_name": "HomeController",
+        "method_name": "getSubjectList",
+        "parameters": "[{\"parameter_type\": \"Long\", \"parameter_name\": \"cateId\", \"parameter_varargs\": false}, {\"parameter_type\": \"Integer\", \"parameter_name\": \"pageSize\", \"parameter_varargs\": false}, {\"parameter_type\": \"Integer\", \"parameter_name\": \"pageNum\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult<List>",
+        "change_type": "MODIFIED"
+      },
+      "package_class": "com.macro.mall.portal.controller.HomeController",
+      "method_signature": "getSubjectList(Long,Integer,Integer)",
+      "chain": {
+        "node_id": "0|com.macro.mall.portal.controller.HomeController|getSubjectList(Long,Integer,Integer)",
+        "package_class": "com.macro.mall.portal.controller.HomeController",
+        "method_signature": "getSubjectList(Long,Integer,Integer)",
+        "method_name": "getSubjectList",
+        "class_name": "HomeController",
+        "depth": 0,
+        "invocation_lines": [],
+        "is_cyclic": false,
+        "is_leaf": true,
+        "db_method_id": 27554,
+        "root_type": "HTTP_API",
+        "call_type": "DIRECT",
+        "has_multiple_call_sites": false,
+        "api_paths": [
+          "[GET]/home/subjectList"
+        ],
+        "change_type": "MODIFIED",
+        "dao_info": null,
+        "documentation": null,
+        "children": [],
+        "_analysis_meta": {
+          "coverage_stats": {
+            "total_query_methods": 17,
+            "methods_with_callers": 9,
+            "methods_without_callers": 8,
+            "cha_resolved_calls": 9,
+            "direct_calls": 2,
+            "cyclic_paths": 0,
+            "depth_limited_paths": 0
+          },
+          "limitations": [],
+          "is_complete": true
+        }
+      },
+      "entry_points": [
+        {
+          "package_class": "com.macro.mall.portal.controller.HomeController",
+          "method_signature": "getSubjectList(Long,Integer,Integer)",
+          "root_type": "HTTP_API",
+          "depth_from_change": 0,
+          "api_paths": [
+            "[GET]/home/subjectList"
+          ]
+        }
+      ],
+      "has_incomplete_paths": false
+    },
+    {
+      "direction": "upwards",
+      "method_info": {
+        "class_name": "MemberAttentionController",
+        "method_name": "detail",
+        "parameters": "[{\"parameter_type\": \"Long\", \"parameter_name\": \"brandId\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult<com.macro.mall.portal.domain.MemberBrandAttention>",
+        "change_type": "MODIFIED"
+      },
+      "package_class": "com.macro.mall.portal.controller.MemberAttentionController",
+      "method_signature": "detail(Long)",
+      "chain": {
+        "node_id": "0|com.macro.mall.portal.controller.MemberAttentionController|detail(Long)",
+        "package_class": "com.macro.mall.portal.controller.MemberAttentionController",
+        "method_signature": "detail(Long)",
+        "method_name": "detail",
+        "class_name": "MemberAttentionController",
+        "depth": 0,
+        "invocation_lines": [],
+        "is_cyclic": false,
+        "is_leaf": true,
+        "db_method_id": 27573,
+        "root_type": "HTTP_API",
+        "call_type": "DIRECT",
+        "has_multiple_call_sites": false,
+        "api_paths": [
+          "[GET]/member/attention/detail"
+        ],
+        "change_type": "MODIFIED",
+        "dao_info": null,
+        "documentation": null,
+        "children": [],
+        "_analysis_meta": {
+          "coverage_stats": {
+            "total_query_methods": 18,
+            "methods_with_callers": 9,
+            "methods_without_callers": 9,
+            "cha_resolved_calls": 9,
+            "direct_calls": 2,
+            "cyclic_paths": 0,
+            "depth_limited_paths": 0
+          },
+          "limitations": [],
+          "is_complete": true
+        }
+      },
+      "entry_points": [
+        {
+          "package_class": "com.macro.mall.portal.controller.MemberAttentionController",
+          "method_signature": "detail(Long)",
+          "root_type": "HTTP_API",
+          "depth_from_change": 0,
+          "api_paths": [
+            "[GET]/member/attention/detail"
+          ]
+        }
+      ],
+      "has_incomplete_paths": false
+    },
+    {
+      "direction": "upwards",
+      "method_info": {
+        "class_name": "MemberAttentionController",
+        "method_name": "list",
+        "parameters": "[{\"parameter_type\": \"Integer\", \"parameter_name\": \"pageNum\", \"parameter_varargs\": false}, {\"parameter_type\": \"Integer\", \"parameter_name\": \"pageSize\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult<com.macro.mall.common.api.CommonPage>",
+        "change_type": "MODIFIED"
+      },
+      "package_class": "com.macro.mall.portal.controller.MemberAttentionController",
+      "method_signature": "list(Integer,Integer)",
+      "chain": {
+        "node_id": "0|com.macro.mall.portal.controller.MemberAttentionController|list(Integer,Integer)",
+        "package_class": "com.macro.mall.portal.controller.MemberAttentionController",
+        "method_signature": "list(Integer,Integer)",
+        "method_name": "list",
+        "class_name": "MemberAttentionController",
+        "depth": 0,
+        "invocation_lines": [],
+        "is_cyclic": false,
+        "is_leaf": true,
+        "db_method_id": 27572,
+        "root_type": "HTTP_API",
+        "call_type": "DIRECT",
+        "has_multiple_call_sites": false,
+        "api_paths": [
+          "[GET]/member/attention/list"
+        ],
+        "change_type": "MODIFIED",
+        "dao_info": null,
+        "documentation": null,
+        "children": [],
+        "_analysis_meta": {
+          "coverage_stats": {
+            "total_query_methods": 19,
+            "methods_with_callers": 9,
+            "methods_without_callers": 10,
+            "cha_resolved_calls": 9,
+            "direct_calls": 2,
+            "cyclic_paths": 0,
+            "depth_limited_paths": 0
+          },
+          "limitations": [],
+          "is_complete": true
+        }
+      },
+      "entry_points": [
+        {
+          "package_class": "com.macro.mall.portal.controller.MemberAttentionController",
+          "method_signature": "list(Integer,Integer)",
+          "root_type": "HTTP_API",
+          "depth_from_change": 0,
+          "api_paths": [
+            "[GET]/member/attention/list"
+          ]
+        }
+      ],
+      "has_incomplete_paths": false
+    },
+    {
+      "direction": "upwards",
+      "method_info": {
+        "class_name": "OmsPortalOrderServiceImpl",
+        "method_name": "cancelOrder",
+        "parameters": "[{\"parameter_type\": \"Long\", \"parameter_name\": \"orderId\", \"parameter_varargs\": false}]",
+        "return_type": "None",
+        "change_type": "MODIFIED"
+      },
+      "package_class": "com.macro.mall.portal.service.impl.OmsPortalOrderServiceImpl",
+      "method_signature": "cancelOrder(Long)",
+      "chain": {
+        "node_id": "0|com.macro.mall.portal.service.impl.OmsPortalOrderServiceImpl|cancelOrder(Long)",
+        "package_class": "com.macro.mall.portal.service.impl.OmsPortalOrderServiceImpl",
+        "method_signature": "cancelOrder(Long)",
+        "method_name": "cancelOrder",
+        "class_name": "OmsPortalOrderServiceImpl",
+        "depth": 0,
+        "invocation_lines": [],
+        "is_cyclic": false,
+        "is_leaf": false,
+        "db_method_id": 27716,
+        "root_type": "NO_STATIC_CALLER",
+        "call_type": "DIRECT",
+        "has_multiple_call_sites": false,
+        "api_paths": [],
+        "change_type": "MODIFIED",
+        "dao_info": null,
+        "documentation": null,
+        "children": [
+          {
+            "node_id": "1|com.macro.mall.portal.component.CancelOrderReceiver|handle(Long)",
+            "package_class": "com.macro.mall.portal.component.CancelOrderReceiver",
+            "method_signature": "handle(Long)",
+            "method_name": "handle",
+            "class_name": "CancelOrderReceiver",
+            "depth": 1,
+            "invocation_lines": [
+              23
+            ],
+            "is_cyclic": false,
+            "is_leaf": true,
+            "db_method_id": 27526,
+            "root_type": "NO_STATIC_CALLER",
+            "call_type": "CHA_RESOLVED",
+            "has_multiple_call_sites": false,
+            "api_paths": [],
+            "change_type": "UNCHANGED",
+            "dao_info": null,
+            "documentation": null,
+            "children": []
+          },
+          {
+            "node_id": "1|com.macro.mall.portal.controller.OmsPortalOrderController|cancelUserOrder(Long)",
+            "package_class": "com.macro.mall.portal.controller.OmsPortalOrderController",
+            "method_signature": "cancelUserOrder(Long)",
+            "method_name": "cancelUserOrder",
+            "class_name": "OmsPortalOrderController",
+            "depth": 1,
+            "invocation_lines": [
+              96
+            ],
+            "is_cyclic": false,
+            "is_leaf": true,
+            "db_method_id": 13857,
+            "root_type": "HTTP_API",
+            "call_type": "CHA_RESOLVED",
+            "has_multiple_call_sites": false,
+            "api_paths": [],
+            "change_type": "UNCHANGED",
+            "dao_info": null,
+            "documentation": null,
+            "children": []
+          }
+        ],
+        "_analysis_meta": {
+          "coverage_stats": {
+            "total_query_methods": 22,
+            "methods_with_callers": 10,
+            "methods_without_callers": 12,
+            "cha_resolved_calls": 11,
+            "direct_calls": 2,
+            "cyclic_paths": 0,
+            "depth_limited_paths": 0
+          },
+          "limitations": [],
+          "is_complete": true
+        }
+      },
+      "entry_points": [
+        {
+          "package_class": "com.macro.mall.portal.controller.OmsPortalOrderController",
+          "method_signature": "cancelUserOrder(Long)",
+          "root_type": "HTTP_API",
+          "depth_from_change": 1,
+          "api_paths": []
+        }
+      ],
+      "has_incomplete_paths": false
+    },
+    {
+      "direction": "upwards",
+      "method_info": {
+        "class_name": "OmsPortalOrderServiceImpl",
+        "method_name": "getUseCoupon",
+        "parameters": "[{\"parameter_type\": \"List<com.macro.mall.portal.domain.CartPromotionItem>\", \"parameter_name\": \"cartPromotionItemList\", \"parameter_varargs\": false}, {\"parameter_type\": \"Long\", \"parameter_name\": \"couponId\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.portal.domain.SmsCouponHistoryDetail",
+        "change_type": "MODIFIED"
+      },
+      "package_class": "com.macro.mall.portal.service.impl.OmsPortalOrderServiceImpl",
+      "method_signature": "getUseCoupon(List<com.macro.mall.portal.domain.CartPromotionItem>,Long)",
+      "chain": {
+        "node_id": "0|com.macro.mall.portal.service.impl.OmsPortalOrderServiceImpl|getUseCoupon(List<com.macro.mall.portal.domain.CartPromotionItem>,Long)",
+        "package_class": "com.macro.mall.portal.service.impl.OmsPortalOrderServiceImpl",
+        "method_signature": "getUseCoupon(List<com.macro.mall.portal.domain.CartPromotionItem>,Long)",
+        "method_name": "getUseCoupon",
+        "class_name": "OmsPortalOrderServiceImpl",
+        "depth": 0,
+        "invocation_lines": [],
+        "is_cyclic": false,
+        "is_leaf": false,
+        "db_method_id": 27738,
+        "root_type": "NO_STATIC_CALLER",
+        "call_type": "DIRECT",
+        "has_multiple_call_sites": false,
+        "api_paths": [],
+        "change_type": "MODIFIED",
+        "dao_info": null,
+        "documentation": null,
+        "children": [
+          {
+            "node_id": "1|com.macro.mall.portal.service.impl.OmsPortalOrderServiceImpl|generateOrder(com.macro.mall.portal.domain.OrderParam)",
+            "package_class": "com.macro.mall.portal.service.impl.OmsPortalOrderServiceImpl",
+            "method_signature": "generateOrder(com.macro.mall.portal.domain.OrderParam)",
+            "method_name": "generateOrder",
+            "class_name": "OmsPortalOrderServiceImpl",
+            "depth": 1,
+            "invocation_lines": [
+              137
+            ],
+            "is_cyclic": false,
+            "is_leaf": false,
+            "db_method_id": 27713,
+            "root_type": "UNKNOWN",
+            "call_type": "DIRECT",
+            "has_multiple_call_sites": false,
+            "api_paths": [],
+            "change_type": "UNCHANGED",
+            "dao_info": null,
+            "documentation": null,
+            "children": [
+              {
+                "node_id": "2|com.macro.mall.portal.controller.OmsPortalOrderController|generateOrder(com.macro.mall.portal.domain.OrderParam)",
+                "package_class": "com.macro.mall.portal.controller.OmsPortalOrderController",
+                "method_signature": "generateOrder(com.macro.mall.portal.domain.OrderParam)",
+                "method_name": "generateOrder",
+                "class_name": "OmsPortalOrderController",
+                "depth": 2,
+                "invocation_lines": [
+                  44
+                ],
+                "is_cyclic": false,
+                "is_leaf": true,
+                "db_method_id": 13851,
+                "root_type": "HTTP_API",
+                "call_type": "CHA_RESOLVED",
+                "has_multiple_call_sites": false,
+                "api_paths": [],
+                "change_type": "UNCHANGED",
+                "dao_info": null,
+                "documentation": null,
+                "children": []
+              }
+            ]
+          }
+        ],
+        "_analysis_meta": {
+          "coverage_stats": {
+            "total_query_methods": 25,
+            "methods_with_callers": 12,
+            "methods_without_callers": 13,
+            "cha_resolved_calls": 12,
+            "direct_calls": 3,
+            "cyclic_paths": 0,
+            "depth_limited_paths": 0
+          },
+          "limitations": [],
+          "is_complete": true
+        }
+      },
+      "entry_points": [
+        {
+          "package_class": "com.macro.mall.portal.controller.OmsPortalOrderController",
+          "method_signature": "generateOrder(com.macro.mall.portal.domain.OrderParam)",
+          "root_type": "HTTP_API",
+          "depth_from_change": 2,
+          "api_paths": []
+        }
+      ],
+      "has_incomplete_paths": false
+    },
+    {
+      "direction": "upwards",
+      "method_info": {
+        "class_name": "OmsPortalOrderServiceImpl",
+        "method_name": "lockStock",
+        "parameters": "[{\"parameter_type\": \"List<com.macro.mall.portal.domain.CartPromotionItem>\", \"parameter_name\": \"cartPromotionItemList\", \"parameter_varargs\": false}]",
+        "return_type": "None",
+        "change_type": "MODIFIED"
+      },
+      "package_class": "com.macro.mall.portal.service.impl.OmsPortalOrderServiceImpl",
+      "method_signature": "lockStock(List<com.macro.mall.portal.domain.CartPromotionItem>)",
+      "chain": {
+        "node_id": "0|com.macro.mall.portal.service.impl.OmsPortalOrderServiceImpl|lockStock(List<com.macro.mall.portal.domain.CartPromotionItem>)",
+        "package_class": "com.macro.mall.portal.service.impl.OmsPortalOrderServiceImpl",
+        "method_signature": "lockStock(List<com.macro.mall.portal.domain.CartPromotionItem>)",
+        "method_name": "lockStock",
+        "class_name": "OmsPortalOrderServiceImpl",
+        "depth": 0,
+        "invocation_lines": [],
+        "is_cyclic": false,
+        "is_leaf": false,
+        "db_method_id": 27740,
+        "root_type": "NO_STATIC_CALLER",
+        "call_type": "DIRECT",
+        "has_multiple_call_sites": false,
+        "api_paths": [],
+        "change_type": "MODIFIED",
+        "dao_info": null,
+        "documentation": null,
+        "children": [
+          {
+            "node_id": "1|com.macro.mall.portal.service.impl.OmsPortalOrderServiceImpl|generateOrder(com.macro.mall.portal.domain.OrderParam)",
+            "package_class": "com.macro.mall.portal.service.impl.OmsPortalOrderServiceImpl",
+            "method_signature": "generateOrder(com.macro.mall.portal.domain.OrderParam)",
+            "method_name": "generateOrder",
+            "class_name": "OmsPortalOrderServiceImpl",
+            "depth": 1,
+            "invocation_lines": [
+              167
+            ],
+            "is_cyclic": false,
+            "is_leaf": false,
+            "db_method_id": 27713,
+            "root_type": "UNKNOWN",
+            "call_type": "DIRECT",
+            "has_multiple_call_sites": false,
+            "api_paths": [],
+            "change_type": "UNCHANGED",
+            "dao_info": null,
+            "documentation": null,
+            "children": [
+              {
+                "node_id": "2|com.macro.mall.portal.controller.OmsPortalOrderController|generateOrder(com.macro.mall.portal.domain.OrderParam)",
+                "package_class": "com.macro.mall.portal.controller.OmsPortalOrderController",
+                "method_signature": "generateOrder(com.macro.mall.portal.domain.OrderParam)",
+                "method_name": "generateOrder",
+                "class_name": "OmsPortalOrderController",
+                "depth": 2,
+                "invocation_lines": [
+                  44
+                ],
+                "is_cyclic": false,
+                "is_leaf": true,
+                "db_method_id": 13851,
+                "root_type": "HTTP_API",
+                "call_type": "CHA_RESOLVED",
+                "has_multiple_call_sites": false,
+                "api_paths": [],
+                "change_type": "UNCHANGED",
+                "dao_info": null,
+                "documentation": null,
+                "children": []
+              }
+            ]
+          }
+        ],
+        "_analysis_meta": {
+          "coverage_stats": {
+            "total_query_methods": 28,
+            "methods_with_callers": 14,
+            "methods_without_callers": 14,
+            "cha_resolved_calls": 13,
+            "direct_calls": 4,
+            "cyclic_paths": 0,
+            "depth_limited_paths": 0
+          },
+          "limitations": [],
+          "is_complete": true
+        }
+      },
+      "entry_points": [
+        {
+          "package_class": "com.macro.mall.portal.controller.OmsPortalOrderController",
+          "method_signature": "generateOrder(com.macro.mall.portal.domain.OrderParam)",
+          "root_type": "HTTP_API",
+          "depth_from_change": 2,
+          "api_paths": []
+        }
+      ],
+      "has_incomplete_paths": false
+    },
+    {
+      "direction": "upwards",
+      "method_info": {
+        "class_name": "OmsPortalOrderServiceImpl",
+        "method_name": "paySuccess",
+        "parameters": "[{\"parameter_type\": \"Long\", \"parameter_name\": \"orderId\", \"parameter_varargs\": false}, {\"parameter_type\": \"Integer\", \"parameter_name\": \"payType\", \"parameter_varargs\": false}]",
+        "return_type": "Integer",
+        "change_type": "MODIFIED"
+      },
+      "package_class": "com.macro.mall.portal.service.impl.OmsPortalOrderServiceImpl",
+      "method_signature": "paySuccess(Long,Integer)",
+      "chain": {
+        "node_id": "0|com.macro.mall.portal.service.impl.OmsPortalOrderServiceImpl|paySuccess(Long,Integer)",
+        "package_class": "com.macro.mall.portal.service.impl.OmsPortalOrderServiceImpl",
+        "method_signature": "paySuccess(Long,Integer)",
+        "method_name": "paySuccess",
+        "class_name": "OmsPortalOrderServiceImpl",
+        "depth": 0,
+        "invocation_lines": [],
+        "is_cyclic": false,
+        "is_leaf": false,
+        "db_method_id": 27714,
+        "root_type": "NO_STATIC_CALLER",
+        "call_type": "DIRECT",
+        "has_multiple_call_sites": false,
+        "api_paths": [],
+        "change_type": "MODIFIED",
+        "dao_info": null,
+        "documentation": null,
+        "children": [
+          {
+            "node_id": "1|com.macro.mall.portal.controller.OmsPortalOrderController|paySuccess(Long,Integer)",
+            "package_class": "com.macro.mall.portal.controller.OmsPortalOrderController",
+            "method_signature": "paySuccess(Long,Integer)",
+            "method_name": "paySuccess",
+            "class_name": "OmsPortalOrderController",
+            "depth": 1,
+            "invocation_lines": [
+              52
+            ],
+            "is_cyclic": false,
+            "is_leaf": true,
+            "db_method_id": 13852,
+            "root_type": "HTTP_API",
+            "call_type": "CHA_RESOLVED",
+            "has_multiple_call_sites": false,
+            "api_paths": [],
+            "change_type": "UNCHANGED",
+            "dao_info": null,
+            "documentation": null,
+            "children": []
+          },
+          {
+            "node_id": "1|com.macro.mall.portal.service.impl.OmsPortalOrderServiceImpl|paySuccessByOrderSn(String,Integer)",
+            "package_class": "com.macro.mall.portal.service.impl.OmsPortalOrderServiceImpl",
+            "method_signature": "paySuccessByOrderSn(String,Integer)",
+            "method_name": "paySuccessByOrderSn",
+            "class_name": "OmsPortalOrderServiceImpl",
+            "depth": 1,
+            "invocation_lines": [
+              455
+            ],
+            "is_cyclic": false,
+            "is_leaf": true,
+            "db_method_id": 27722,
+            "root_type": "NO_STATIC_CALLER",
+            "call_type": "DIRECT",
+            "has_multiple_call_sites": false,
+            "api_paths": [],
+            "change_type": "UNCHANGED",
+            "dao_info": null,
+            "documentation": null,
+            "children": []
+          }
+        ],
+        "_analysis_meta": {
+          "coverage_stats": {
+            "total_query_methods": 31,
+            "methods_with_callers": 15,
+            "methods_without_callers": 16,
+            "cha_resolved_calls": 14,
+            "direct_calls": 5,
+            "cyclic_paths": 0,
+            "depth_limited_paths": 0
+          },
+          "limitations": [],
+          "is_complete": true
+        }
+      },
+      "entry_points": [
+        {
+          "package_class": "com.macro.mall.portal.controller.OmsPortalOrderController",
+          "method_signature": "paySuccess(Long,Integer)",
+          "root_type": "HTTP_API",
+          "depth_from_change": 1,
+          "api_paths": []
+        }
+      ],
+      "has_incomplete_paths": false
+    },
+    {
+      "direction": "upwards",
+      "method_info": {
+        "class_name": "PmsProductAttributeController",
+        "method_name": "getAttrInfo",
+        "parameters": "[{\"parameter_type\": \"Long\", \"parameter_name\": \"productCategoryId\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult<List>",
+        "change_type": "MODIFIED"
+      },
+      "package_class": "com.macro.mall.controller.PmsProductAttributeController",
+      "method_signature": "getAttrInfo(Long)",
+      "chain": {
+        "node_id": "0|com.macro.mall.controller.PmsProductAttributeController|getAttrInfo(Long)",
+        "package_class": "com.macro.mall.controller.PmsProductAttributeController",
+        "method_signature": "getAttrInfo(Long)",
+        "method_name": "getAttrInfo",
+        "class_name": "PmsProductAttributeController",
+        "depth": 0,
+        "invocation_lines": [],
+        "is_cyclic": false,
+        "is_leaf": true,
+        "db_method_id": 14604,
+        "root_type": "HTTP_API",
+        "call_type": "DIRECT",
+        "has_multiple_call_sites": false,
+        "api_paths": [
+          "[GET]/productAttribute/attrInfo/{productCategoryId}"
+        ],
+        "change_type": "MODIFIED",
+        "dao_info": null,
+        "documentation": null,
+        "children": [],
+        "_analysis_meta": {
+          "coverage_stats": {
+            "total_query_methods": 32,
+            "methods_with_callers": 15,
+            "methods_without_callers": 17,
+            "cha_resolved_calls": 14,
+            "direct_calls": 5,
+            "cyclic_paths": 0,
+            "depth_limited_paths": 0
+          },
+          "limitations": [],
+          "is_complete": true
+        }
+      },
+      "entry_points": [
+        {
+          "package_class": "com.macro.mall.controller.PmsProductAttributeController",
+          "method_signature": "getAttrInfo(Long)",
+          "root_type": "HTTP_API",
+          "depth_from_change": 0,
+          "api_paths": [
+            "[GET]/productAttribute/attrInfo/{productCategoryId}"
+          ]
+        }
+      ],
+      "has_incomplete_paths": false
+    },
+    {
+      "direction": "upwards",
+      "method_info": {
+        "class_name": "PmsProductAttributeController",
+        "method_name": "getItem",
+        "parameters": "[{\"parameter_type\": \"Long\", \"parameter_name\": \"id\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult<com.macro.mall.model.PmsProductAttribute>",
+        "change_type": "MODIFIED"
+      },
+      "package_class": "com.macro.mall.controller.PmsProductAttributeController",
+      "method_signature": "getItem(Long)",
+      "chain": {
+        "node_id": "0|com.macro.mall.controller.PmsProductAttributeController|getItem(Long)",
+        "package_class": "com.macro.mall.controller.PmsProductAttributeController",
+        "method_signature": "getItem(Long)",
+        "method_name": "getItem",
+        "class_name": "PmsProductAttributeController",
+        "depth": 0,
+        "invocation_lines": [],
+        "is_cyclic": false,
+        "is_leaf": true,
+        "db_method_id": 14602,
+        "root_type": "HTTP_API",
+        "call_type": "DIRECT",
+        "has_multiple_call_sites": false,
+        "api_paths": [
+          "[GET]/productAttribute/{id}"
+        ],
+        "change_type": "MODIFIED",
+        "dao_info": null,
+        "documentation": null,
+        "children": [],
+        "_analysis_meta": {
+          "coverage_stats": {
+            "total_query_methods": 33,
+            "methods_with_callers": 15,
+            "methods_without_callers": 18,
+            "cha_resolved_calls": 14,
+            "direct_calls": 5,
+            "cyclic_paths": 0,
+            "depth_limited_paths": 0
+          },
+          "limitations": [],
+          "is_complete": true
+        }
+      },
+      "entry_points": [
+        {
+          "package_class": "com.macro.mall.controller.PmsProductAttributeController",
+          "method_signature": "getItem(Long)",
+          "root_type": "HTTP_API",
+          "depth_from_change": 0,
+          "api_paths": [
+            "[GET]/productAttribute/{id}"
+          ]
+        }
+      ],
+      "has_incomplete_paths": false
+    },
+    {
+      "direction": "upwards",
+      "method_info": {
+        "class_name": "PmsProductAttributeController",
+        "method_name": "getList",
+        "parameters": "[{\"parameter_type\": \"Long\", \"parameter_name\": \"cid\", \"parameter_varargs\": false}, {\"parameter_type\": \"Integer\", \"parameter_name\": \"type\", \"parameter_varargs\": false}, {\"parameter_type\": \"Integer\", \"parameter_name\": \"pageSize\", \"parameter_varargs\": false}, {\"parameter_type\": \"Integer\", \"parameter_name\": \"pageNum\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult<com.macro.mall.common.api.CommonPage>",
+        "change_type": "MODIFIED"
+      },
+      "package_class": "com.macro.mall.controller.PmsProductAttributeController",
+      "method_signature": "getList(Long,Integer,Integer,Integer)",
+      "chain": {
+        "node_id": "0|com.macro.mall.controller.PmsProductAttributeController|getList(Long,Integer,Integer,Integer)",
+        "package_class": "com.macro.mall.controller.PmsProductAttributeController",
+        "method_signature": "getList(Long,Integer,Integer,Integer)",
+        "method_name": "getList",
+        "class_name": "PmsProductAttributeController",
+        "depth": 0,
+        "invocation_lines": [],
+        "is_cyclic": false,
+        "is_leaf": true,
+        "db_method_id": 14599,
+        "root_type": "HTTP_API",
+        "call_type": "DIRECT",
+        "has_multiple_call_sites": false,
+        "api_paths": [
+          "[GET]/productAttribute/list/{cid}"
+        ],
+        "change_type": "MODIFIED",
+        "dao_info": null,
+        "documentation": null,
+        "children": [],
+        "_analysis_meta": {
+          "coverage_stats": {
+            "total_query_methods": 34,
+            "methods_with_callers": 15,
+            "methods_without_callers": 19,
+            "cha_resolved_calls": 14,
+            "direct_calls": 5,
+            "cyclic_paths": 0,
+            "depth_limited_paths": 0
+          },
+          "limitations": [],
+          "is_complete": true
+        }
+      },
+      "entry_points": [
+        {
+          "package_class": "com.macro.mall.controller.PmsProductAttributeController",
+          "method_signature": "getList(Long,Integer,Integer,Integer)",
+          "root_type": "HTTP_API",
+          "depth_from_change": 0,
+          "api_paths": [
+            "[GET]/productAttribute/list/{cid}"
+          ]
+        }
+      ],
+      "has_incomplete_paths": false
+    },
+    {
+      "direction": "upwards",
+      "method_info": {
+        "class_name": "PmsProductCategoryController",
+        "method_name": "delete",
+        "parameters": "[{\"parameter_type\": \"Long\", \"parameter_name\": \"id\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult",
+        "change_type": "MODIFIED"
+      },
+      "package_class": "com.macro.mall.controller.PmsProductCategoryController",
+      "method_signature": "delete(Long)",
+      "chain": {
+        "node_id": "0|com.macro.mall.controller.PmsProductCategoryController|delete(Long)",
+        "package_class": "com.macro.mall.controller.PmsProductCategoryController",
+        "method_signature": "delete(Long)",
+        "method_name": "delete",
+        "class_name": "PmsProductCategoryController",
+        "depth": 0,
+        "invocation_lines": [],
+        "is_cyclic": false,
+        "is_leaf": true,
+        "db_method_id": 14366,
+        "root_type": "HTTP_API",
+        "call_type": "DIRECT",
+        "has_multiple_call_sites": false,
+        "api_paths": [
+          "[POST]/productCategory/delete/{id}"
+        ],
+        "change_type": "MODIFIED",
+        "dao_info": null,
+        "documentation": null,
+        "children": [],
+        "_analysis_meta": {
+          "coverage_stats": {
+            "total_query_methods": 35,
+            "methods_with_callers": 15,
+            "methods_without_callers": 20,
+            "cha_resolved_calls": 14,
+            "direct_calls": 5,
+            "cyclic_paths": 0,
+            "depth_limited_paths": 0
+          },
+          "limitations": [],
+          "is_complete": true
+        }
+      },
+      "entry_points": [
+        {
+          "package_class": "com.macro.mall.controller.PmsProductCategoryController",
+          "method_signature": "delete(Long)",
+          "root_type": "HTTP_API",
+          "depth_from_change": 0,
+          "api_paths": [
+            "[POST]/productCategory/delete/{id}"
+          ]
+        }
+      ],
+      "has_incomplete_paths": false
+    },
+    {
+      "direction": "upwards",
+      "method_info": {
+        "class_name": "PmsProductCategoryController",
+        "method_name": "getItem",
+        "parameters": "[{\"parameter_type\": \"Long\", \"parameter_name\": \"id\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult<com.macro.mall.model.PmsProductCategory>",
+        "change_type": "MODIFIED"
+      },
+      "package_class": "com.macro.mall.controller.PmsProductCategoryController",
+      "method_signature": "getItem(Long)",
+      "chain": {
+        "node_id": "0|com.macro.mall.controller.PmsProductCategoryController|getItem(Long)",
+        "package_class": "com.macro.mall.controller.PmsProductCategoryController",
+        "method_signature": "getItem(Long)",
+        "method_name": "getItem",
+        "class_name": "PmsProductCategoryController",
+        "depth": 0,
+        "invocation_lines": [],
+        "is_cyclic": false,
+        "is_leaf": true,
+        "db_method_id": 14365,
+        "root_type": "HTTP_API",
+        "call_type": "DIRECT",
+        "has_multiple_call_sites": false,
+        "api_paths": [
+          "[GET]/productCategory/{id}"
+        ],
+        "change_type": "MODIFIED",
+        "dao_info": null,
+        "documentation": null,
+        "children": [],
+        "_analysis_meta": {
+          "coverage_stats": {
+            "total_query_methods": 36,
+            "methods_with_callers": 15,
+            "methods_without_callers": 21,
+            "cha_resolved_calls": 14,
+            "direct_calls": 5,
+            "cyclic_paths": 0,
+            "depth_limited_paths": 0
+          },
+          "limitations": [],
+          "is_complete": true
+        }
+      },
+      "entry_points": [
+        {
+          "package_class": "com.macro.mall.controller.PmsProductCategoryController",
+          "method_signature": "getItem(Long)",
+          "root_type": "HTTP_API",
+          "depth_from_change": 0,
+          "api_paths": [
+            "[GET]/productCategory/{id}"
+          ]
+        }
+      ],
+      "has_incomplete_paths": false
+    },
+    {
+      "direction": "upwards",
+      "method_info": {
+        "class_name": "PmsProductCategoryController",
+        "method_name": "updateNavStatus",
+        "parameters": "[{\"parameter_type\": \"List<Long>\", \"parameter_name\": \"ids\", \"parameter_varargs\": false}, {\"parameter_type\": \"Integer\", \"parameter_name\": \"navStatus\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult",
+        "change_type": "MODIFIED"
+      },
+      "package_class": "com.macro.mall.controller.PmsProductCategoryController",
+      "method_signature": "updateNavStatus(List<Long>,Integer)",
+      "chain": {
+        "node_id": "0|com.macro.mall.controller.PmsProductCategoryController|updateNavStatus(List<Long>,Integer)",
+        "package_class": "com.macro.mall.controller.PmsProductCategoryController",
+        "method_signature": "updateNavStatus(List<Long>,Integer)",
+        "method_name": "updateNavStatus",
+        "class_name": "PmsProductCategoryController",
+        "depth": 0,
+        "invocation_lines": [],
+        "is_cyclic": false,
+        "is_leaf": true,
+        "db_method_id": 14367,
+        "root_type": "HTTP_API",
+        "call_type": "DIRECT",
+        "has_multiple_call_sites": false,
+        "api_paths": [
+          "[POST]/productCategory/update/navStatus"
+        ],
+        "change_type": "MODIFIED",
+        "dao_info": null,
+        "documentation": null,
+        "children": [],
+        "_analysis_meta": {
+          "coverage_stats": {
+            "total_query_methods": 37,
+            "methods_with_callers": 15,
+            "methods_without_callers": 22,
+            "cha_resolved_calls": 14,
+            "direct_calls": 5,
+            "cyclic_paths": 0,
+            "depth_limited_paths": 0
+          },
+          "limitations": [],
+          "is_complete": true
+        }
+      },
+      "entry_points": [
+        {
+          "package_class": "com.macro.mall.controller.PmsProductCategoryController",
+          "method_signature": "updateNavStatus(List<Long>,Integer)",
+          "root_type": "HTTP_API",
+          "depth_from_change": 0,
+          "api_paths": [
+            "[POST]/productCategory/update/navStatus"
+          ]
+        }
+      ],
+      "has_incomplete_paths": false
+    },
+    {
+      "direction": "upwards",
+      "method_info": {
+        "class_name": "PmsProductCategoryController",
+        "method_name": "updateShowStatus",
+        "parameters": "[{\"parameter_type\": \"List<Long>\", \"parameter_name\": \"ids\", \"parameter_varargs\": false}, {\"parameter_type\": \"Integer\", \"parameter_name\": \"showStatus\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult",
+        "change_type": "MODIFIED"
+      },
+      "package_class": "com.macro.mall.controller.PmsProductCategoryController",
+      "method_signature": "updateShowStatus(List<Long>,Integer)",
+      "chain": {
+        "node_id": "0|com.macro.mall.controller.PmsProductCategoryController|updateShowStatus(List<Long>,Integer)",
+        "package_class": "com.macro.mall.controller.PmsProductCategoryController",
+        "method_signature": "updateShowStatus(List<Long>,Integer)",
+        "method_name": "updateShowStatus",
+        "class_name": "PmsProductCategoryController",
+        "depth": 0,
+        "invocation_lines": [],
+        "is_cyclic": false,
+        "is_leaf": true,
+        "db_method_id": 14368,
+        "root_type": "HTTP_API",
+        "call_type": "DIRECT",
+        "has_multiple_call_sites": false,
+        "api_paths": [
+          "[POST]/productCategory/update/showStatus"
+        ],
+        "change_type": "MODIFIED",
+        "dao_info": null,
+        "documentation": null,
+        "children": [],
+        "_analysis_meta": {
+          "coverage_stats": {
+            "total_query_methods": 38,
+            "methods_with_callers": 15,
+            "methods_without_callers": 23,
+            "cha_resolved_calls": 14,
+            "direct_calls": 5,
+            "cyclic_paths": 0,
+            "depth_limited_paths": 0
+          },
+          "limitations": [],
+          "is_complete": true
+        }
+      },
+      "entry_points": [
+        {
+          "package_class": "com.macro.mall.controller.PmsProductCategoryController",
+          "method_signature": "updateShowStatus(List<Long>,Integer)",
+          "root_type": "HTTP_API",
+          "depth_from_change": 0,
+          "api_paths": [
+            "[POST]/productCategory/update/showStatus"
+          ]
+        }
+      ],
+      "has_incomplete_paths": false
+    },
+    {
+      "direction": "upwards",
+      "method_info": {
+        "class_name": "PmsProductController",
+        "method_name": "update",
+        "parameters": "[{\"parameter_type\": \"Long\", \"parameter_name\": \"id\", \"parameter_varargs\": false}, {\"parameter_type\": \"com.macro.mall.dto.PmsProductParam\", \"parameter_name\": \"productParam\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult",
+        "change_type": "MODIFIED"
+      },
+      "package_class": "com.macro.mall.controller.PmsProductController",
+      "method_signature": "update(Long,com.macro.mall.dto.PmsProductParam)",
+      "chain": {
+        "node_id": "0|com.macro.mall.controller.PmsProductController|update(Long,com.macro.mall.dto.PmsProductParam)",
+        "package_class": "com.macro.mall.controller.PmsProductController",
+        "method_signature": "update(Long,com.macro.mall.dto.PmsProductParam)",
+        "method_name": "update",
+        "class_name": "PmsProductController",
+        "depth": 0,
+        "invocation_lines": [],
+        "is_cyclic": false,
+        "is_leaf": true,
+        "db_method_id": 27447,
+        "root_type": "HTTP_API",
+        "call_type": "DIRECT",
+        "has_multiple_call_sites": false,
+        "api_paths": [
+          "[POST]/product/update/{id}"
+        ],
+        "change_type": "MODIFIED",
+        "dao_info": null,
+        "documentation": null,
+        "children": [],
+        "_analysis_meta": {
+          "coverage_stats": {
+            "total_query_methods": 39,
+            "methods_with_callers": 15,
+            "methods_without_callers": 24,
+            "cha_resolved_calls": 14,
+            "direct_calls": 5,
+            "cyclic_paths": 0,
+            "depth_limited_paths": 0
+          },
+          "limitations": [],
+          "is_complete": true
+        }
+      },
+      "entry_points": [
+        {
+          "package_class": "com.macro.mall.controller.PmsProductController",
+          "method_signature": "update(Long,com.macro.mall.dto.PmsProductParam)",
+          "root_type": "HTTP_API",
+          "depth_from_change": 0,
+          "api_paths": [
+            "[POST]/product/update/{id}"
+          ]
+        }
+      ],
+      "has_incomplete_paths": false
+    },
+    {
+      "direction": "upwards",
+      "method_info": {
+        "class_name": "PmsProductServiceImpl",
+        "method_name": "relateAndInsertList",
+        "parameters": "[{\"parameter_type\": \"Object\", \"parameter_name\": \"dao\", \"parameter_varargs\": false}, {\"parameter_type\": \"List\", \"parameter_name\": \"dataList\", \"parameter_varargs\": false}, {\"parameter_type\": \"Long\", \"parameter_name\": \"productId\", \"parameter_varargs\": false}]",
+        "return_type": "None",
+        "change_type": "MODIFIED"
+      },
+      "package_class": "com.macro.mall.service.impl.PmsProductServiceImpl",
+      "method_signature": "relateAndInsertList(Object,List,Long)",
+      "chain": {
+        "node_id": "0|com.macro.mall.service.impl.PmsProductServiceImpl|relateAndInsertList(Object,List,Long)",
+        "package_class": "com.macro.mall.service.impl.PmsProductServiceImpl",
+        "method_signature": "relateAndInsertList(Object,List,Long)",
+        "method_name": "relateAndInsertList",
+        "class_name": "PmsProductServiceImpl",
+        "depth": 0,
+        "invocation_lines": [],
+        "is_cyclic": false,
+        "is_leaf": false,
+        "db_method_id": 27623,
+        "root_type": "NO_STATIC_CALLER",
+        "call_type": "DIRECT",
+        "has_multiple_call_sites": false,
+        "api_paths": [],
+        "change_type": "MODIFIED",
+        "dao_info": null,
+        "documentation": null,
+        "children": [
+          {
+            "node_id": "1|com.macro.mall.service.impl.PmsProductServiceImpl|create(com.macro.mall.dto.PmsProductParam)",
+            "package_class": "com.macro.mall.service.impl.PmsProductServiceImpl",
+            "method_signature": "create(com.macro.mall.dto.PmsProductParam)",
+            "method_name": "create",
+            "class_name": "PmsProductServiceImpl",
+            "depth": 1,
+            "invocation_lines": [
+              78,
+              80,
+              82,
+              86,
+              88,
+              90,
+              92
+            ],
+            "is_cyclic": false,
+            "is_leaf": false,
+            "db_method_id": 27611,
+            "root_type": "UNKNOWN",
+            "call_type": "DIRECT",
+            "has_multiple_call_sites": true,
+            "api_paths": [],
+            "change_type": "UNCHANGED",
+            "dao_info": null,
+            "documentation": null,
+            "children": [
+              {
+                "node_id": "2|com.macro.mall.controller.PmsProductController|create(com.macro.mall.dto.PmsProductParam)",
+                "package_class": "com.macro.mall.controller.PmsProductController",
+                "method_signature": "create(com.macro.mall.dto.PmsProductParam)",
+                "method_name": "create",
+                "class_name": "PmsProductController",
+                "depth": 2,
+                "invocation_lines": [
+                  35
+                ],
+                "is_cyclic": false,
+                "is_leaf": true,
+                "db_method_id": 27445,
+                "root_type": "HTTP_API",
+                "call_type": "CHA_RESOLVED",
+                "has_multiple_call_sites": false,
+                "api_paths": [],
+                "change_type": "UNCHANGED",
+                "dao_info": null,
+                "documentation": null,
+                "children": []
+              }
+            ]
+          },
+          {
+            "node_id": "1|com.macro.mall.service.impl.PmsProductServiceImpl|update(Long,com.macro.mall.dto.PmsProductParam)",
+            "package_class": "com.macro.mall.service.impl.PmsProductServiceImpl",
+            "method_signature": "update(Long,com.macro.mall.dto.PmsProductParam)",
+            "method_name": "update",
+            "class_name": "PmsProductServiceImpl",
+            "depth": 1,
+            "invocation_lines": [
+              131,
+              136,
+              141,
+              148,
+              153,
+              158
+            ],
+            "is_cyclic": false,
+            "is_leaf": false,
+            "db_method_id": 27614,
+            "root_type": "UNKNOWN",
+            "call_type": "DIRECT",
+            "has_multiple_call_sites": true,
+            "api_paths": [],
+            "change_type": "UNCHANGED",
+            "dao_info": null,
+            "documentation": null,
+            "children": [
+              {
+                "node_id": "2|com.macro.mall.controller.PmsProductController|update(Long,com.macro.mall.dto.PmsProductParam)",
+                "package_class": "com.macro.mall.controller.PmsProductController",
+                "method_signature": "update(Long,com.macro.mall.dto.PmsProductParam)",
+                "method_name": "update",
+                "class_name": "PmsProductController",
+                "depth": 2,
+                "invocation_lines": [
+                  55
+                ],
+                "is_cyclic": false,
+                "is_leaf": true,
+                "db_method_id": 27447,
+                "root_type": "HTTP_API",
+                "call_type": "CHA_RESOLVED",
+                "has_multiple_call_sites": false,
+                "api_paths": [],
+                "change_type": "MODIFIED",
+                "dao_info": null,
+                "documentation": null,
+                "children": []
+              }
+            ]
+          },
+          {
+            "node_id": "1|com.macro.mall.service.impl.PmsProductServiceImpl|handleUpdateSkuStockList(Long,com.macro.mall.dto.PmsProductParam)",
+            "package_class": "com.macro.mall.service.impl.PmsProductServiceImpl",
+            "method_signature": "handleUpdateSkuStockList(Long,com.macro.mall.dto.PmsProductParam)",
+            "method_name": "handleUpdateSkuStockList",
+            "class_name": "PmsProductServiceImpl",
+            "depth": 1,
+            "invocation_lines": [
+              188
+            ],
+            "is_cyclic": false,
+            "is_leaf": false,
+            "db_method_id": 27615,
+            "root_type": "UNKNOWN",
+            "call_type": "DIRECT",
+            "has_multiple_call_sites": false,
+            "api_paths": [],
+            "change_type": "UNCHANGED",
+            "dao_info": null,
+            "documentation": null,
+            "children": [
+              {
+                "node_id": "2|com.macro.mall.service.impl.PmsProductServiceImpl|update(Long,com.macro.mall.dto.PmsProductParam)",
+                "package_class": "com.macro.mall.service.impl.PmsProductServiceImpl",
+                "method_signature": "update(Long,com.macro.mall.dto.PmsProductParam)",
+                "method_name": "update",
+                "class_name": "PmsProductServiceImpl",
+                "depth": 2,
+                "invocation_lines": [
+                  143
+                ],
+                "is_cyclic": false,
+                "is_leaf": false,
+                "db_method_id": 27614,
+                "root_type": "UNKNOWN",
+                "call_type": "DIRECT",
+                "has_multiple_call_sites": false,
+                "api_paths": [],
+                "change_type": "UNCHANGED",
+                "dao_info": null,
+                "documentation": null,
+                "children": [
+                  {
+                    "node_id": "3|com.macro.mall.controller.PmsProductController|update(Long,com.macro.mall.dto.PmsProductParam)",
+                    "package_class": "com.macro.mall.controller.PmsProductController",
+                    "method_signature": "update(Long,com.macro.mall.dto.PmsProductParam)",
+                    "method_name": "update",
+                    "class_name": "PmsProductController",
+                    "depth": 3,
+                    "invocation_lines": [
+                      55
+                    ],
+                    "is_cyclic": false,
+                    "is_leaf": true,
+                    "db_method_id": 27447,
+                    "root_type": "HTTP_API",
+                    "call_type": "CHA_RESOLVED",
+                    "has_multiple_call_sites": false,
+                    "api_paths": [],
+                    "change_type": "MODIFIED",
+                    "dao_info": null,
+                    "documentation": null,
+                    "children": []
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "_analysis_meta": {
+          "coverage_stats": {
+            "total_query_methods": 47,
+            "methods_with_callers": 20,
+            "methods_without_callers": 27,
+            "cha_resolved_calls": 17,
+            "direct_calls": 9,
+            "cyclic_paths": 0,
+            "depth_limited_paths": 0
+          },
+          "limitations": [],
+          "is_complete": true
+        }
+      },
+      "entry_points": [
+        {
+          "package_class": "com.macro.mall.controller.PmsProductController",
+          "method_signature": "create(com.macro.mall.dto.PmsProductParam)",
+          "root_type": "HTTP_API",
+          "depth_from_change": 2,
+          "api_paths": []
+        },
+        {
+          "package_class": "com.macro.mall.controller.PmsProductController",
+          "method_signature": "update(Long,com.macro.mall.dto.PmsProductParam)",
+          "root_type": "HTTP_API",
+          "depth_from_change": 2,
+          "api_paths": []
+        },
+        {
+          "package_class": "com.macro.mall.controller.PmsProductController",
+          "method_signature": "update(Long,com.macro.mall.dto.PmsProductParam)",
+          "root_type": "HTTP_API",
+          "depth_from_change": 3,
+          "api_paths": []
+        }
+      ],
+      "has_incomplete_paths": false
+    },
+    {
+      "direction": "upwards",
+      "method_info": {
+        "class_name": "PmsSkuStockController",
+        "method_name": "update",
+        "parameters": "[{\"parameter_type\": \"Long\", \"parameter_name\": \"pid\", \"parameter_varargs\": false}, {\"parameter_type\": \"List<com.macro.mall.model.PmsSkuStock>\", \"parameter_name\": \"skuStockList\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult",
+        "change_type": "MODIFIED"
+      },
+      "package_class": "com.macro.mall.controller.PmsSkuStockController",
+      "method_signature": "update(Long,List<com.macro.mall.model.PmsSkuStock>)",
+      "chain": {
+        "node_id": "0|com.macro.mall.controller.PmsSkuStockController|update(Long,List<com.macro.mall.model.PmsSkuStock>)",
+        "package_class": "com.macro.mall.controller.PmsSkuStockController",
+        "method_signature": "update(Long,List<com.macro.mall.model.PmsSkuStock>)",
+        "method_name": "update",
+        "class_name": "PmsSkuStockController",
+        "depth": 0,
+        "invocation_lines": [],
+        "is_cyclic": false,
+        "is_leaf": true,
+        "db_method_id": 14343,
+        "root_type": "HTTP_API",
+        "call_type": "DIRECT",
+        "has_multiple_call_sites": false,
+        "api_paths": [
+          "[POST]/sku/update/{pid}"
+        ],
+        "change_type": "MODIFIED",
+        "dao_info": null,
+        "documentation": null,
+        "children": [],
+        "_analysis_meta": {
+          "coverage_stats": {
+            "total_query_methods": 48,
+            "methods_with_callers": 20,
+            "methods_without_callers": 28,
+            "cha_resolved_calls": 17,
+            "direct_calls": 9,
+            "cyclic_paths": 0,
+            "depth_limited_paths": 0
+          },
+          "limitations": [],
+          "is_complete": true
+        }
+      },
+      "entry_points": [
+        {
+          "package_class": "com.macro.mall.controller.PmsSkuStockController",
+          "method_signature": "update(Long,List<com.macro.mall.model.PmsSkuStock>)",
+          "root_type": "HTTP_API",
+          "depth_from_change": 0,
+          "api_paths": [
+            "[POST]/sku/update/{pid}"
+          ]
+        }
+      ],
+      "has_incomplete_paths": false
+    },
+    {
+      "direction": "upwards",
+      "method_info": {
+        "class_name": "SmsCouponController",
+        "method_name": "delete",
+        "parameters": "[{\"parameter_type\": \"Long\", \"parameter_name\": \"id\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult",
+        "change_type": "MODIFIED"
+      },
+      "package_class": "com.macro.mall.controller.SmsCouponController",
+      "method_signature": "delete(Long)",
+      "chain": {
+        "node_id": "0|com.macro.mall.controller.SmsCouponController|delete(Long)",
+        "package_class": "com.macro.mall.controller.SmsCouponController",
+        "method_signature": "delete(Long)",
+        "method_name": "delete",
+        "class_name": "SmsCouponController",
+        "depth": 0,
+        "invocation_lines": [],
+        "is_cyclic": false,
+        "is_leaf": true,
+        "db_method_id": 14718,
+        "root_type": "HTTP_API",
+        "call_type": "DIRECT",
+        "has_multiple_call_sites": false,
+        "api_paths": [
+          "[POST]/coupon/delete/{id}"
+        ],
+        "change_type": "MODIFIED",
+        "dao_info": null,
+        "documentation": null,
+        "children": [],
+        "_analysis_meta": {
+          "coverage_stats": {
+            "total_query_methods": 49,
+            "methods_with_callers": 20,
+            "methods_without_callers": 29,
+            "cha_resolved_calls": 17,
+            "direct_calls": 9,
+            "cyclic_paths": 0,
+            "depth_limited_paths": 0
+          },
+          "limitations": [],
+          "is_complete": true
+        }
+      },
+      "entry_points": [
+        {
+          "package_class": "com.macro.mall.controller.SmsCouponController",
+          "method_signature": "delete(Long)",
+          "root_type": "HTTP_API",
+          "depth_from_change": 0,
+          "api_paths": [
+            "[POST]/coupon/delete/{id}"
+          ]
+        }
+      ],
+      "has_incomplete_paths": false
+    },
+    {
+      "direction": "upwards",
+      "method_info": {
+        "class_name": "SmsCouponController",
+        "method_name": "update",
+        "parameters": "[{\"parameter_type\": \"Long\", \"parameter_name\": \"id\", \"parameter_varargs\": false}, {\"parameter_type\": \"com.macro.mall.dto.SmsCouponParam\", \"parameter_name\": \"couponParam\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult",
+        "change_type": "MODIFIED"
+      },
+      "package_class": "com.macro.mall.controller.SmsCouponController",
+      "method_signature": "update(Long,com.macro.mall.dto.SmsCouponParam)",
+      "chain": {
+        "node_id": "0|com.macro.mall.controller.SmsCouponController|update(Long,com.macro.mall.dto.SmsCouponParam)",
+        "package_class": "com.macro.mall.controller.SmsCouponController",
+        "method_signature": "update(Long,com.macro.mall.dto.SmsCouponParam)",
+        "method_name": "update",
+        "class_name": "SmsCouponController",
+        "depth": 0,
+        "invocation_lines": [],
+        "is_cyclic": false,
+        "is_leaf": true,
+        "db_method_id": 14719,
+        "root_type": "HTTP_API",
+        "call_type": "DIRECT",
+        "has_multiple_call_sites": false,
+        "api_paths": [
+          "[POST]/coupon/update/{id}"
+        ],
+        "change_type": "MODIFIED",
+        "dao_info": null,
+        "documentation": null,
+        "children": [],
+        "_analysis_meta": {
+          "coverage_stats": {
+            "total_query_methods": 50,
+            "methods_with_callers": 20,
+            "methods_without_callers": 30,
+            "cha_resolved_calls": 17,
+            "direct_calls": 9,
+            "cyclic_paths": 0,
+            "depth_limited_paths": 0
+          },
+          "limitations": [],
+          "is_complete": true
+        }
+      },
+      "entry_points": [
+        {
+          "package_class": "com.macro.mall.controller.SmsCouponController",
+          "method_signature": "update(Long,com.macro.mall.dto.SmsCouponParam)",
+          "root_type": "HTTP_API",
+          "depth_from_change": 0,
+          "api_paths": [
+            "[POST]/coupon/update/{id}"
+          ]
+        }
+      ],
+      "has_incomplete_paths": false
+    },
+    {
+      "direction": "upwards",
+      "method_info": {
+        "class_name": "SmsFlashPromotionController",
+        "method_name": "getItem",
+        "parameters": "[{\"parameter_type\": \"String\", \"parameter_name\": \"keyword\", \"parameter_varargs\": false}, {\"parameter_type\": \"Integer\", \"parameter_name\": \"pageSize\", \"parameter_varargs\": false}, {\"parameter_type\": \"Integer\", \"parameter_name\": \"pageNum\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult<com.macro.mall.common.api.CommonPage>",
+        "change_type": "MODIFIED"
+      },
+      "package_class": "com.macro.mall.controller.SmsFlashPromotionController",
+      "method_signature": "getItem(String,Integer,Integer)",
+      "chain": {
+        "node_id": "0|com.macro.mall.controller.SmsFlashPromotionController|getItem(String,Integer,Integer)",
+        "package_class": "com.macro.mall.controller.SmsFlashPromotionController",
+        "method_signature": "getItem(String,Integer,Integer)",
+        "method_name": "getItem",
+        "class_name": "SmsFlashPromotionController",
+        "depth": 0,
+        "invocation_lines": [],
+        "is_cyclic": false,
+        "is_leaf": true,
+        "db_method_id": 14711,
+        "root_type": "HTTP_API",
+        "call_type": "DIRECT",
+        "has_multiple_call_sites": false,
+        "api_paths": [
+          "[GET]/flash/list"
+        ],
+        "change_type": "MODIFIED",
+        "dao_info": null,
+        "documentation": null,
+        "children": [],
+        "_analysis_meta": {
+          "coverage_stats": {
+            "total_query_methods": 51,
+            "methods_with_callers": 20,
+            "methods_without_callers": 31,
+            "cha_resolved_calls": 17,
+            "direct_calls": 9,
+            "cyclic_paths": 0,
+            "depth_limited_paths": 0
+          },
+          "limitations": [],
+          "is_complete": true
+        }
+      },
+      "entry_points": [
+        {
+          "package_class": "com.macro.mall.controller.SmsFlashPromotionController",
+          "method_signature": "getItem(String,Integer,Integer)",
+          "root_type": "HTTP_API",
+          "depth_from_change": 0,
+          "api_paths": [
+            "[GET]/flash/list"
+          ]
+        }
+      ],
+      "has_incomplete_paths": false
+    },
+    {
+      "direction": "upwards",
+      "method_info": {
+        "class_name": "SmsFlashPromotionController",
+        "method_name": "update",
+        "parameters": "[{\"parameter_type\": \"Long\", \"parameter_name\": \"id\", \"parameter_varargs\": false}, {\"parameter_type\": \"Integer\", \"parameter_name\": \"status\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult",
+        "change_type": "MODIFIED"
+      },
+      "package_class": "com.macro.mall.controller.SmsFlashPromotionController",
+      "method_signature": "update(Long,Integer)",
+      "chain": {
+        "node_id": "0|com.macro.mall.controller.SmsFlashPromotionController|update(Long,Integer)",
+        "package_class": "com.macro.mall.controller.SmsFlashPromotionController",
+        "method_signature": "update(Long,Integer)",
+        "method_name": "update",
+        "class_name": "SmsFlashPromotionController",
+        "depth": 0,
+        "invocation_lines": [],
+        "is_cyclic": false,
+        "is_leaf": true,
+        "db_method_id": 14709,
+        "root_type": "HTTP_API",
+        "call_type": "DIRECT",
+        "has_multiple_call_sites": false,
+        "api_paths": [
+          "[POST]/flash/update/status/{id}"
+        ],
+        "change_type": "MODIFIED",
+        "dao_info": null,
+        "documentation": null,
+        "children": [],
+        "_analysis_meta": {
+          "coverage_stats": {
+            "total_query_methods": 52,
+            "methods_with_callers": 20,
+            "methods_without_callers": 32,
+            "cha_resolved_calls": 17,
+            "direct_calls": 9,
+            "cyclic_paths": 0,
+            "depth_limited_paths": 0
+          },
+          "limitations": [],
+          "is_complete": true
+        }
+      },
+      "entry_points": [
+        {
+          "package_class": "com.macro.mall.controller.SmsFlashPromotionController",
+          "method_signature": "update(Long,Integer)",
+          "root_type": "HTTP_API",
+          "depth_from_change": 0,
+          "api_paths": [
+            "[POST]/flash/update/status/{id}"
+          ]
+        }
+      ],
+      "has_incomplete_paths": false
+    },
+    {
+      "direction": "upwards",
+      "method_info": {
+        "class_name": "SmsFlashPromotionProductRelationController",
+        "method_name": "delete",
+        "parameters": "[{\"parameter_type\": \"Long\", \"parameter_name\": \"id\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult",
+        "change_type": "MODIFIED"
+      },
+      "package_class": "com.macro.mall.controller.SmsFlashPromotionProductRelationController",
+      "method_signature": "delete(Long)",
+      "chain": {
+        "node_id": "0|com.macro.mall.controller.SmsFlashPromotionProductRelationController|delete(Long)",
+        "package_class": "com.macro.mall.controller.SmsFlashPromotionProductRelationController",
+        "method_signature": "delete(Long)",
+        "method_name": "delete",
+        "class_name": "SmsFlashPromotionProductRelationController",
+        "depth": 0,
+        "invocation_lines": [],
+        "is_cyclic": false,
+        "is_leaf": true,
+        "db_method_id": 15073,
+        "root_type": "HTTP_API",
+        "call_type": "DIRECT",
+        "has_multiple_call_sites": false,
+        "api_paths": [
+          "[POST]/flashProductRelation/delete/{id}"
+        ],
+        "change_type": "MODIFIED",
+        "dao_info": null,
+        "documentation": null,
+        "children": [],
+        "_analysis_meta": {
+          "coverage_stats": {
+            "total_query_methods": 53,
+            "methods_with_callers": 20,
+            "methods_without_callers": 33,
+            "cha_resolved_calls": 17,
+            "direct_calls": 9,
+            "cyclic_paths": 0,
+            "depth_limited_paths": 0
+          },
+          "limitations": [],
+          "is_complete": true
+        }
+      },
+      "entry_points": [
+        {
+          "package_class": "com.macro.mall.controller.SmsFlashPromotionProductRelationController",
+          "method_signature": "delete(Long)",
+          "root_type": "HTTP_API",
+          "depth_from_change": 0,
+          "api_paths": [
+            "[POST]/flashProductRelation/delete/{id}"
+          ]
+        }
+      ],
+      "has_incomplete_paths": false
+    },
+    {
+      "direction": "upwards",
+      "method_info": {
+        "class_name": "SmsFlashPromotionProductRelationController",
+        "method_name": "update",
+        "parameters": "[{\"parameter_type\": \"Long\", \"parameter_name\": \"id\", \"parameter_varargs\": false}, {\"parameter_type\": \"com.macro.mall.model.SmsFlashPromotionProductRelation\", \"parameter_name\": \"relation\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult",
+        "change_type": "MODIFIED"
+      },
+      "package_class": "com.macro.mall.controller.SmsFlashPromotionProductRelationController",
+      "method_signature": "update(Long,com.macro.mall.model.SmsFlashPromotionProductRelation)",
+      "chain": {
+        "node_id": "0|com.macro.mall.controller.SmsFlashPromotionProductRelationController|update(Long,com.macro.mall.model.SmsFlashPromotionProductRelation)",
+        "package_class": "com.macro.mall.controller.SmsFlashPromotionProductRelationController",
+        "method_signature": "update(Long,com.macro.mall.model.SmsFlashPromotionProductRelation)",
+        "method_name": "update",
+        "class_name": "SmsFlashPromotionProductRelationController",
+        "depth": 0,
+        "invocation_lines": [],
+        "is_cyclic": false,
+        "is_leaf": true,
+        "db_method_id": 15072,
+        "root_type": "HTTP_API",
+        "call_type": "DIRECT",
+        "has_multiple_call_sites": false,
+        "api_paths": [
+          "[POST]/flashProductRelation/update/{id}"
+        ],
+        "change_type": "MODIFIED",
+        "dao_info": null,
+        "documentation": null,
+        "children": [],
+        "_analysis_meta": {
+          "coverage_stats": {
+            "total_query_methods": 54,
+            "methods_with_callers": 20,
+            "methods_without_callers": 34,
+            "cha_resolved_calls": 17,
+            "direct_calls": 9,
+            "cyclic_paths": 0,
+            "depth_limited_paths": 0
+          },
+          "limitations": [],
+          "is_complete": true
+        }
+      },
+      "entry_points": [
+        {
+          "package_class": "com.macro.mall.controller.SmsFlashPromotionProductRelationController",
+          "method_signature": "update(Long,com.macro.mall.model.SmsFlashPromotionProductRelation)",
+          "root_type": "HTTP_API",
+          "depth_from_change": 0,
+          "api_paths": [
+            "[POST]/flashProductRelation/update/{id}"
+          ]
+        }
+      ],
+      "has_incomplete_paths": false
+    },
+    {
+      "direction": "upwards",
+      "method_info": {
+        "class_name": "SmsFlashPromotionSessionController",
+        "method_name": "updateStatus",
+        "parameters": "[{\"parameter_type\": \"Long\", \"parameter_name\": \"id\", \"parameter_varargs\": false}, {\"parameter_type\": \"Integer\", \"parameter_name\": \"status\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult",
+        "change_type": "MODIFIED"
+      },
+      "package_class": "com.macro.mall.controller.SmsFlashPromotionSessionController",
+      "method_signature": "updateStatus(Long,Integer)",
+      "chain": {
+        "node_id": "0|com.macro.mall.controller.SmsFlashPromotionSessionController|updateStatus(Long,Integer)",
+        "package_class": "com.macro.mall.controller.SmsFlashPromotionSessionController",
+        "method_signature": "updateStatus(Long,Integer)",
+        "method_name": "updateStatus",
+        "class_name": "SmsFlashPromotionSessionController",
+        "depth": 0,
+        "invocation_lines": [],
+        "is_cyclic": false,
+        "is_leaf": true,
+        "db_method_id": 15044,
+        "root_type": "HTTP_API",
+        "call_type": "DIRECT",
+        "has_multiple_call_sites": false,
+        "api_paths": [
+          "[POST]/flashSession/update/status/{id}"
+        ],
+        "change_type": "MODIFIED",
+        "dao_info": null,
+        "documentation": null,
+        "children": [],
+        "_analysis_meta": {
+          "coverage_stats": {
+            "total_query_methods": 55,
+            "methods_with_callers": 20,
+            "methods_without_callers": 35,
+            "cha_resolved_calls": 17,
+            "direct_calls": 9,
+            "cyclic_paths": 0,
+            "depth_limited_paths": 0
+          },
+          "limitations": [],
+          "is_complete": true
+        }
+      },
+      "entry_points": [
+        {
+          "package_class": "com.macro.mall.controller.SmsFlashPromotionSessionController",
+          "method_signature": "updateStatus(Long,Integer)",
+          "root_type": "HTTP_API",
+          "depth_from_change": 0,
+          "api_paths": [
+            "[POST]/flashSession/update/status/{id}"
+          ]
+        }
+      ],
+      "has_incomplete_paths": false
+    },
+    {
+      "direction": "upwards",
+      "method_info": {
+        "class_name": "SmsHomeAdvertiseController",
+        "method_name": "delete",
+        "parameters": "[{\"parameter_type\": \"List<Long>\", \"parameter_name\": \"ids\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult",
+        "change_type": "MODIFIED"
+      },
+      "package_class": "com.macro.mall.controller.SmsHomeAdvertiseController",
+      "method_signature": "delete(List<Long>)",
+      "chain": {
+        "node_id": "0|com.macro.mall.controller.SmsHomeAdvertiseController|delete(List<Long>)",
+        "package_class": "com.macro.mall.controller.SmsHomeAdvertiseController",
+        "method_signature": "delete(List<Long>)",
+        "method_name": "delete",
+        "class_name": "SmsHomeAdvertiseController",
+        "depth": 0,
+        "invocation_lines": [],
+        "is_cyclic": false,
+        "is_leaf": true,
+        "db_method_id": 14955,
+        "root_type": "HTTP_API",
+        "call_type": "DIRECT",
+        "has_multiple_call_sites": false,
+        "api_paths": [
+          "[POST]/home/advertise/delete"
+        ],
+        "change_type": "MODIFIED",
+        "dao_info": null,
+        "documentation": null,
+        "children": [],
+        "_analysis_meta": {
+          "coverage_stats": {
+            "total_query_methods": 56,
+            "methods_with_callers": 20,
+            "methods_without_callers": 36,
+            "cha_resolved_calls": 17,
+            "direct_calls": 9,
+            "cyclic_paths": 0,
+            "depth_limited_paths": 0
+          },
+          "limitations": [],
+          "is_complete": true
+        }
+      },
+      "entry_points": [
+        {
+          "package_class": "com.macro.mall.controller.SmsHomeAdvertiseController",
+          "method_signature": "delete(List<Long>)",
+          "root_type": "HTTP_API",
+          "depth_from_change": 0,
+          "api_paths": [
+            "[POST]/home/advertise/delete"
+          ]
+        }
+      ],
+      "has_incomplete_paths": false
+    },
+    {
+      "direction": "upwards",
+      "method_info": {
+        "class_name": "SmsHomeAdvertiseController",
+        "method_name": "getItem",
+        "parameters": "[{\"parameter_type\": \"Long\", \"parameter_name\": \"id\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult<com.macro.mall.model.SmsHomeAdvertise>",
+        "change_type": "MODIFIED"
+      },
+      "package_class": "com.macro.mall.controller.SmsHomeAdvertiseController",
+      "method_signature": "getItem(Long)",
+      "chain": {
+        "node_id": "0|com.macro.mall.controller.SmsHomeAdvertiseController|getItem(Long)",
+        "package_class": "com.macro.mall.controller.SmsHomeAdvertiseController",
+        "method_signature": "getItem(Long)",
+        "method_name": "getItem",
+        "class_name": "SmsHomeAdvertiseController",
+        "depth": 0,
+        "invocation_lines": [],
+        "is_cyclic": false,
+        "is_leaf": true,
+        "db_method_id": 14957,
+        "root_type": "HTTP_API",
+        "call_type": "DIRECT",
+        "has_multiple_call_sites": false,
+        "api_paths": [
+          "[GET]/home/advertise/{id}"
+        ],
+        "change_type": "MODIFIED",
+        "dao_info": null,
+        "documentation": null,
+        "children": [],
+        "_analysis_meta": {
+          "coverage_stats": {
+            "total_query_methods": 57,
+            "methods_with_callers": 20,
+            "methods_without_callers": 37,
+            "cha_resolved_calls": 17,
+            "direct_calls": 9,
+            "cyclic_paths": 0,
+            "depth_limited_paths": 0
+          },
+          "limitations": [],
+          "is_complete": true
+        }
+      },
+      "entry_points": [
+        {
+          "package_class": "com.macro.mall.controller.SmsHomeAdvertiseController",
+          "method_signature": "getItem(Long)",
+          "root_type": "HTTP_API",
+          "depth_from_change": 0,
+          "api_paths": [
+            "[GET]/home/advertise/{id}"
+          ]
+        }
+      ],
+      "has_incomplete_paths": false
+    },
+    {
+      "direction": "upwards",
+      "method_info": {
+        "class_name": "SmsHomeAdvertiseController",
+        "method_name": "list",
+        "parameters": "[{\"parameter_type\": \"String\", \"parameter_name\": \"name\", \"parameter_varargs\": false}, {\"parameter_type\": \"Integer\", \"parameter_name\": \"type\", \"parameter_varargs\": false}, {\"parameter_type\": \"String\", \"parameter_name\": \"endTime\", \"parameter_varargs\": false}, {\"parameter_type\": \"Integer\", \"parameter_name\": \"pageSize\", \"parameter_varargs\": false}, {\"parameter_type\": \"Integer\", \"parameter_name\": \"pageNum\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult<com.macro.mall.common.api.CommonPage>",
+        "change_type": "MODIFIED"
+      },
+      "package_class": "com.macro.mall.controller.SmsHomeAdvertiseController",
+      "method_signature": "list(String,Integer,String,Integer,Integer)",
+      "chain": {
+        "node_id": "0|com.macro.mall.controller.SmsHomeAdvertiseController|list(String,Integer,String,Integer,Integer)",
+        "package_class": "com.macro.mall.controller.SmsHomeAdvertiseController",
+        "method_signature": "list(String,Integer,String,Integer,Integer)",
+        "method_name": "list",
+        "class_name": "SmsHomeAdvertiseController",
+        "depth": 0,
+        "invocation_lines": [],
+        "is_cyclic": false,
+        "is_leaf": true,
+        "db_method_id": 14959,
+        "root_type": "HTTP_API",
+        "call_type": "DIRECT",
+        "has_multiple_call_sites": false,
+        "api_paths": [
+          "[GET]/home/advertise/list"
+        ],
+        "change_type": "MODIFIED",
+        "dao_info": null,
+        "documentation": null,
+        "children": [],
+        "_analysis_meta": {
+          "coverage_stats": {
+            "total_query_methods": 58,
+            "methods_with_callers": 20,
+            "methods_without_callers": 38,
+            "cha_resolved_calls": 17,
+            "direct_calls": 9,
+            "cyclic_paths": 0,
+            "depth_limited_paths": 0
+          },
+          "limitations": [],
+          "is_complete": true
+        }
+      },
+      "entry_points": [
+        {
+          "package_class": "com.macro.mall.controller.SmsHomeAdvertiseController",
+          "method_signature": "list(String,Integer,String,Integer,Integer)",
+          "root_type": "HTTP_API",
+          "depth_from_change": 0,
+          "api_paths": [
+            "[GET]/home/advertise/list"
+          ]
+        }
+      ],
+      "has_incomplete_paths": false
+    },
+    {
+      "direction": "upwards",
+      "method_info": {
+        "class_name": "SmsHomeAdvertiseController",
+        "method_name": "update",
+        "parameters": "[{\"parameter_type\": \"Long\", \"parameter_name\": \"id\", \"parameter_varargs\": false}, {\"parameter_type\": \"com.macro.mall.model.SmsHomeAdvertise\", \"parameter_name\": \"advertise\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult",
+        "change_type": "MODIFIED"
+      },
+      "package_class": "com.macro.mall.controller.SmsHomeAdvertiseController",
+      "method_signature": "update(Long,com.macro.mall.model.SmsHomeAdvertise)",
+      "chain": {
+        "node_id": "0|com.macro.mall.controller.SmsHomeAdvertiseController|update(Long,com.macro.mall.model.SmsHomeAdvertise)",
+        "package_class": "com.macro.mall.controller.SmsHomeAdvertiseController",
+        "method_signature": "update(Long,com.macro.mall.model.SmsHomeAdvertise)",
+        "method_name": "update",
+        "class_name": "SmsHomeAdvertiseController",
+        "depth": 0,
+        "invocation_lines": [],
+        "is_cyclic": false,
+        "is_leaf": true,
+        "db_method_id": 14958,
+        "root_type": "HTTP_API",
+        "call_type": "DIRECT",
+        "has_multiple_call_sites": false,
+        "api_paths": [
+          "[POST]/home/advertise/update/{id}"
+        ],
+        "change_type": "MODIFIED",
+        "dao_info": null,
+        "documentation": null,
+        "children": [],
+        "_analysis_meta": {
+          "coverage_stats": {
+            "total_query_methods": 59,
+            "methods_with_callers": 20,
+            "methods_without_callers": 39,
+            "cha_resolved_calls": 17,
+            "direct_calls": 9,
+            "cyclic_paths": 0,
+            "depth_limited_paths": 0
+          },
+          "limitations": [],
+          "is_complete": true
+        }
+      },
+      "entry_points": [
+        {
+          "package_class": "com.macro.mall.controller.SmsHomeAdvertiseController",
+          "method_signature": "update(Long,com.macro.mall.model.SmsHomeAdvertise)",
+          "root_type": "HTTP_API",
+          "depth_from_change": 0,
+          "api_paths": [
+            "[POST]/home/advertise/update/{id}"
+          ]
+        }
+      ],
+      "has_incomplete_paths": false
+    },
+    {
+      "direction": "upwards",
+      "method_info": {
+        "class_name": "SmsHomeNewProductController",
+        "method_name": "create",
+        "parameters": "[{\"parameter_type\": \"List<com.macro.mall.model.SmsHomeNewProduct>\", \"parameter_name\": \"homeNewProductList\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult",
+        "change_type": "MODIFIED"
+      },
+      "package_class": "com.macro.mall.controller.SmsHomeNewProductController",
+      "method_signature": "create(List<com.macro.mall.model.SmsHomeNewProduct>)",
+      "chain": {
+        "node_id": "0|com.macro.mall.controller.SmsHomeNewProductController|create(List<com.macro.mall.model.SmsHomeNewProduct>)",
+        "package_class": "com.macro.mall.controller.SmsHomeNewProductController",
+        "method_signature": "create(List<com.macro.mall.model.SmsHomeNewProduct>)",
+        "method_name": "create",
+        "class_name": "SmsHomeNewProductController",
+        "depth": 0,
+        "invocation_lines": [],
+        "is_cyclic": false,
+        "is_leaf": true,
+        "db_method_id": 15076,
+        "root_type": "HTTP_API",
+        "call_type": "DIRECT",
+        "has_multiple_call_sites": false,
+        "api_paths": [
+          "[POST]/home/newProduct/create"
+        ],
+        "change_type": "MODIFIED",
+        "dao_info": null,
+        "documentation": null,
+        "children": [],
+        "_analysis_meta": {
+          "coverage_stats": {
+            "total_query_methods": 60,
+            "methods_with_callers": 20,
+            "methods_without_callers": 40,
+            "cha_resolved_calls": 17,
+            "direct_calls": 9,
+            "cyclic_paths": 0,
+            "depth_limited_paths": 0
+          },
+          "limitations": [],
+          "is_complete": true
+        }
+      },
+      "entry_points": [
+        {
+          "package_class": "com.macro.mall.controller.SmsHomeNewProductController",
+          "method_signature": "create(List<com.macro.mall.model.SmsHomeNewProduct>)",
+          "root_type": "HTTP_API",
+          "depth_from_change": 0,
+          "api_paths": [
+            "[POST]/home/newProduct/create"
+          ]
+        }
+      ],
+      "has_incomplete_paths": false
+    },
+    {
+      "direction": "upwards",
+      "method_info": {
+        "class_name": "SmsHomeRecommendSubjectController",
+        "method_name": "create",
+        "parameters": "[{\"parameter_type\": \"List<com.macro.mall.model.SmsHomeRecommendSubject>\", \"parameter_name\": \"homeRecommendSubjectList\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult",
+        "change_type": "MODIFIED"
+      },
+      "package_class": "com.macro.mall.controller.SmsHomeRecommendSubjectController",
+      "method_signature": "create(List<com.macro.mall.model.SmsHomeRecommendSubject>)",
+      "chain": {
+        "node_id": "0|com.macro.mall.controller.SmsHomeRecommendSubjectController|create(List<com.macro.mall.model.SmsHomeRecommendSubject>)",
+        "package_class": "com.macro.mall.controller.SmsHomeRecommendSubjectController",
+        "method_signature": "create(List<com.macro.mall.model.SmsHomeRecommendSubject>)",
+        "method_name": "create",
+        "class_name": "SmsHomeRecommendSubjectController",
+        "depth": 0,
+        "invocation_lines": [],
+        "is_cyclic": false,
+        "is_leaf": true,
+        "db_method_id": 15215,
+        "root_type": "HTTP_API",
+        "call_type": "DIRECT",
+        "has_multiple_call_sites": false,
+        "api_paths": [
+          "[POST]/home/recommendSubject/create"
+        ],
+        "change_type": "MODIFIED",
+        "dao_info": null,
+        "documentation": null,
+        "children": [],
+        "_analysis_meta": {
+          "coverage_stats": {
+            "total_query_methods": 61,
+            "methods_with_callers": 20,
+            "methods_without_callers": 41,
+            "cha_resolved_calls": 17,
+            "direct_calls": 9,
+            "cyclic_paths": 0,
+            "depth_limited_paths": 0
+          },
+          "limitations": [],
+          "is_complete": true
+        }
+      },
+      "entry_points": [
+        {
+          "package_class": "com.macro.mall.controller.SmsHomeRecommendSubjectController",
+          "method_signature": "create(List<com.macro.mall.model.SmsHomeRecommendSubject>)",
+          "root_type": "HTTP_API",
+          "depth_from_change": 0,
+          "api_paths": [
+            "[POST]/home/recommendSubject/create"
+          ]
+        }
+      ],
+      "has_incomplete_paths": false
+    },
+    {
+      "direction": "upwards",
+      "method_info": {
+        "class_name": "SmsHomeRecommendSubjectController",
+        "method_name": "delete",
+        "parameters": "[{\"parameter_type\": \"List<Long>\", \"parameter_name\": \"ids\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult",
+        "change_type": "MODIFIED"
+      },
+      "package_class": "com.macro.mall.controller.SmsHomeRecommendSubjectController",
+      "method_signature": "delete(List<Long>)",
+      "chain": {
+        "node_id": "0|com.macro.mall.controller.SmsHomeRecommendSubjectController|delete(List<Long>)",
+        "package_class": "com.macro.mall.controller.SmsHomeRecommendSubjectController",
+        "method_signature": "delete(List<Long>)",
+        "method_name": "delete",
+        "class_name": "SmsHomeRecommendSubjectController",
+        "depth": 0,
+        "invocation_lines": [],
+        "is_cyclic": false,
+        "is_leaf": true,
+        "db_method_id": 15217,
+        "root_type": "HTTP_API",
+        "call_type": "DIRECT",
+        "has_multiple_call_sites": false,
+        "api_paths": [
+          "[POST]/home/recommendSubject/delete"
+        ],
+        "change_type": "MODIFIED",
+        "dao_info": null,
+        "documentation": null,
+        "children": [],
+        "_analysis_meta": {
+          "coverage_stats": {
+            "total_query_methods": 62,
+            "methods_with_callers": 20,
+            "methods_without_callers": 42,
+            "cha_resolved_calls": 17,
+            "direct_calls": 9,
+            "cyclic_paths": 0,
+            "depth_limited_paths": 0
+          },
+          "limitations": [],
+          "is_complete": true
+        }
+      },
+      "entry_points": [
+        {
+          "package_class": "com.macro.mall.controller.SmsHomeRecommendSubjectController",
+          "method_signature": "delete(List<Long>)",
+          "root_type": "HTTP_API",
+          "depth_from_change": 0,
+          "api_paths": [
+            "[POST]/home/recommendSubject/delete"
+          ]
+        }
+      ],
+      "has_incomplete_paths": false
+    },
+    {
+      "direction": "upwards",
+      "method_info": {
+        "class_name": "SmsHomeRecommendSubjectController",
+        "method_name": "list",
+        "parameters": "[{\"parameter_type\": \"String\", \"parameter_name\": \"subjectName\", \"parameter_varargs\": false}, {\"parameter_type\": \"Integer\", \"parameter_name\": \"recommendStatus\", \"parameter_varargs\": false}, {\"parameter_type\": \"Integer\", \"parameter_name\": \"pageSize\", \"parameter_varargs\": false}, {\"parameter_type\": \"Integer\", \"parameter_name\": \"pageNum\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult<com.macro.mall.common.api.CommonPage>",
+        "change_type": "MODIFIED"
+      },
+      "package_class": "com.macro.mall.controller.SmsHomeRecommendSubjectController",
+      "method_signature": "list(String,Integer,Integer,Integer)",
+      "chain": {
+        "node_id": "0|com.macro.mall.controller.SmsHomeRecommendSubjectController|list(String,Integer,Integer,Integer)",
+        "package_class": "com.macro.mall.controller.SmsHomeRecommendSubjectController",
+        "method_signature": "list(String,Integer,Integer,Integer)",
+        "method_name": "list",
+        "class_name": "SmsHomeRecommendSubjectController",
+        "depth": 0,
+        "invocation_lines": [],
+        "is_cyclic": false,
+        "is_leaf": true,
+        "db_method_id": 15219,
+        "root_type": "HTTP_API",
+        "call_type": "DIRECT",
+        "has_multiple_call_sites": false,
+        "api_paths": [
+          "[GET]/home/recommendSubject/list"
+        ],
+        "change_type": "MODIFIED",
+        "dao_info": null,
+        "documentation": null,
+        "children": [],
+        "_analysis_meta": {
+          "coverage_stats": {
+            "total_query_methods": 63,
+            "methods_with_callers": 20,
+            "methods_without_callers": 43,
+            "cha_resolved_calls": 17,
+            "direct_calls": 9,
+            "cyclic_paths": 0,
+            "depth_limited_paths": 0
+          },
+          "limitations": [],
+          "is_complete": true
+        }
+      },
+      "entry_points": [
+        {
+          "package_class": "com.macro.mall.controller.SmsHomeRecommendSubjectController",
+          "method_signature": "list(String,Integer,Integer,Integer)",
+          "root_type": "HTTP_API",
+          "depth_from_change": 0,
+          "api_paths": [
+            "[GET]/home/recommendSubject/list"
+          ]
+        }
+      ],
+      "has_incomplete_paths": false
+    },
+    {
+      "direction": "upwards",
+      "method_info": {
+        "class_name": "SmsHomeRecommendSubjectController",
+        "method_name": "updateRecommendStatus",
+        "parameters": "[{\"parameter_type\": \"List<Long>\", \"parameter_name\": \"ids\", \"parameter_varargs\": false}, {\"parameter_type\": \"Integer\", \"parameter_name\": \"recommendStatus\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult",
+        "change_type": "MODIFIED"
+      },
+      "package_class": "com.macro.mall.controller.SmsHomeRecommendSubjectController",
+      "method_signature": "updateRecommendStatus(List<Long>,Integer)",
+      "chain": {
+        "node_id": "0|com.macro.mall.controller.SmsHomeRecommendSubjectController|updateRecommendStatus(List<Long>,Integer)",
+        "package_class": "com.macro.mall.controller.SmsHomeRecommendSubjectController",
+        "method_signature": "updateRecommendStatus(List<Long>,Integer)",
+        "method_name": "updateRecommendStatus",
+        "class_name": "SmsHomeRecommendSubjectController",
+        "depth": 0,
+        "invocation_lines": [],
+        "is_cyclic": false,
+        "is_leaf": true,
+        "db_method_id": 15218,
+        "root_type": "HTTP_API",
+        "call_type": "DIRECT",
+        "has_multiple_call_sites": false,
+        "api_paths": [
+          "[POST]/home/recommendSubject/update/recommendStatus"
+        ],
+        "change_type": "MODIFIED",
+        "dao_info": null,
+        "documentation": null,
+        "children": [],
+        "_analysis_meta": {
+          "coverage_stats": {
+            "total_query_methods": 64,
+            "methods_with_callers": 20,
+            "methods_without_callers": 44,
+            "cha_resolved_calls": 17,
+            "direct_calls": 9,
+            "cyclic_paths": 0,
+            "depth_limited_paths": 0
+          },
+          "limitations": [],
+          "is_complete": true
+        }
+      },
+      "entry_points": [
+        {
+          "package_class": "com.macro.mall.controller.SmsHomeRecommendSubjectController",
+          "method_signature": "updateRecommendStatus(List<Long>,Integer)",
+          "root_type": "HTTP_API",
+          "depth_from_change": 0,
+          "api_paths": [
+            "[POST]/home/recommendSubject/update/recommendStatus"
+          ]
+        }
+      ],
+      "has_incomplete_paths": false
+    },
+    {
+      "direction": "upwards",
+      "method_info": {
+        "class_name": "SmsHomeRecommendSubjectController",
+        "method_name": "updateSort",
+        "parameters": "[{\"parameter_type\": \"Long\", \"parameter_name\": \"id\", \"parameter_varargs\": false}, {\"parameter_type\": \"Integer\", \"parameter_name\": \"sort\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult",
+        "change_type": "MODIFIED"
+      },
+      "package_class": "com.macro.mall.controller.SmsHomeRecommendSubjectController",
+      "method_signature": "updateSort(Long,Integer)",
+      "chain": {
+        "node_id": "0|com.macro.mall.controller.SmsHomeRecommendSubjectController|updateSort(Long,Integer)",
+        "package_class": "com.macro.mall.controller.SmsHomeRecommendSubjectController",
+        "method_signature": "updateSort(Long,Integer)",
+        "method_name": "updateSort",
+        "class_name": "SmsHomeRecommendSubjectController",
+        "depth": 0,
+        "invocation_lines": [],
+        "is_cyclic": false,
+        "is_leaf": true,
+        "db_method_id": 15216,
+        "root_type": "HTTP_API",
+        "call_type": "DIRECT",
+        "has_multiple_call_sites": false,
+        "api_paths": [
+          "[POST]/home/recommendSubject/update/sort/{id}"
+        ],
+        "change_type": "MODIFIED",
+        "dao_info": null,
+        "documentation": null,
+        "children": [],
+        "_analysis_meta": {
+          "coverage_stats": {
+            "total_query_methods": 65,
+            "methods_with_callers": 20,
+            "methods_without_callers": 45,
+            "cha_resolved_calls": 17,
+            "direct_calls": 9,
+            "cyclic_paths": 0,
+            "depth_limited_paths": 0
+          },
+          "limitations": [],
+          "is_complete": true
+        }
+      },
+      "entry_points": [
+        {
+          "package_class": "com.macro.mall.controller.SmsHomeRecommendSubjectController",
+          "method_signature": "updateSort(Long,Integer)",
+          "root_type": "HTTP_API",
+          "depth_from_change": 0,
+          "api_paths": [
+            "[POST]/home/recommendSubject/update/sort/{id}"
+          ]
+        }
+      ],
+      "has_incomplete_paths": false
+    },
+    {
+      "direction": "upwards",
+      "method_info": {
+        "class_name": "UmsAdminController",
+        "method_name": "logout",
+        "parameters": "[{\"parameter_type\": \"Principal\", \"parameter_name\": \"principal\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult",
+        "change_type": "MODIFIED"
+      },
+      "package_class": "com.macro.mall.controller.UmsAdminController",
+      "method_signature": "logout(Principal)",
+      "chain": {
+        "node_id": "0|com.macro.mall.controller.UmsAdminController|logout(Principal)",
+        "package_class": "com.macro.mall.controller.UmsAdminController",
+        "method_signature": "logout(Principal)",
+        "method_name": "logout",
+        "class_name": "UmsAdminController",
+        "depth": 0,
+        "invocation_lines": [],
+        "is_cyclic": false,
+        "is_leaf": true,
+        "db_method_id": 15411,
+        "root_type": "HTTP_API",
+        "call_type": "DIRECT",
+        "has_multiple_call_sites": false,
+        "api_paths": [
+          "[POST]/admin/logout"
+        ],
+        "change_type": "MODIFIED",
+        "dao_info": null,
+        "documentation": null,
+        "children": [],
+        "_analysis_meta": {
+          "coverage_stats": {
+            "total_query_methods": 66,
+            "methods_with_callers": 20,
+            "methods_without_callers": 46,
+            "cha_resolved_calls": 17,
+            "direct_calls": 9,
+            "cyclic_paths": 0,
+            "depth_limited_paths": 0
+          },
+          "limitations": [],
+          "is_complete": true
+        }
+      },
+      "entry_points": [
+        {
+          "package_class": "com.macro.mall.controller.UmsAdminController",
+          "method_signature": "logout(Principal)",
+          "root_type": "HTTP_API",
+          "depth_from_change": 0,
+          "api_paths": [
+            "[POST]/admin/logout"
+          ]
+        }
+      ],
+      "has_incomplete_paths": false
+    },
+    {
+      "direction": "upwards",
+      "method_info": {
+        "class_name": "UmsAdminServiceImpl",
+        "method_name": "delete",
+        "parameters": "[{\"parameter_type\": \"Long\", \"parameter_name\": \"id\", \"parameter_varargs\": false}]",
+        "return_type": "int",
+        "change_type": "MODIFIED"
+      },
+      "package_class": "com.macro.mall.service.impl.UmsAdminServiceImpl",
+      "method_signature": "delete(Long)",
+      "chain": {
+        "node_id": "0|com.macro.mall.service.impl.UmsAdminServiceImpl|delete(Long)",
+        "package_class": "com.macro.mall.service.impl.UmsAdminServiceImpl",
+        "method_signature": "delete(Long)",
+        "method_name": "delete",
+        "class_name": "UmsAdminServiceImpl",
+        "depth": 0,
+        "invocation_lines": [],
+        "is_cyclic": false,
+        "is_leaf": false,
+        "db_method_id": 27500,
+        "root_type": "NO_STATIC_CALLER",
+        "call_type": "DIRECT",
+        "has_multiple_call_sites": false,
+        "api_paths": [],
+        "change_type": "MODIFIED",
+        "dao_info": null,
+        "documentation": null,
+        "children": [
+          {
+            "node_id": "1|com.macro.mall.controller.UmsAdminController|delete(Long)",
+            "package_class": "com.macro.mall.controller.UmsAdminController",
+            "method_signature": "delete(Long)",
+            "method_name": "delete",
+            "class_name": "UmsAdminController",
+            "depth": 1,
+            "invocation_lines": [
+              167
+            ],
+            "is_cyclic": false,
+            "is_leaf": true,
+            "db_method_id": 15416,
+            "root_type": "HTTP_API",
+            "call_type": "CHA_RESOLVED",
+            "has_multiple_call_sites": false,
+            "api_paths": [],
+            "change_type": "UNCHANGED",
+            "dao_info": null,
+            "documentation": null,
+            "children": []
+          }
+        ],
+        "_analysis_meta": {
+          "coverage_stats": {
+            "total_query_methods": 68,
+            "methods_with_callers": 21,
+            "methods_without_callers": 47,
+            "cha_resolved_calls": 18,
+            "direct_calls": 9,
+            "cyclic_paths": 0,
+            "depth_limited_paths": 0
+          },
+          "limitations": [],
+          "is_complete": true
+        }
+      },
+      "entry_points": [
+        {
+          "package_class": "com.macro.mall.controller.UmsAdminController",
+          "method_signature": "delete(Long)",
+          "root_type": "HTTP_API",
+          "depth_from_change": 1,
+          "api_paths": []
+        }
+      ],
+      "has_incomplete_paths": false
+    },
+    {
+      "direction": "upwards",
+      "method_info": {
+        "class_name": "UmsMemberCouponServiceImpl",
+        "method_name": "listCart",
+        "parameters": "[{\"parameter_type\": \"List<com.macro.mall.portal.domain.CartPromotionItem>\", \"parameter_name\": \"cartItemList\", \"parameter_varargs\": false}, {\"parameter_type\": \"Integer\", \"parameter_name\": \"type\", \"parameter_varargs\": false}]",
+        "return_type": "List<com.macro.mall.portal.domain.SmsCouponHistoryDetail>",
+        "change_type": "MODIFIED"
+      },
+      "package_class": "com.macro.mall.portal.service.impl.UmsMemberCouponServiceImpl",
+      "method_signature": "listCart(List<com.macro.mall.portal.domain.CartPromotionItem>,Integer)",
+      "chain": {
+        "node_id": "0|com.macro.mall.portal.service.impl.UmsMemberCouponServiceImpl|listCart(List<com.macro.mall.portal.domain.CartPromotionItem>,Integer)",
+        "package_class": "com.macro.mall.portal.service.impl.UmsMemberCouponServiceImpl",
+        "method_signature": "listCart(List<com.macro.mall.portal.domain.CartPromotionItem>,Integer)",
+        "method_name": "listCart",
+        "class_name": "UmsMemberCouponServiceImpl",
+        "depth": 0,
+        "invocation_lines": [],
+        "is_cyclic": false,
+        "is_leaf": false,
+        "db_method_id": 27692,
+        "root_type": "NO_STATIC_CALLER",
+        "call_type": "DIRECT",
+        "has_multiple_call_sites": false,
+        "api_paths": [],
+        "change_type": "MODIFIED",
+        "dao_info": null,
+        "documentation": null,
+        "children": [
+          {
+            "node_id": "1|com.macro.mall.portal.controller.UmsMemberCouponController|listCart(Integer)",
+            "package_class": "com.macro.mall.portal.controller.UmsMemberCouponController",
+            "method_signature": "listCart(Integer)",
+            "method_name": "listCart",
+            "class_name": "UmsMemberCouponController",
+            "depth": 1,
+            "invocation_lines": [
+              72
+            ],
+            "is_cyclic": false,
+            "is_leaf": true,
+            "db_method_id": 13927,
+            "root_type": "HTTP_API",
+            "call_type": "CHA_RESOLVED",
+            "has_multiple_call_sites": false,
+            "api_paths": [],
+            "change_type": "UNCHANGED",
+            "dao_info": null,
+            "documentation": null,
+            "children": []
+          },
+          {
+            "node_id": "1|com.macro.mall.portal.service.impl.OmsPortalOrderServiceImpl|generateConfirmOrder(List<Long>)",
+            "package_class": "com.macro.mall.portal.service.impl.OmsPortalOrderServiceImpl",
+            "method_signature": "generateConfirmOrder(List<Long>)",
+            "method_name": "generateConfirmOrder",
+            "class_name": "OmsPortalOrderServiceImpl",
+            "depth": 1,
+            "invocation_lines": [
+              82
+            ],
+            "is_cyclic": false,
+            "is_leaf": false,
+            "db_method_id": 27712,
+            "root_type": "UNKNOWN",
+            "call_type": "CHA_RESOLVED",
+            "has_multiple_call_sites": false,
+            "api_paths": [],
+            "change_type": "UNCHANGED",
+            "dao_info": null,
+            "documentation": null,
+            "children": [
+              {
+                "node_id": "2|com.macro.mall.portal.controller.OmsPortalOrderController|generateConfirmOrder(List<Long>)",
+                "package_class": "com.macro.mall.portal.controller.OmsPortalOrderController",
+                "method_signature": "generateConfirmOrder(List<Long>)",
+                "method_name": "generateConfirmOrder",
+                "class_name": "OmsPortalOrderController",
+                "depth": 2,
+                "invocation_lines": [
+                  36
+                ],
+                "is_cyclic": false,
+                "is_leaf": true,
+                "db_method_id": 13850,
+                "root_type": "HTTP_API",
+                "call_type": "CHA_RESOLVED",
+                "has_multiple_call_sites": false,
+                "api_paths": [],
+                "change_type": "UNCHANGED",
+                "dao_info": null,
+                "documentation": null,
+                "children": []
+              }
+            ]
+          },
+          {
+            "node_id": "1|com.macro.mall.portal.service.impl.OmsPortalOrderServiceImpl|getUseCoupon(List<com.macro.mall.portal.domain.CartPromotionItem>,Long)",
+            "package_class": "com.macro.mall.portal.service.impl.OmsPortalOrderServiceImpl",
+            "method_signature": "getUseCoupon(List<com.macro.mall.portal.domain.CartPromotionItem>,Long)",
+            "method_name": "getUseCoupon",
+            "class_name": "OmsPortalOrderServiceImpl",
+            "depth": 1,
+            "invocation_lines": [
+              727
+            ],
+            "is_cyclic": false,
+            "is_leaf": false,
+            "db_method_id": 27738,
+            "root_type": "UNKNOWN",
+            "call_type": "CHA_RESOLVED",
+            "has_multiple_call_sites": false,
+            "api_paths": [],
+            "change_type": "MODIFIED",
+            "dao_info": null,
+            "documentation": null,
+            "children": [
+              {
+                "node_id": "2|com.macro.mall.portal.service.impl.OmsPortalOrderServiceImpl|generateOrder(com.macro.mall.portal.domain.OrderParam)",
+                "package_class": "com.macro.mall.portal.service.impl.OmsPortalOrderServiceImpl",
+                "method_signature": "generateOrder(com.macro.mall.portal.domain.OrderParam)",
+                "method_name": "generateOrder",
+                "class_name": "OmsPortalOrderServiceImpl",
+                "depth": 2,
+                "invocation_lines": [
+                  137
+                ],
+                "is_cyclic": false,
+                "is_leaf": false,
+                "db_method_id": 27713,
+                "root_type": "UNKNOWN",
+                "call_type": "DIRECT",
+                "has_multiple_call_sites": false,
+                "api_paths": [],
+                "change_type": "UNCHANGED",
+                "dao_info": null,
+                "documentation": null,
+                "children": [
+                  {
+                    "node_id": "3|com.macro.mall.portal.controller.OmsPortalOrderController|generateOrder(com.macro.mall.portal.domain.OrderParam)",
+                    "package_class": "com.macro.mall.portal.controller.OmsPortalOrderController",
+                    "method_signature": "generateOrder(com.macro.mall.portal.domain.OrderParam)",
+                    "method_name": "generateOrder",
+                    "class_name": "OmsPortalOrderController",
+                    "depth": 3,
+                    "invocation_lines": [
+                      44
+                    ],
+                    "is_cyclic": false,
+                    "is_leaf": true,
+                    "db_method_id": 13851,
+                    "root_type": "HTTP_API",
+                    "call_type": "CHA_RESOLVED",
+                    "has_multiple_call_sites": false,
+                    "api_paths": [],
+                    "change_type": "UNCHANGED",
+                    "dao_info": null,
+                    "documentation": null,
+                    "children": []
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "_analysis_meta": {
+          "coverage_stats": {
+            "total_query_methods": 75,
+            "methods_with_callers": 25,
+            "methods_without_callers": 50,
+            "cha_resolved_calls": 23,
+            "direct_calls": 10,
+            "cyclic_paths": 0,
+            "depth_limited_paths": 0
+          },
+          "limitations": [],
+          "is_complete": true
+        }
+      },
+      "entry_points": [
+        {
+          "package_class": "com.macro.mall.portal.controller.UmsMemberCouponController",
+          "method_signature": "listCart(Integer)",
+          "root_type": "HTTP_API",
+          "depth_from_change": 1,
+          "api_paths": []
+        },
+        {
+          "package_class": "com.macro.mall.portal.controller.OmsPortalOrderController",
+          "method_signature": "generateConfirmOrder(List<Long>)",
+          "root_type": "HTTP_API",
+          "depth_from_change": 2,
+          "api_paths": []
+        },
+        {
+          "package_class": "com.macro.mall.portal.controller.OmsPortalOrderController",
+          "method_signature": "generateOrder(com.macro.mall.portal.domain.OrderParam)",
+          "root_type": "HTTP_API",
+          "depth_from_change": 3,
+          "api_paths": []
+        }
+      ],
+      "has_incomplete_paths": false
+    },
+    {
+      "direction": "upwards",
+      "method_info": {
+        "class_name": "UmsMemberReceiveAddressController",
+        "method_name": "list",
+        "parameters": "[]",
+        "return_type": "com.macro.mall.common.api.CommonResult<List>",
+        "change_type": "MODIFIED"
+      },
+      "package_class": "com.macro.mall.portal.controller.UmsMemberReceiveAddressController",
+      "method_signature": "list()",
+      "chain": {
+        "node_id": "0|com.macro.mall.portal.controller.UmsMemberReceiveAddressController|list()",
+        "package_class": "com.macro.mall.portal.controller.UmsMemberReceiveAddressController",
+        "method_signature": "list()",
+        "method_name": "list",
+        "class_name": "UmsMemberReceiveAddressController",
+        "depth": 0,
+        "invocation_lines": [],
+        "is_cyclic": false,
+        "is_leaf": true,
+        "db_method_id": 27549,
+        "root_type": "HTTP_API",
+        "call_type": "DIRECT",
+        "has_multiple_call_sites": false,
+        "api_paths": [
+          "[GET]/member/address/list"
+        ],
+        "change_type": "MODIFIED",
+        "dao_info": null,
+        "documentation": null,
+        "children": [],
+        "_analysis_meta": {
+          "coverage_stats": {
+            "total_query_methods": 76,
+            "methods_with_callers": 25,
+            "methods_without_callers": 51,
+            "cha_resolved_calls": 23,
+            "direct_calls": 10,
+            "cyclic_paths": 0,
+            "depth_limited_paths": 0
+          },
+          "limitations": [],
+          "is_complete": true
+        }
+      },
+      "entry_points": [
+        {
+          "package_class": "com.macro.mall.portal.controller.UmsMemberReceiveAddressController",
+          "method_signature": "list()",
+          "root_type": "HTTP_API",
+          "depth_from_change": 0,
+          "api_paths": [
+            "[GET]/member/address/list"
+          ]
+        }
+      ],
+      "has_incomplete_paths": false
+    },
+    {
+      "direction": "upwards",
+      "method_info": {
+        "class_name": "UmsMenuController",
+        "method_name": "list",
+        "parameters": "[{\"parameter_type\": \"Long\", \"parameter_name\": \"parentId\", \"parameter_varargs\": false}, {\"parameter_type\": \"Integer\", \"parameter_name\": \"pageSize\", \"parameter_varargs\": false}, {\"parameter_type\": \"Integer\", \"parameter_name\": \"pageNum\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult<com.macro.mall.common.api.CommonPage>",
+        "change_type": "MODIFIED"
+      },
+      "package_class": "com.macro.mall.controller.UmsMenuController",
+      "method_signature": "list(Long,Integer,Integer)",
+      "chain": {
+        "node_id": "0|com.macro.mall.controller.UmsMenuController|list(Long,Integer,Integer)",
+        "package_class": "com.macro.mall.controller.UmsMenuController",
+        "method_signature": "list(Long,Integer,Integer)",
+        "method_name": "list",
+        "class_name": "UmsMenuController",
+        "depth": 0,
+        "invocation_lines": [],
+        "is_cyclic": false,
+        "is_leaf": true,
+        "db_method_id": 15197,
+        "root_type": "HTTP_API",
+        "call_type": "DIRECT",
+        "has_multiple_call_sites": false,
+        "api_paths": [
+          "[GET]/menu/list/{parentId}"
+        ],
+        "change_type": "MODIFIED",
+        "dao_info": null,
+        "documentation": null,
+        "children": [],
+        "_analysis_meta": {
+          "coverage_stats": {
+            "total_query_methods": 77,
+            "methods_with_callers": 25,
+            "methods_without_callers": 52,
+            "cha_resolved_calls": 23,
+            "direct_calls": 10,
+            "cyclic_paths": 0,
+            "depth_limited_paths": 0
+          },
+          "limitations": [],
+          "is_complete": true
+        }
+      },
+      "entry_points": [
+        {
+          "package_class": "com.macro.mall.controller.UmsMenuController",
+          "method_signature": "list(Long,Integer,Integer)",
+          "root_type": "HTTP_API",
+          "depth_from_change": 0,
+          "api_paths": [
+            "[GET]/menu/list/{parentId}"
+          ]
+        }
+      ],
+      "has_incomplete_paths": false
+    },
+    {
+      "direction": "upwards",
+      "method_info": {
+        "class_name": "UmsMenuController",
+        "method_name": "updateHidden",
+        "parameters": "[{\"parameter_type\": \"Long\", \"parameter_name\": \"id\", \"parameter_varargs\": false}, {\"parameter_type\": \"Integer\", \"parameter_name\": \"hidden\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult",
+        "change_type": "MODIFIED"
+      },
+      "package_class": "com.macro.mall.controller.UmsMenuController",
+      "method_signature": "updateHidden(Long,Integer)",
+      "chain": {
+        "node_id": "0|com.macro.mall.controller.UmsMenuController|updateHidden(Long,Integer)",
+        "package_class": "com.macro.mall.controller.UmsMenuController",
+        "method_signature": "updateHidden(Long,Integer)",
+        "method_name": "updateHidden",
+        "class_name": "UmsMenuController",
+        "depth": 0,
+        "invocation_lines": [],
+        "is_cyclic": false,
+        "is_leaf": true,
+        "db_method_id": 15199,
+        "root_type": "HTTP_API",
+        "call_type": "DIRECT",
+        "has_multiple_call_sites": false,
+        "api_paths": [
+          "[POST]/menu/updateHidden/{id}"
+        ],
+        "change_type": "MODIFIED",
+        "dao_info": null,
+        "documentation": null,
+        "children": [],
+        "_analysis_meta": {
+          "coverage_stats": {
+            "total_query_methods": 78,
+            "methods_with_callers": 25,
+            "methods_without_callers": 53,
+            "cha_resolved_calls": 23,
+            "direct_calls": 10,
+            "cyclic_paths": 0,
+            "depth_limited_paths": 0
+          },
+          "limitations": [],
+          "is_complete": true
+        }
+      },
+      "entry_points": [
+        {
+          "package_class": "com.macro.mall.controller.UmsMenuController",
+          "method_signature": "updateHidden(Long,Integer)",
+          "root_type": "HTTP_API",
+          "depth_from_change": 0,
+          "api_paths": [
+            "[POST]/menu/updateHidden/{id}"
+          ]
+        }
+      ],
+      "has_incomplete_paths": false
+    },
+    {
+      "direction": "upwards",
+      "method_info": {
+        "class_name": "UmsMenuServiceImpl",
+        "method_name": "updateHidden",
+        "parameters": "[{\"parameter_type\": \"Long\", \"parameter_name\": \"id\", \"parameter_varargs\": false}, {\"parameter_type\": \"Integer\", \"parameter_name\": \"hidden\", \"parameter_varargs\": false}]",
+        "return_type": "int",
+        "change_type": "MODIFIED"
+      },
+      "package_class": "com.macro.mall.service.impl.UmsMenuServiceImpl",
+      "method_signature": "updateHidden(Long,Integer)",
+      "chain": {
+        "node_id": "0|com.macro.mall.service.impl.UmsMenuServiceImpl|updateHidden(Long,Integer)",
+        "package_class": "com.macro.mall.service.impl.UmsMenuServiceImpl",
+        "method_signature": "updateHidden(Long,Integer)",
+        "method_name": "updateHidden",
+        "class_name": "UmsMenuServiceImpl",
+        "depth": 0,
+        "invocation_lines": [],
+        "is_cyclic": false,
+        "is_leaf": false,
+        "db_method_id": 27483,
+        "root_type": "NO_STATIC_CALLER",
+        "call_type": "DIRECT",
+        "has_multiple_call_sites": false,
+        "api_paths": [],
+        "change_type": "MODIFIED",
+        "dao_info": null,
+        "documentation": null,
+        "children": [
+          {
+            "node_id": "1|com.macro.mall.controller.UmsMenuController|updateHidden(Long,Integer)",
+            "package_class": "com.macro.mall.controller.UmsMenuController",
+            "method_signature": "updateHidden(Long,Integer)",
+            "method_name": "updateHidden",
+            "class_name": "UmsMenuController",
+            "depth": 1,
+            "invocation_lines": [
+              97
+            ],
+            "is_cyclic": false,
+            "is_leaf": true,
+            "db_method_id": 15199,
+            "root_type": "HTTP_API",
+            "call_type": "CHA_RESOLVED",
+            "has_multiple_call_sites": false,
+            "api_paths": [],
+            "change_type": "MODIFIED",
+            "dao_info": null,
+            "documentation": null,
+            "children": []
+          }
+        ],
+        "_analysis_meta": {
+          "coverage_stats": {
+            "total_query_methods": 80,
+            "methods_with_callers": 26,
+            "methods_without_callers": 54,
+            "cha_resolved_calls": 24,
+            "direct_calls": 10,
+            "cyclic_paths": 0,
+            "depth_limited_paths": 0
+          },
+          "limitations": [],
+          "is_complete": true
+        }
+      },
+      "entry_points": [
+        {
+          "package_class": "com.macro.mall.controller.UmsMenuController",
+          "method_signature": "updateHidden(Long,Integer)",
+          "root_type": "HTTP_API",
+          "depth_from_change": 1,
+          "api_paths": []
+        }
+      ],
+      "has_incomplete_paths": false
+    },
+    {
+      "direction": "upwards",
+      "method_info": {
+        "class_name": "UmsRoleController",
+        "method_name": "listMenu",
+        "parameters": "[{\"parameter_type\": \"Long\", \"parameter_name\": \"roleId\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult<List>",
+        "change_type": "MODIFIED"
+      },
+      "package_class": "com.macro.mall.controller.UmsRoleController",
+      "method_signature": "listMenu(Long)",
+      "chain": {
+        "node_id": "0|com.macro.mall.controller.UmsRoleController|listMenu(Long)",
+        "package_class": "com.macro.mall.controller.UmsRoleController",
+        "method_signature": "listMenu(Long)",
+        "method_name": "listMenu",
+        "class_name": "UmsRoleController",
+        "depth": 0,
+        "invocation_lines": [],
+        "is_cyclic": false,
+        "is_leaf": true,
+        "db_method_id": 27431,
+        "root_type": "HTTP_API",
+        "call_type": "DIRECT",
+        "has_multiple_call_sites": false,
+        "api_paths": [
+          "[GET]/role/listMenu/{roleId}"
+        ],
+        "change_type": "MODIFIED",
+        "dao_info": null,
+        "documentation": null,
+        "children": [],
+        "_analysis_meta": {
+          "coverage_stats": {
+            "total_query_methods": 81,
+            "methods_with_callers": 26,
+            "methods_without_callers": 55,
+            "cha_resolved_calls": 24,
+            "direct_calls": 10,
+            "cyclic_paths": 0,
+            "depth_limited_paths": 0
+          },
+          "limitations": [],
+          "is_complete": true
+        }
+      },
+      "entry_points": [
+        {
+          "package_class": "com.macro.mall.controller.UmsRoleController",
+          "method_signature": "listMenu(Long)",
+          "root_type": "HTTP_API",
+          "depth_from_change": 0,
+          "api_paths": [
+            "[GET]/role/listMenu/{roleId}"
+          ]
+        }
+      ],
+      "has_incomplete_paths": false
+    }
+  ],
+  "failed": [],
+  "analysis_limitations": [
+    {
+      "id": "DYNAMIC_DISPATCH",
+      "severity": "HIGH",
+      "description": "无法覆盖通过反射、Lambda、方法引用、动态代理发起的调用",
+      "examples": [
+        "Spring AOP 代理方法",
+        "MyBatis Mapper 动态绑定",
+        "反射调用 invoke()"
+      ],
+      "impact": "向上分析可能遗漏实际调用者，结果属于'过于乐观的下界'"
+    },
+    {
+      "id": "INTERFACE_RESOLUTION",
+      "severity": "MEDIUM",
+      "description": "CHA 解析基于静态类层次，无法处理运行时类型确定",
+      "examples": [
+        "条件分支中不同实现类赋值",
+        "工厂模式返回类型"
+      ],
+      "impact": "可能包含不可达调用路径（假阳性），或遗漏某些实现类（假阴性）"
+    },
+    {
+      "id": "FRAMEWORK_CALLS",
+      "severity": "MEDIUM",
+      "description": "框架代码（Spring DispatcherServlet、定时任务调度器等）通常不在分析范围内",
+      "examples": [
+        "HTTP 请求由 DispatcherServlet 转发",
+        "@Scheduled 由 Spring 调度器触发"
+      ],
+      "impact": "Controller 方法可能显示为'无静态调用者'，需结合注解识别"
+    },
+    {
+      "id": "NATIVE_CODE",
+      "severity": "LOW",
+      "description": "JNI 调用、Native 方法无法追踪",
+      "examples": [
+        "System.arraycopy()",
+        "文件 IO 的 Native 实现"
+      ],
+      "impact": "不影响常规业务代码分析"
+    }
+  ],
+  "recommendations": [
+    "覆盖率较低（<30%），建议检查是否存在大量动态绑定调用（如 MyBatis Mapper、Spring AOP）。考虑结合运行时分析补充静态分析盲区。"
+  ]
+}

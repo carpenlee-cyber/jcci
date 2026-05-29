@@ -198,7 +198,7 @@ import { ref, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { Connection, InfoFilled, WarningFilled } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
-import axios from 'axios'
+import apiClient from '@/api/client'
 import { useAIAnalysisStore } from '@/stores/aiAnalysis'
 import { useSessionStore } from '@/stores/session'
 
@@ -231,12 +231,10 @@ const bulkCompleted = ref(0)
 const bulkError = ref('')
 let bulkTaskId: string | null = null
 let bulkPollTimer: number | null = null
+let statusRefreshTimer: number | null = null
 
-const apiClient = axios.create({
-  baseURL: 'http://127.0.0.1:8000/api',
-  timeout: 300000,
-  headers: { 'Content-Type': 'application/json' }
-})
+// AI 批量分析可能耗时较长，单独设置超时
+apiClient.defaults.timeout = 300000
 
 // 轮询批量任务进度 + Tree 节点状态
 const startBatchPolling = (taskId: string) => {
@@ -282,7 +280,24 @@ const stopBatchPolling = () => {
 
 onMounted(() => {
   loadNodesStatus()
+  
+  // 页面可见性变化时刷新标签（用户从其他标签页返回时）
+  document.addEventListener('visibilitychange', handleVisibilityChange)
+  
+  // 定期刷新节点状态（30秒间隔）
+  statusRefreshTimer = window.setInterval(() => {
+    if (document.visibilityState === 'visible') {
+      loadNodesStatus()
+    }
+  }, 30000)
 })
+
+// 页面可见性变化时刷新节点状态
+const handleVisibilityChange = () => {
+  if (document.visibilityState === 'visible') {
+    loadNodesStatus()
+  }
+}
 
 // 数据变化时重新加载节点状态
 watch(() => props.data, () => {
@@ -291,6 +306,11 @@ watch(() => props.data, () => {
 
 onUnmounted(() => {
   stopBatchPolling()
+  if (statusRefreshTimer) {
+    clearInterval(statusRefreshTimer)
+    statusRefreshTimer = null
+  }
+  document.removeEventListener('visibilitychange', handleVisibilityChange)
 })
 
 const startBulkAnalysis = async () => {

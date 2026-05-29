@@ -628,7 +628,7 @@ workflow/
 ```python
 # 敏感配置（不提交到版本控制）
 LLM_API_URL = "https://openai.good.hidns.vip/v1"
-LLM_API_KEY = "sk-..."
+LLM_API_KEY = "sk-B882bCwUweSeMRscoNwxZw4vxpjXmvWTLBxO5aXC7WAYhfwa"
 LLM_MODEL = "moonshotai/kimi-k2.6"
 
 # 路径配置

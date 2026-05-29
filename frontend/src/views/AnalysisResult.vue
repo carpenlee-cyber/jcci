@@ -13,12 +13,13 @@
       
       <!-- 基线选择器 -->
       <BaselineSelector 
-        :initialBaseline="sessionStore.selectedBaseline"
+        :initialBaseline="lockedBaseline || sessionStore.selectedBaseline"
         :initialVersion="sessionStore.selectedVersion"
+        :lockedBaseline="!!lockedBaseline"
         @change="handleBaselineChange" 
       />
       
-      <!-- 任务信息（如果有） -->
+      <!-- 任务信息 -->
       <el-descriptions :column="3" border v-if="taskInfo">
         <el-descriptions-item label="任务ID">{{ taskInfo.task_id }}</el-descriptions-item>
         <el-descriptions-item label="状态">
@@ -28,7 +29,7 @@
           <el-progress :percentage="taskInfo.progress" />
         </el-descriptions-item>
         <el-descriptions-item label="Git仓库" :span="2">{{ taskInfo.git_url }}</el-descriptions-item>
-        <el-descriptions-item label="版本对比">{{ taskInfo.tag_old }} → {{ taskInfo.tag_new }}</el-descriptions-item>
+        <el-descriptions-item label="基线 → 目标">{{ taskInfo.tag_old }} → {{ taskInfo.tag_new }}</el-descriptions-item>
       </el-descriptions>
       
       <el-divider />
@@ -89,6 +90,7 @@ const sessionStore = useSessionStore()
 const taskInfo = ref<any>(null)
 const loading = ref(false)
 const activeTab = ref('upstream')
+const lockedBaseline = ref('')
 
 // 分析结果数据
 const upstreamData = ref<any[]>([])
@@ -349,6 +351,18 @@ const loadTaskInfo = async () => {
   try {
     const response = await taskApi.getTask(taskId)
     taskInfo.value = response.data
+    
+    // 从任务锁定基线版本，允许多版本切换（使用完整标签，后端自动映射）
+    if (taskInfo.value?.tag_old) {
+      lockedBaseline.value = taskInfo.value.tag_old
+      // 若 session 中无基线/版本，用任务的完整标签填充
+      if (!sessionStore.selectedBaseline) {
+        sessionStore.setBaselineAndVersion(
+          taskInfo.value.tag_old,
+          taskInfo.value.tag_new || ''
+        )
+      }
+    }
   } catch (error) {
     console.error('加载任务信息失败:', error)
   } finally {

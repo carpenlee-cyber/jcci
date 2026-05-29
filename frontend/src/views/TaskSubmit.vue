@@ -9,7 +9,7 @@
         <el-row :gutter="20">
           <el-col :span="12">
             <el-form-item label="Git仓库地址" prop="git_url">
-              <el-input v-model="form.git_url" placeholder="https://github.com/user/repo.git" value="https://github.com/carpenlee-cyber/mall.git" />
+              <el-input v-model="form.git_url" placeholder="https://github.com/user/repo.git" />
             </el-form-item>
           </el-col>
           <el-col :span="12">

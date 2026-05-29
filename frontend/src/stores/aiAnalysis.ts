@@ -130,7 +130,16 @@ export const useAIAnalysisStore = defineStore('aiAnalysis', () => {
       custom_analysis_prompt: customAnalysisPrompt.value,
       method_info: data.methodInfo,
       db_info: data.dbInfo,
-      chain_data: data.chainData,
+      chain_data: data.chainData || (data.analysisType === 'chain' ? {
+        method_info: data.methodInfo,
+        methods: selectedMethods.value.map(m => ({
+          class_name: m.class_name,
+          method_name: m.method_name,
+          signature: m.signature || `${m.method_name}()`,
+          change_type: m.change_type || 'UNKNOWN',
+          documentation: m.documentation || ''
+        }))
+      } : undefined),
       selected_methods: data.analysisType === 'chain' ? selectedMethods.value : undefined
     }
 

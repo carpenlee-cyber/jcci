@@ -20,7 +20,7 @@ class Settings(BaseSettings):
     # 应用基本信息
     APP_NAME: str = "JCCI Analysis Platform"
     APP_VERSION: str = "1.0.0"
-    DEBUG: bool = True
+    DEBUG: bool = False
     
     # 服务器配置
     HOST: str = "0.0.0.0"
@@ -32,15 +32,28 @@ class Settings(BaseSettings):
     # 分析结果目录（与 JCCI 引擎保持一致）
     RESULT_DIR: str = JCCI_RESULT_DIR
     
-    # CORS 配置
-    ALLOWED_ORIGINS: list = ["*"]
+    # CORS 配置（生产环境应通过环境变量限制为前端域名）
+    ALLOWED_ORIGINS: str = "*"
     
-    # LLM API 配置（可选）
-    LLM_API_URL: str = "https://openai.good.hidns.vip/v1"
-    LLM_API_KEY: str = "sk-B882bCwUweSeMRscoNwxZw4vxpjXmvWTLBxO5aXC7WAYhfwa"
-    # LLM_MODEL: str = "minimaxai/minimax-m2.7"
-    LLM_MODEL: str = "moonshotai/kimi-k2.6"
+    @property
+    def allowed_origins_list(self) -> list:
+        """将逗号分隔的字符串转为列表"""
+        return [o.strip() for o in self.ALLOWED_ORIGINS.split(",") if o.strip()]
     
+    # # LLM API 配置
+    # LLM_API_URL: str = "https://openai.good.hidns.vip/v1"
+    # LLM_API_KEY: str = "sk-B882bCwUweSeMRscoNwxZw4vxpjXmvWTLBxO5aXC7WAYhfwa"
+    # # LLM_MODEL: str = "minimaxai/minimax-m2.7"
+    # LLM_MODEL: str = "moonshotai/kimi-k2.6"
+    
+    # LLM API 配置
+    LLM_API_URL: str = "http://192.168.50.46:8317/v1"
+    LLM_API_KEY: str = "sk-JDKWFDsjavDzhGMWR"
+    LLM_MODEL: str = "gemini-3.1-flash-lite"
+    
+
+
+
     class Config:
         env_file = ".env"
         case_sensitive = True

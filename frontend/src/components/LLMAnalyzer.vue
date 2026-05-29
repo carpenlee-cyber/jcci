@@ -69,7 +69,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import axios from 'axios'
+import apiClient from '@/api/client'
 import { marked } from 'marked'
 
 const props = defineProps<{
@@ -85,14 +85,6 @@ const analysisResult = ref('')
 const fromCache = ref(false)
 const cacheInfo = ref<any>(null)
 const error = ref('')
-
-const apiClient = axios.create({
-  baseURL: 'http://127.0.0.1:8000/api',
-  timeout: 300000, // 5分钟超时
-  headers: {
-    'Content-Type': 'application/json'
-  }
-})
 
 const renderedMarkdown = computed(() => {
   if (!analysisResult.value) return ''

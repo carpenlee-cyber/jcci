@@ -2,7 +2,10 @@
 分析结果数据加载 API
 """
 import os
+import sys
 import json
+import sqlite3
+import re
 import threading
 from typing import List, Dict, Optional
 from fastapi import APIRouter, HTTPException, BackgroundTasks
@@ -12,7 +15,87 @@ from app.config import settings
 from app.services.llm_service import llm_service, llm_status
 from app.services.sql_analyzer import sql_analyzer
 
+# 添加项目根目录到路径（用于导入 jcci 核心引擎）
+_project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
+if _project_root not in sys.path:
+    sys.path.insert(0, _project_root)
+
+from jcci.utils.tag_utils import extract_short_tag as _extract_short_tag
+
 router = APIRouter(prefix="/api/analysis", tags=["analysis"])
+
+
+# ── 标签辅助函数 ──────────────────────────────────────────────
+# _extract_short_tag 已从 jcci.utils.tag_utils 统一导入（见文件顶部）
+
+
+def _get_full_baseline_from_tasks(task_db_path: str, short_name: str) -> str:
+    """从任务表将短标签目录名映射回完整基线标签"""
+    try:
+        conn = sqlite3.connect(task_db_path)
+        cursor = conn.cursor()
+        cursor.execute('SELECT DISTINCT tag_old FROM analysis_tasks WHERE tag_old IS NOT NULL')
+        for row in cursor.fetchall():
+            full = row[0]
+            short = _extract_short_tag(full)
+            # 匹配：目录名以短标签结尾（如 mall_20260403_01）、精确相等、或完整标签等于目录名
+            if short_name.endswith('_' + short) or short == short_name or full == short_name:
+                conn.close()
+                return full
+        conn.close()
+    except Exception:
+        pass
+    return short_name  # 回退
+
+
+def _get_full_versions_from_tasks(task_db_path: str, baseline_full: str, baseline_dir: str) -> List[str]:
+    """从任务表将版本目录名映射回完整版本标签"""
+    versions = []
+    try:
+        conn = sqlite3.connect(task_db_path)
+        cursor = conn.cursor()
+        # 获取所有含 tag_new 的任务，在 Python 中做基线匹配
+        cursor.execute('SELECT DISTINCT tag_new, tag_old FROM analysis_tasks WHERE tag_new IS NOT NULL')
+        for row in cursor.fetchall():
+            full_new = row[0]
+            tag_old = row[1]
+            # 基线匹配：完整标签相等 或 短标签一致（兼容任务列表和目录名两种基线来源）
+            if tag_old != baseline_full and _extract_short_tag(tag_old) != _extract_short_tag(baseline_full):
+                continue
+            short_new = _extract_short_tag(full_new)
+            version_dir = os.path.join(baseline_dir, short_new)
+            if os.path.isdir(version_dir):
+                versions.append(full_new)
+        conn.close()
+    except Exception:
+        pass
+    return versions
+
+
+def _resolve_data_path(baseline: str, version: str) -> str:
+    """接受完整标签或短标签, 映射到磁盘上的实际路径"""
+    result_dir = settings.RESULT_DIR
+    
+    # 先尝试原始路径（短标签或目录名直接命中的情况）
+    direct_path = os.path.join(result_dir, baseline, version)
+    if os.path.exists(direct_path):
+        return direct_path
+    
+    # 回退：转换为短标签再尝试（完整长标签的情况）
+    baseline_short = _extract_short_tag(baseline)
+    version_short = _extract_short_tag(version)
+    short_path = os.path.join(result_dir, baseline_short, version_short)
+    if os.path.exists(short_path):
+        return short_path
+    
+    # 二次回退：扫描带项目前缀的目录名（如 mall_20031225_01）
+    baseline_suffix = '_' + baseline_short
+    for item in sorted(os.listdir(result_dir)):
+        if item.endswith(baseline_suffix) and os.path.isdir(os.path.join(result_dir, item)):
+            return os.path.join(result_dir, item, version_short)
+    
+    # 最终回退
+    return short_path
 
 
 class BaselineInfo(BaseModel):
@@ -33,36 +116,44 @@ class VersionInfo(BaseModel):
 @router.get("/baselines", response_model=List[BaselineInfo])
 async def list_baselines():
     """
-    获取所有可用的基线列表及其版本
-    
-    Returns:
-        基线信息列表
+    获取所有可用的基线列表及其版本。
+    返回完整标签名（从任务表映射），若无任务记录则回退到磁盘目录名。
     """
     result_dir = settings.RESULT_DIR
+    task_db_path = settings.DB_PATH
     
     if not os.path.exists(result_dir):
         return []
     
     baselines = []
+    has_task_db = os.path.exists(task_db_path)
     
     # 扫描所有基线目录
     for item in sorted(os.listdir(result_dir)):
         baseline_path = os.path.join(result_dir, item)
         
-        # 跳过隐藏文件和文件
         if item.startswith('.') or not os.path.isdir(baseline_path):
             continue
         
+        # 映射为完整标签
+        if has_task_db:
+            baseline_full = _get_full_baseline_from_tasks(task_db_path, item)
+        else:
+            baseline_full = item
+        
         # 获取该基线下的所有版本子目录
-        versions = []
-        for version in sorted(os.listdir(baseline_path)):
-            version_path = os.path.join(baseline_path, version)
-            if os.path.isdir(version_path) and not version.startswith('.'):
-                versions.append(version)
+        if has_task_db and baseline_full != item:
+            versions = _get_full_versions_from_tasks(task_db_path, baseline_full, baseline_path)
+        else:
+            versions = []
+            for version in sorted(os.listdir(baseline_path)):
+                version_path = os.path.join(baseline_path, version)
+                if os.path.isdir(version_path) and not version.startswith('.'):
+                    versions.append(version)
         
         if versions:
             baselines.append(BaselineInfo(
-                name=item,
+                name=baseline_full,
                 versions=versions
             ))
     
@@ -82,7 +173,7 @@ async def get_version_info(baseline: str, version: str):
         版本信息
     """
     result_dir = settings.RESULT_DIR
-    version_dir = os.path.join(result_dir, baseline, version)
+    version_dir = _resolve_data_path(baseline, version)
     
     if not os.path.exists(version_dir):
         raise HTTPException(status_code=404, detail="Version not found")
@@ -114,7 +205,7 @@ async def get_upwards_chains(baseline: str, version: str):
         向上调用链 JSON 数据
     """
     result_dir = settings.RESULT_DIR
-    filepath = os.path.join(result_dir, baseline, version, "upwards_call_chains.json")
+    filepath = os.path.join(_resolve_data_path(baseline, version), "upwards_call_chains.json")
     
     if not os.path.exists(filepath):
         raise HTTPException(status_code=404, detail="Upwards chains file not found")
@@ -142,7 +233,7 @@ async def get_downwards_chains(baseline: str, version: str):
         向下调用链 JSON 数据
     """
     result_dir = settings.RESULT_DIR
-    filepath = os.path.join(result_dir, baseline, version, "downwards_call_chains.json")
+    filepath = os.path.join(_resolve_data_path(baseline, version), "downwards_call_chains.json")
     
     if not os.path.exists(filepath):
         raise HTTPException(status_code=404, detail="Downwards chains file not found")
@@ -170,7 +261,7 @@ async def get_upwards_text(baseline: str, version: str):
         文本内容
     """
     result_dir = settings.RESULT_DIR
-    filepath = os.path.join(result_dir, baseline, version, "upwards.txt")
+    filepath = os.path.join(_resolve_data_path(baseline, version), "upwards.txt")
     
     if not os.path.exists(filepath):
         raise HTTPException(status_code=404, detail="Upwards text file not found")
@@ -196,7 +287,7 @@ async def get_downwards_text(baseline: str, version: str):
         文本内容
     """
     result_dir = settings.RESULT_DIR
-    filepath = os.path.join(result_dir, baseline, version, "downwards.txt")
+    filepath = os.path.join(_resolve_data_path(baseline, version), "downwards.txt")
     
     if not os.path.exists(filepath):
         raise HTTPException(status_code=404, detail="Downwards text file not found")
@@ -489,7 +580,7 @@ async def analyze_upwards_summary(baseline: str, version: str, request: UpwardsS
         汇总分析结果
     """
     result_dir = settings.RESULT_DIR
-    filepath = os.path.join(result_dir, baseline, version, "upwards_call_chains.json")
+    filepath = os.path.join(_resolve_data_path(baseline, version), "upwards_call_chains.json")
     
     if not os.path.exists(filepath):
         raise HTTPException(status_code=404, detail="Upwards chains file not found")
@@ -599,7 +690,7 @@ async def analyze_chain(request: ChainAnalysisRequest):
 async def get_sql_summary(baseline: str, version: str):
     """获取 SQL 分析汇总"""
     result_dir = settings.RESULT_DIR
-    filepath = os.path.join(result_dir, baseline, version, "downwards_call_chains.json")
+    filepath = os.path.join(_resolve_data_path(baseline, version), "downwards_call_chains.json")
 
     if not os.path.exists(filepath):
         raise HTTPException(status_code=404, detail="Downwards chains file not found")
@@ -789,11 +880,39 @@ async def get_analysis_task(task_id: str):
 @router.get("/results/{result_id}")
 async def get_analysis_result(result_id: str):
     """
-    获取单个分析结果
+    获取单个分析结果（含子结果列表，用于链分析的聚合/子方法切换）
     """
     result = llm_service.get_result(result_id)
     if not result:
         raise HTTPException(status_code=404, detail="Result not found")
+
+    # 查询同一任务下的其他结果作为子结果（用于链分析 Tab 切换）
+    sub_results = []
+    task_id = result.get('task_id', '')
+    if task_id:
+        conn = __import__('sqlite3').connect(settings.DB_PATH)
+        conn.row_factory = __import__('sqlite3').Row
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT result_id, class_name, method_name, analysis_result,
+                   analysis_duration, from_cache, created_at
+            FROM llm_analysis_results
+            WHERE (task_id = ? OR parent_task_id = ?)
+              AND result_id != ?
+            ORDER BY created_at
+        ''', (task_id, task_id, result_id))
+        for row in cursor.fetchall():
+            sub_results.append({
+                'result_id': row['result_id'],
+                'class_name': row['class_name'] or '',
+                'method_name': row['method_name'] or '',
+                'analysis_result': row['analysis_result'],
+                'analysis_duration': row['analysis_duration'],
+                'from_cache': bool(row['from_cache']),
+                'created_at': row['created_at']
+            })
+        conn.close()
+
     return {
         'result_id': result['result_id'],
         'task_id': result.get('task_id'),
@@ -803,7 +922,8 @@ async def get_analysis_result(result_id: str):
         'model_name': result.get('model_name'),
         'analysis_duration': result.get('analysis_duration'),
         'from_cache': bool(result.get('from_cache')),
-        'created_at': result.get('created_at')
+        'created_at': result.get('created_at'),
+        'sub_results': sub_results
     }
 
 
@@ -835,51 +955,59 @@ async def get_nodes_status(request: NodeStatusRequest):
             'latest_downwards_chain_result_id': None
         }
         
-        # 检查方法分析缓存
+        # 检查方法分析缓存（含链分析的逐方法子结果 + 批量分析结果）
         cursor.execute('''
             SELECT r.result_id FROM llm_analysis_results r
             JOIN llm_analysis_tasks t ON r.task_id = t.task_id
-            WHERE t.analysis_type = 'method'
+            WHERE t.analysis_type IN ('method', 'batch', 'chain')
               AND r.class_name = ? AND r.method_name = ?
+              AND (t.baseline = '' OR t.baseline = ?) AND (t.version = '' OR t.version = ?)
             ORDER BY r.created_at DESC LIMIT 1
-        ''', (class_name, method_name))
+        ''', (class_name, method_name, request.baseline, request.version))
         row = cursor.fetchone()
         if row:
             status['method_status'] = 'analyzed'
             status['latest_method_result_id'] = row['result_id']
         
-        # 检查向上调用链分析缓存
+        # 检查向上调用链分析缓存（仅 chain 类型的聚合结果，排除子结果和 batch 类型）
         cursor.execute('''
             SELECT r.result_id FROM llm_analysis_results r
             JOIN llm_analysis_tasks t ON r.task_id = t.task_id
-            WHERE t.analysis_type = 'chain' AND t.direction = 'upwards'
+            WHERE t.analysis_type = 'chain'
+              AND t.direction = 'upwards'
+              AND r.parent_task_id IS NULL
               AND r.class_name = ? AND r.method_name = ?
+              AND (t.baseline = '' OR t.baseline = ?) AND (t.version = '' OR t.version = ?)
             ORDER BY r.created_at DESC LIMIT 1
-        ''', (class_name, method_name))
+        ''', (class_name, method_name, request.baseline, request.version))
         row = cursor.fetchone()
         if row:
             status['upwards_chain_status'] = 'analyzed'
             status['latest_upwards_chain_result_id'] = row['result_id']
         
-        # 检查向下调用链分析缓存
+        # 检查向下调用链分析缓存（仅 chain 类型的聚合结果，排除子结果和 batch 类型）
         cursor.execute('''
             SELECT r.result_id FROM llm_analysis_results r
             JOIN llm_analysis_tasks t ON r.task_id = t.task_id
-            WHERE t.analysis_type = 'chain' AND t.direction = 'downwards'
+            WHERE t.analysis_type = 'chain'
+              AND t.direction = 'downwards'
+              AND r.parent_task_id IS NULL
               AND r.class_name = ? AND r.method_name = ?
+              AND (t.baseline = '' OR t.baseline = ?) AND (t.version = '' OR t.version = ?)
             ORDER BY r.created_at DESC LIMIT 1
-        ''', (class_name, method_name))
+        ''', (class_name, method_name, request.baseline, request.version))
         row = cursor.fetchone()
         if row:
             status['downwards_chain_status'] = 'analyzed'
             status['latest_downwards_chain_result_id'] = row['result_id']
         
-        # 检查是否有运行中的任务
+        # 检查是否有运行中的任务（排除超时 30 分钟的僵尸任务）
         cursor.execute('''
             SELECT task_id FROM llm_analysis_tasks
             WHERE class_name = ? AND method_name = ?
               AND baseline = ? AND version = ?
               AND status IN ('pending', 'running')
+              AND (started_at IS NULL OR datetime(started_at, '+30 minutes') > datetime('now', 'localtime'))
             LIMIT 1
         ''', (class_name, method_name, request.baseline, request.version))
         row = cursor.fetchone()
@@ -899,7 +1027,7 @@ async def get_chain_methods(baseline: str, version: str, direction: str = 'upwar
     """
     result_dir = settings.RESULT_DIR
     filename = f"{direction}_call_chains.json"
-    filepath = os.path.join(result_dir, baseline, version, filename)
+    filepath = os.path.join(_resolve_data_path(baseline, version), filename)
     
     if not os.path.exists(filepath):
         raise HTTPException(status_code=404, detail=f"{direction} call chains file not found")
@@ -939,42 +1067,49 @@ async def get_chain_methods(baseline: str, version: str, direction: str = 'upwar
         downwards_chain_status = 'none'
         
         try:
-            # 方法分析状态
+            # 方法分析状态（含链分析的逐方法子结果 + 批量分析结果）
             cursor.execute('''
                 SELECT r.result_id FROM llm_analysis_results r
                 JOIN llm_analysis_tasks t ON r.task_id = t.task_id
-                WHERE t.analysis_type = 'method'
+                WHERE t.analysis_type IN ('method', 'batch', 'chain')
                   AND r.class_name = ? AND r.method_name = ?
+                  AND (t.baseline = '' OR t.baseline = ?) AND (t.version = '' OR t.version = ?)
                 ORDER BY r.created_at DESC LIMIT 1
-            ''', (class_name, method_name))
+            ''', (class_name, method_name, baseline, version))
             if cursor.fetchone():
                 method_status = 'analyzed'
         except Exception:
             pass
         
         try:
-            # 向上链分析状态
+            # 向上链分析状态（仅 chain 类型的聚合结果）
             cursor.execute('''
                 SELECT r.result_id FROM llm_analysis_results r
                 JOIN llm_analysis_tasks t ON r.task_id = t.task_id
-                WHERE t.analysis_type = 'chain' AND t.direction = 'upwards'
+                WHERE t.analysis_type = 'chain'
+                  AND t.direction = 'upwards'
+                  AND r.parent_task_id IS NULL
                   AND r.class_name = ? AND r.method_name = ?
+                  AND (t.baseline = '' OR t.baseline = ?) AND (t.version = '' OR t.version = ?)
                 ORDER BY r.created_at DESC LIMIT 1
-            ''', (class_name, method_name))
+            ''', (class_name, method_name, baseline, version))
             if cursor.fetchone():
                 upwards_chain_status = 'analyzed'
         except Exception:
             pass
         
         try:
-            # 向下链分析状态
+            # 向下链分析状态（仅 chain 类型的聚合结果）
             cursor.execute('''
                 SELECT r.result_id FROM llm_analysis_results r
                 JOIN llm_analysis_tasks t ON r.task_id = t.task_id
-                WHERE t.analysis_type = 'chain' AND t.direction = 'downwards'
+                WHERE t.analysis_type = 'chain'
+                  AND t.direction = 'downwards'
+                  AND r.parent_task_id IS NULL
                   AND r.class_name = ? AND r.method_name = ?
+                  AND (t.baseline = '' OR t.baseline = ?) AND (t.version = '' OR t.version = ?)
                 ORDER BY r.created_at DESC LIMIT 1
-            ''', (class_name, method_name))
+            ''', (class_name, method_name, baseline, version))
             if cursor.fetchone():
                 downwards_chain_status = 'analyzed'
         except Exception:

@@ -183,7 +183,11 @@ const viewResult = () => {
         resultId: latestResultId.value
       },
       query: {
-        aiTaskId: aiTaskId
+        aiTaskId: aiTaskId,
+        class_name: store.taskStatus?.class_name || '',
+        method_name: store.taskStatus?.method_name || '',
+        baseline: store.taskStatus?.baseline || '',
+        version: store.taskStatus?.version || ''
       }
     })
   }

@@ -13,6 +13,7 @@ from . import mapper_parse as mapper_parse
 from . import diff_parse as diff_parse
 from . import graph as graph
 from . import constant as constant
+from jcci.utils.tag_utils import extract_short_tag as _normalize_commit_or_tag
 
 # 导入变更类型分析器
 try:
@@ -46,40 +47,6 @@ class JCCI(object):
         self.diff_parse_map = {}
         self.xml_parse_results_new = {}
         self.xml_parse_results_old = {}
-
-    @staticmethod
-    def _normalize_commit_or_tag(identifier: str) -> str:
-        """
-        标准化commit hash或tag标识符
-        
-        规则：
-        - 如果是commit hash（40位十六进制字符串），截取前8位
-        - 如果是长tag（长度>11且不是40位十六进制），取最后11个字符作为短标识符
-        - 如果是短tag或短commit（长度<=11），保持不变
-        
-        例如：
-        - dd6569c3558f79af5b21aad601349e0f029b9a6d -> dd6569c3 (commit hash，前8位)
-        - MIX_LJ01.BUP_BUP3_UAT_UAT_00.00.01_SUMMER_20260403_01 -> 20260403_01 (tag，后11位)
-        - d9501e9 -> d9501e9 (保持不变)
-        
-        Args:
-            identifier: commit hash或tag字符串
-            
-        Returns:
-            标准化后的标识符
-        """
-        import re
-        
-        # 判断是否为40位commit hash（十六进制字符串）
-        if len(identifier) == 40 and re.match(r'^[0-9a-f]{40}$', identifier, re.IGNORECASE):
-            # Commit hash：截取前8位
-            return identifier[:8]
-        elif len(identifier) > 11:
-            # 长tag：取最后11个字符
-            return identifier[-11:]
-        else:
-            # 短标识符：保持不变
-            return identifier
 
     # Step 1.1
     def _can_analyze(self, filepath, cci_file_path):
@@ -142,8 +109,8 @@ class JCCI(object):
         time.sleep(1)
         logging.info(f'Git diff between {commit_new} and {commit_old}')
         # 使用标准化后的短标识符命名diff文件
-        commit_old_short = self._normalize_commit_or_tag(commit_old)
-        commit_new_short = self._normalize_commit_or_tag(commit_new)
+        commit_old_short = _normalize_commit_or_tag(commit_old)
+        commit_new_short = _normalize_commit_or_tag(commit_new)
         diff_base = f'cd {self.file_path} && git diff {commit_old}..{commit_new} > diff_{commit_old_short}..{commit_new_short}.txt'
         os.system(diff_base)
         diff_txt = os.path.join(self.file_path, f'diff_{commit_old_short}..{commit_new_short}.txt')
@@ -180,8 +147,8 @@ class JCCI(object):
         time.sleep(1)
         logging.info(f'Git diff between {commit_new} and {commit_old}')
         # 使用标准化后的短标识符命名diff文件
-        commit_old_short = self._normalize_commit_or_tag(commit_old)
-        commit_new_short = self._normalize_commit_or_tag(commit_new)
+        commit_old_short = _normalize_commit_or_tag(commit_old)
+        commit_new_short = _normalize_commit_or_tag(commit_new)
         diff_base = f'cd {self.file_path} && git diff {commit_old}..{commit_new} > diff_{commit_old_short}..{commit_new_short}.txt'
         os.system(diff_base)
         diff_txt = os.path.join(self.file_path, f'diff_{commit_old_short}..{commit_new_short}.txt')
@@ -940,8 +907,8 @@ class JCCI(object):
         self.commit_or_branch_old = commit_old
         
         # 生成短标识符用于数据库和文件命名
-        self.commit_short_new = self._normalize_commit_or_tag(commit_new)
-        self.commit_short_old = self._normalize_commit_or_tag(commit_old)
+        self.commit_short_new = _normalize_commit_or_tag(commit_new)
+        self.commit_short_old = _normalize_commit_or_tag(commit_old)
         
         self.branch_name = kwargs.get('branch', 'master')
         

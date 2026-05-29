@@ -1,0 +1,2935 @@
+{
+  "nodes": [
+    {
+      "category": 0,
+      "id": "0",
+      "name": "PmsProductAttributeController.getList(Long,Integer,Integer,Integer)",
+      "type": "method",
+      "diff_type": [
+        "changed"
+      ],
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/PmsProductAttributeController.java",
+      "diff_content": "    @ApiOperation(\"根据分类ID查询属性列表或参数列表\")\n",
+      "documentation": "None",
+      "body": "[\"    @ApiOperation(\\\"根据分类ID查询属性列表或参数列表\\\")\", \"    @ApiImplicitParams({@ApiImplicitParam(name = \\\"type\\\", value = \\\"0表示属性，1表示参数\\\", required = true, paramType = \\\"query\\\", dataType = \\\"integer\\\")})\", \"    @RequestMapping(value = \\\"/list/{cid}\\\", method = RequestMethod.GET)\", \"    @ResponseBody\", \"    public CommonResult<CommonPage<PmsProductAttribute>> getList(@PathVariable Long cid,\", \"                                                                 @RequestParam(value = \\\"type\\\") Integer type,\", \"                                                                 @RequestParam(value = \\\"pageSize\\\", defaultValue = \\\"5\\\") Integer pageSize,\", \"                                                                 @RequestParam(value = \\\"pageNum\\\", defaultValue = \\\"1\\\") Integer pageNum) {\", \"        List<PmsProductAttribute> productAttributeList = productAttributeService.getList(cid, type, pageSize, pageNum);\", \"        return CommonResult.success(CommonPage.restPage(productAttributeList));\", \"    }\"]",
+      "is_api": true,
+      "api_path": "[\"[GET]/productAttribute/list/{cid}\"]",
+      "x": 100,
+      "y": 10.909090909090908,
+      "symbolSize": 20,
+      "label": {
+        "show": true,
+        "formatter": "PmsProductAttributeController.getList"
+      },
+      "tooltip": {
+        "show": true,
+        "position": "right",
+        "formatter": "PmsProductAttributeController.getList<br>[Changed]    @ApiOperation(\"根据分类ID查询属性列表或参数列表\")\n<br>[API][\"[GET]/productAttribute/list/{cid}\"]"
+      }
+    },
+    {
+      "category": 0,
+      "id": "1",
+      "name": "PmsProductAttributeController.getItem(Long)",
+      "type": "method",
+      "diff_type": [
+        "changed"
+      ],
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/PmsProductAttributeController.java",
+      "diff_content": "    @ApiOperation(\"根据ID查询商品属性\")\n",
+      "documentation": "None",
+      "body": "[\"    @ApiOperation(\\\"根据ID查询商品属性\\\")\", \"    @RequestMapping(value = \\\"/{id}\\\", method = RequestMethod.GET)\", \"    @ResponseBody\", \"    public CommonResult<PmsProductAttribute> getItem(@PathVariable Long id) {\", \"        PmsProductAttribute productAttribute = productAttributeService.getItem(id);\", \"        return CommonResult.success(productAttribute);\", \"    }\"]",
+      "is_api": true,
+      "api_path": "[\"[GET]/productAttribute/{id}\"]",
+      "x": 100,
+      "y": 21.818181818181817,
+      "symbolSize": 20,
+      "label": {
+        "show": true,
+        "formatter": "PmsProductAttributeController.getItem"
+      },
+      "tooltip": {
+        "show": true,
+        "position": "right",
+        "formatter": "PmsProductAttributeController.getItem<br>[Changed]    @ApiOperation(\"根据ID查询商品属性\")\n<br>[API][\"[GET]/productAttribute/{id}\"]"
+      }
+    },
+    {
+      "category": 0,
+      "id": "2",
+      "name": "PmsProductAttributeController.getAttrInfo(Long)",
+      "type": "method",
+      "diff_type": [
+        "changed"
+      ],
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/PmsProductAttributeController.java",
+      "diff_content": "    @ApiOperation(\"根据商品分类的ID获取商品属性及属性分类ID\")\n",
+      "documentation": "None",
+      "body": "[\"    @ApiOperation(\\\"根据商品分类的ID获取商品属性及属性分类ID\\\")\", \"    @RequestMapping(value = \\\"/attrInfo/{productCategoryId}\\\", method = RequestMethod.GET)\", \"    @ResponseBody\", \"    public CommonResult<List<ProductAttrInfo>> getAttrInfo(@PathVariable Long productCategoryId) {\", \"        List<ProductAttrInfo> productAttrInfoList = productAttributeService.getProductAttrInfo(productCategoryId);\", \"        return CommonResult.success(productAttrInfoList);\", \"    }\"]",
+      "is_api": true,
+      "api_path": "[\"[GET]/productAttribute/attrInfo/{productCategoryId}\"]",
+      "x": 100,
+      "y": 32.72727272727273,
+      "symbolSize": 20,
+      "label": {
+        "show": true,
+        "formatter": "PmsProductAttributeController.getAttrInfo"
+      },
+      "tooltip": {
+        "show": true,
+        "position": "right",
+        "formatter": "PmsProductAttributeController.getAttrInfo<br>[Changed]    @ApiOperation(\"根据商品分类的ID获取商品属性及属性分类ID\")\n<br>[API][\"[GET]/productAttribute/attrInfo/{productCategoryId}\"]"
+      }
+    },
+    {
+      "category": 1,
+      "id": "3",
+      "name": "PmsProductCategoryController.getItem(Long)",
+      "type": "method",
+      "diff_type": [
+        "changed"
+      ],
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/PmsProductCategoryController.java",
+      "diff_content": "    @ApiOperation(\"根据ID获取商品分类\")\n",
+      "documentation": "None",
+      "body": "[\"    @ApiOperation(\\\"根据ID获取商品分类\\\")\", \"    @RequestMapping(value = \\\"/{id}\\\", method = RequestMethod.GET)\", \"    @ResponseBody\", \"    public CommonResult<PmsProductCategory> getItem(@PathVariable Long id) {\", \"        PmsProductCategory productCategory = productCategoryService.getItem(id);\", \"        return CommonResult.success(productCategory);\", \"    }\"]",
+      "is_api": true,
+      "api_path": "[\"[GET]/productCategory/{id}\"]",
+      "x": 100,
+      "y": 43.63636363636363,
+      "symbolSize": 20,
+      "label": {
+        "show": true,
+        "formatter": "PmsProductCategoryController.getItem"
+      },
+      "tooltip": {
+        "show": true,
+        "position": "right",
+        "formatter": "PmsProductCategoryController.getItem<br>[Changed]    @ApiOperation(\"根据ID获取商品分类\")\n<br>[API][\"[GET]/productCategory/{id}\"]"
+      }
+    },
+    {
+      "category": 1,
+      "id": "4",
+      "name": "PmsProductCategoryController.delete(Long)",
+      "type": "method",
+      "diff_type": [
+        "changed"
+      ],
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/PmsProductCategoryController.java",
+      "diff_content": "    @ApiOperation(\"根据ID删除商品分类\")\n",
+      "documentation": "None",
+      "body": "[\"    @ApiOperation(\\\"根据ID删除商品分类\\\")\", \"    @RequestMapping(value = \\\"/delete/{id}\\\", method = RequestMethod.POST)\", \"    @ResponseBody\", \"    public CommonResult delete(@PathVariable Long id) {\", \"        int count = productCategoryService.delete(id);\", \"        if (count > 0) {\", \"            return CommonResult.success(count);\", \"        } else {\", \"            return CommonResult.failed();\", \"        }\"]",
+      "is_api": true,
+      "api_path": "[\"[POST]/productCategory/delete/{id}\"]",
+      "x": 100,
+      "y": 54.54545454545454,
+      "symbolSize": 20,
+      "label": {
+        "show": true,
+        "formatter": "PmsProductCategoryController.delete"
+      },
+      "tooltip": {
+        "show": true,
+        "position": "right",
+        "formatter": "PmsProductCategoryController.delete<br>[Changed]    @ApiOperation(\"根据ID删除商品分类\")\n<br>[API][\"[POST]/productCategory/delete/{id}\"]"
+      }
+    },
+    {
+      "category": 1,
+      "id": "5",
+      "name": "PmsProductCategoryController.updateNavStatus(List<Long>,Integer)",
+      "type": "method",
+      "diff_type": [
+        "changed"
+      ],
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/PmsProductCategoryController.java",
+      "diff_content": "    @ApiOperation(\"批量修改导航栏显示状态\")\n",
+      "documentation": "None",
+      "body": "[\"    @ApiOperation(\\\"批量修改导航栏显示状态\\\")\", \"    @RequestMapping(value = \\\"/update/navStatus\\\", method = RequestMethod.POST)\", \"    @ResponseBody\", \"    public CommonResult updateNavStatus(@RequestParam(\\\"ids\\\") List<Long> ids, @RequestParam(\\\"navStatus\\\") Integer navStatus) {\", \"        int count = productCategoryService.updateNavStatus(ids, navStatus);\", \"        if (count > 0) {\", \"            return CommonResult.success(count);\", \"        } else {\", \"            return CommonResult.failed();\", \"        }\"]",
+      "is_api": true,
+      "api_path": "[\"[POST]/productCategory/update/navStatus\"]",
+      "x": 100,
+      "y": 65.45454545454545,
+      "symbolSize": 20,
+      "label": {
+        "show": true,
+        "formatter": "PmsProductCategoryController.updateNavStatus"
+      },
+      "tooltip": {
+        "show": true,
+        "position": "right",
+        "formatter": "PmsProductCategoryController.updateNavStatus<br>[Changed]    @ApiOperation(\"批量修改导航栏显示状态\")\n<br>[API][\"[POST]/productCategory/update/navStatus\"]"
+      }
+    },
+    {
+      "category": 1,
+      "id": "6",
+      "name": "PmsProductCategoryController.updateShowStatus(List<Long>,Integer)",
+      "type": "method",
+      "diff_type": [
+        "changed"
+      ],
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/PmsProductCategoryController.java",
+      "diff_content": "    @ApiOperation(\"批量修改显示状态\")\n",
+      "documentation": "None",
+      "body": "[\"    @ApiOperation(\\\"批量修改显示状态\\\")\", \"    @RequestMapping(value = \\\"/update/showStatus\\\", method = RequestMethod.POST)\", \"    @ResponseBody\", \"    public CommonResult updateShowStatus(@RequestParam(\\\"ids\\\") List<Long> ids, @RequestParam(\\\"showStatus\\\") Integer showStatus) {\", \"        int count = productCategoryService.updateShowStatus(ids, showStatus);\", \"        if (count > 0) {\", \"            return CommonResult.success(count);\", \"        } else {\", \"            return CommonResult.failed();\", \"        }\"]",
+      "is_api": true,
+      "api_path": "[\"[POST]/productCategory/update/showStatus\"]",
+      "x": 100,
+      "y": 76.36363636363636,
+      "symbolSize": 20,
+      "label": {
+        "show": true,
+        "formatter": "PmsProductCategoryController.updateShowStatus"
+      },
+      "tooltip": {
+        "show": true,
+        "position": "right",
+        "formatter": "PmsProductCategoryController.updateShowStatus<br>[Changed]    @ApiOperation(\"批量修改显示状态\")\n<br>[API][\"[POST]/productCategory/update/showStatus\"]"
+      }
+    },
+    {
+      "category": 3,
+      "id": "8",
+      "name": "PmsSkuStockController.update(Long,List<com.macro.mall.model.PmsSkuStock>)",
+      "type": "method",
+      "diff_type": [
+        "changed"
+      ],
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/PmsSkuStockController.java",
+      "diff_content": "    @ApiOperation(\"根据商品ID批量更新sku库存信息\")\n",
+      "documentation": "None",
+      "body": "[\"    @ApiOperation(\\\"根据商品ID批量更新sku库存信息\\\")\", \"    @RequestMapping(value =\\\"/update/{pid}\\\",method = RequestMethod.POST)\", \"    @ResponseBody\", \"    public CommonResult update(@PathVariable Long pid,@RequestBody List<PmsSkuStock> skuStockList){\", \"        int count = skuStockService.update(pid,skuStockList);\", \"        if(count>0){\", \"            return CommonResult.success(count);\", \"        }else{\", \"            return CommonResult.failed();\", \"        }\"]",
+      "is_api": true,
+      "api_path": "[\"[POST]/sku/update/{pid}\"]",
+      "x": 100,
+      "y": 87.27272727272727,
+      "symbolSize": 20,
+      "label": {
+        "show": true,
+        "formatter": "PmsSkuStockController.update"
+      },
+      "tooltip": {
+        "show": true,
+        "position": "right",
+        "formatter": "PmsSkuStockController.update<br>[Changed]    @ApiOperation(\"根据商品ID批量更新sku库存信息\")\n<br>[API][\"[POST]/sku/update/{pid}\"]"
+      }
+    },
+    {
+      "category": 4,
+      "id": "9",
+      "name": "SmsCouponController.delete(Long)",
+      "type": "method",
+      "diff_type": [
+        "changed"
+      ],
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsCouponController.java",
+      "diff_content": "    @ApiOperation(\"根据ID删除优惠券\")\n",
+      "documentation": "None",
+      "body": "[\"    @ApiOperation(\\\"根据ID删除优惠券\\\")\", \"    @RequestMapping(value = \\\"/delete/{id}\\\", method = RequestMethod.POST)\", \"    @ResponseBody\", \"    public CommonResult delete(@PathVariable Long id) {\", \"        int count = couponService.delete(id);\", \"        if(count>0){\", \"            return CommonResult.success(count);\", \"        }\", \"        return CommonResult.failed();\", \"    }\"]",
+      "is_api": true,
+      "api_path": "[\"[POST]/coupon/delete/{id}\"]",
+      "x": 100,
+      "y": 98.18181818181817,
+      "symbolSize": 20,
+      "label": {
+        "show": true,
+        "formatter": "SmsCouponController.delete"
+      },
+      "tooltip": {
+        "show": true,
+        "position": "right",
+        "formatter": "SmsCouponController.delete<br>[Changed]    @ApiOperation(\"根据ID删除优惠券\")\n<br>[API][\"[POST]/coupon/delete/{id}\"]"
+      }
+    },
+    {
+      "category": 4,
+      "id": "10",
+      "name": "SmsCouponController.update(Long,com.macro.mall.dto.SmsCouponParam)",
+      "type": "method",
+      "diff_type": [
+        "changed"
+      ],
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsCouponController.java",
+      "diff_content": "    @ApiOperation(\"根据ID修改优惠券\")\n",
+      "documentation": "None",
+      "body": "[\"    @ApiOperation(\\\"根据ID修改优惠券\\\")\", \"    @RequestMapping(value = \\\"/update/{id}\\\", method = RequestMethod.POST)\", \"    @ResponseBody\", \"    public CommonResult update(@PathVariable Long id,@RequestBody SmsCouponParam couponParam) {\", \"        int count = couponService.update(id,couponParam);\", \"        if(count>0){\", \"            return CommonResult.success(count);\", \"        }\", \"        return CommonResult.failed();\", \"    }\"]",
+      "is_api": true,
+      "api_path": "[\"[POST]/coupon/update/{id}\"]",
+      "x": 100,
+      "y": 109.09090909090908,
+      "symbolSize": 20,
+      "label": {
+        "show": true,
+        "formatter": "SmsCouponController.update"
+      },
+      "tooltip": {
+        "show": true,
+        "position": "right",
+        "formatter": "SmsCouponController.update<br>[Changed]    @ApiOperation(\"根据ID修改优惠券\")\n<br>[API][\"[POST]/coupon/update/{id}\"]"
+      }
+    },
+    {
+      "category": 5,
+      "id": "11",
+      "name": "SmsFlashPromotionController.update(Long,Integer)",
+      "type": "method",
+      "diff_type": [
+        "changed"
+      ],
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsFlashPromotionController.java",
+      "diff_content": "    @ApiOperation(\"修改活动上下线状态\")\n",
+      "documentation": "None",
+      "body": "[\"    @ApiOperation(\\\"修改活动上下线状态\\\")\", \"    @RequestMapping(value = \\\"/update/status/{id}\\\", method = RequestMethod.POST)\", \"    @ResponseBody\", \"    public CommonResult update(@PathVariable Long id, Integer status) {\", \"        int count = flashPromotionService.updateStatus(id, status);\", \"        if (count > 0) {\", \"            return CommonResult.success(count);\", \"        }\", \"        return CommonResult.failed();\", \"    }\"]",
+      "is_api": true,
+      "api_path": "[\"[POST]/flash/update/status/{id}\"]",
+      "x": 100,
+      "y": 119.99999999999999,
+      "symbolSize": 20,
+      "label": {
+        "show": true,
+        "formatter": "SmsFlashPromotionController.update"
+      },
+      "tooltip": {
+        "show": true,
+        "position": "right",
+        "formatter": "SmsFlashPromotionController.update<br>[Changed]    @ApiOperation(\"修改活动上下线状态\")\n<br>[API][\"[POST]/flash/update/status/{id}\"]"
+      }
+    },
+    {
+      "category": 5,
+      "id": "12",
+      "name": "SmsFlashPromotionController.getItem(String,Integer,Integer)",
+      "type": "method",
+      "diff_type": [
+        "changed"
+      ],
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsFlashPromotionController.java",
+      "diff_content": "    @ApiOperation(\"根据活动名称分页查询活动\")\n",
+      "documentation": "None",
+      "body": "[\"    @ApiOperation(\\\"根据活动名称分页查询活动\\\")\", \"    @RequestMapping(value = \\\"/list\\\", method = RequestMethod.GET)\", \"    @ResponseBody\", \"    public CommonResult<CommonPage<SmsFlashPromotion>> getItem(@RequestParam(value = \\\"keyword\\\", required = false) String keyword,\", \"                          @RequestParam(value = \\\"pageSize\\\", defaultValue = \\\"5\\\") Integer pageSize,\", \"                          @RequestParam(value = \\\"pageNum\\\", defaultValue = \\\"1\\\") Integer pageNum) {\", \"        List<SmsFlashPromotion> flashPromotionList = flashPromotionService.list(keyword, pageSize, pageNum);\", \"        return CommonResult.success(CommonPage.restPage(flashPromotionList));\", \"    }\"]",
+      "is_api": true,
+      "api_path": "[\"[GET]/flash/list\"]",
+      "x": 100,
+      "y": 130.9090909090909,
+      "symbolSize": 20,
+      "label": {
+        "show": true,
+        "formatter": "SmsFlashPromotionController.getItem"
+      },
+      "tooltip": {
+        "show": true,
+        "position": "right",
+        "formatter": "SmsFlashPromotionController.getItem<br>[Changed]    @ApiOperation(\"根据活动名称分页查询活动\")\n<br>[API][\"[GET]/flash/list\"]"
+      }
+    },
+    {
+      "category": 6,
+      "id": "13",
+      "name": "SmsFlashPromotionProductRelationController.update(Long,com.macro.mall.model.SmsFlashPromotionProductRelation)",
+      "type": "method",
+      "diff_type": [
+        "changed"
+      ],
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsFlashPromotionProductRelationController.java",
+      "diff_content": "    @ApiOperation(\"根据ID修改关联信息\")\n",
+      "documentation": "None",
+      "body": "[\"    @ApiOperation(\\\"根据ID修改关联信息\\\")\", \"    @RequestMapping(value = \\\"/update/{id}\\\", method = RequestMethod.POST)\", \"    @ResponseBody\", \"    public CommonResult update(@PathVariable Long id, @RequestBody SmsFlashPromotionProductRelation relation) {\", \"        int count = relationService.update(id, relation);\", \"        if (count > 0) {\", \"            return CommonResult.success(count);\", \"        }\", \"        return CommonResult.failed();\", \"    }\"]",
+      "is_api": true,
+      "api_path": "[\"[POST]/flashProductRelation/update/{id}\"]",
+      "x": 100,
+      "y": 141.8181818181818,
+      "symbolSize": 20,
+      "label": {
+        "show": true,
+        "formatter": "SmsFlashPromotionProductRelationController.update"
+      },
+      "tooltip": {
+        "show": true,
+        "position": "right",
+        "formatter": "SmsFlashPromotionProductRelationController.update<br>[Changed]    @ApiOperation(\"根据ID修改关联信息\")\n<br>[API][\"[POST]/flashProductRelation/update/{id}\"]"
+      }
+    },
+    {
+      "category": 6,
+      "id": "14",
+      "name": "SmsFlashPromotionProductRelationController.delete(Long)",
+      "type": "method",
+      "diff_type": [
+        "changed"
+      ],
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsFlashPromotionProductRelationController.java",
+      "diff_content": "    @ApiOperation(\"根据ID删除关联信息\")\n",
+      "documentation": "None",
+      "body": "[\"    @ApiOperation(\\\"根据ID删除关联信息\\\")\", \"    @RequestMapping(value = \\\"/delete/{id}\\\", method = RequestMethod.POST)\", \"    @ResponseBody\", \"    public CommonResult delete(@PathVariable Long id) {\", \"        int count = relationService.delete(id);\", \"        if (count > 0) {\", \"            return CommonResult.success(count);\", \"        }\", \"        return CommonResult.failed();\", \"    }\"]",
+      "is_api": true,
+      "api_path": "[\"[POST]/flashProductRelation/delete/{id}\"]",
+      "x": 100,
+      "y": 152.72727272727272,
+      "symbolSize": 20,
+      "label": {
+        "show": true,
+        "formatter": "SmsFlashPromotionProductRelationController.delete"
+      },
+      "tooltip": {
+        "show": true,
+        "position": "right",
+        "formatter": "SmsFlashPromotionProductRelationController.delete<br>[Changed]    @ApiOperation(\"根据ID删除关联信息\")\n<br>[API][\"[POST]/flashProductRelation/delete/{id}\"]"
+      }
+    },
+    {
+      "category": 7,
+      "id": "15",
+      "name": "SmsFlashPromotionSessionController.updateStatus(Long,Integer)",
+      "type": "method",
+      "diff_type": [
+        "changed"
+      ],
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsFlashPromotionSessionController.java",
+      "diff_content": "    @ApiOperation(\"根据ID修改场次启用状态\")\n",
+      "documentation": "None",
+      "body": "[\"    @ApiOperation(\\\"根据ID修改场次启用状态\\\")\", \"    @RequestMapping(value = \\\"/update/status/{id}\\\", method = RequestMethod.POST)\", \"    @ResponseBody\", \"    public CommonResult updateStatus(@PathVariable Long id, Integer status) {\", \"        int count = flashPromotionSessionService.updateStatus(id, status);\", \"        if (count > 0) {\", \"            return CommonResult.success(count);\", \"        }\", \"        return CommonResult.failed();\", \"    }\"]",
+      "is_api": true,
+      "api_path": "[\"[POST]/flashSession/update/status/{id}\"]",
+      "x": 100,
+      "y": 163.63636363636363,
+      "symbolSize": 20,
+      "label": {
+        "show": true,
+        "formatter": "SmsFlashPromotionSessionController.updateStatus"
+      },
+      "tooltip": {
+        "show": true,
+        "position": "right",
+        "formatter": "SmsFlashPromotionSessionController.updateStatus<br>[Changed]    @ApiOperation(\"根据ID修改场次启用状态\")\n<br>[API][\"[POST]/flashSession/update/status/{id}\"]"
+      }
+    },
+    {
+      "category": 8,
+      "id": "16",
+      "name": "SmsHomeAdvertiseController.delete(List<Long>)",
+      "type": "method",
+      "diff_type": [
+        "changed"
+      ],
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsHomeAdvertiseController.java",
+      "diff_content": "    @ApiOperation(\"批量删除广告\")\n",
+      "documentation": "None",
+      "body": "[\"    @ApiOperation(\\\"批量删除广告\\\")\", \"    @RequestMapping(value = \\\"/delete\\\", method = RequestMethod.POST)\", \"    @ResponseBody\", \"    public CommonResult delete(@RequestParam(\\\"ids\\\") List<Long> ids) {\", \"        int count = advertiseService.delete(ids);\", \"        if (count > 0)\", \"            return CommonResult.success(count);\", \"        return CommonResult.failed();\", \"    }\"]",
+      "is_api": true,
+      "api_path": "[\"[POST]/home/advertise/delete\"]",
+      "x": 100,
+      "y": 174.54545454545453,
+      "symbolSize": 20,
+      "label": {
+        "show": true,
+        "formatter": "SmsHomeAdvertiseController.delete"
+      },
+      "tooltip": {
+        "show": true,
+        "position": "right",
+        "formatter": "SmsHomeAdvertiseController.delete<br>[Changed]    @ApiOperation(\"批量删除广告\")\n<br>[API][\"[POST]/home/advertise/delete\"]"
+      }
+    },
+    {
+      "category": 8,
+      "id": "17",
+      "name": "SmsHomeAdvertiseController.getItem(Long)",
+      "type": "method",
+      "diff_type": [
+        "changed"
+      ],
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsHomeAdvertiseController.java",
+      "diff_content": "    @ApiOperation(\"根据ID获取广告详情\")\n",
+      "documentation": "None",
+      "body": "[\"    @ApiOperation(\\\"根据ID获取广告详情\\\")\", \"    @RequestMapping(value = \\\"/{id}\\\", method = RequestMethod.GET)\", \"    @ResponseBody\", \"    public CommonResult<SmsHomeAdvertise> getItem(@PathVariable Long id) {\", \"        SmsHomeAdvertise advertise = advertiseService.getItem(id);\", \"        return CommonResult.success(advertise);\", \"    }\"]",
+      "is_api": true,
+      "api_path": "[\"[GET]/home/advertise/{id}\"]",
+      "x": 100,
+      "y": 185.45454545454544,
+      "symbolSize": 20,
+      "label": {
+        "show": true,
+        "formatter": "SmsHomeAdvertiseController.getItem"
+      },
+      "tooltip": {
+        "show": true,
+        "position": "right",
+        "formatter": "SmsHomeAdvertiseController.getItem<br>[Changed]    @ApiOperation(\"根据ID获取广告详情\")\n<br>[API][\"[GET]/home/advertise/{id}\"]"
+      }
+    },
+    {
+      "category": 8,
+      "id": "18",
+      "name": "SmsHomeAdvertiseController.update(Long,com.macro.mall.model.SmsHomeAdvertise)",
+      "type": "method",
+      "diff_type": [
+        "changed"
+      ],
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsHomeAdvertiseController.java",
+      "diff_content": "    @ApiOperation(\"根据ID修改广告\")\n",
+      "documentation": "None",
+      "body": "[\"    @ApiOperation(\\\"根据ID修改广告\\\")\", \"    @RequestMapping(value = \\\"/update/{id}\\\", method = RequestMethod.POST)\", \"    @ResponseBody\", \"    public CommonResult update(@PathVariable Long id, @RequestBody SmsHomeAdvertise advertise) {\", \"        int count = advertiseService.update(id, advertise);\", \"        if (count > 0)\", \"            return CommonResult.success(count);\", \"        return CommonResult.failed();\", \"    }\"]",
+      "is_api": true,
+      "api_path": "[\"[POST]/home/advertise/update/{id}\"]",
+      "x": 100,
+      "y": 196.36363636363635,
+      "symbolSize": 20,
+      "label": {
+        "show": true,
+        "formatter": "SmsHomeAdvertiseController.update"
+      },
+      "tooltip": {
+        "show": true,
+        "position": "right",
+        "formatter": "SmsHomeAdvertiseController.update<br>[Changed]    @ApiOperation(\"根据ID修改广告\")\n<br>[API][\"[POST]/home/advertise/update/{id}\"]"
+      }
+    },
+    {
+      "category": 8,
+      "id": "19",
+      "name": "SmsHomeAdvertiseController.list(String,Integer,String,Integer,Integer)",
+      "type": "method",
+      "diff_type": [
+        "changed"
+      ],
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsHomeAdvertiseController.java",
+      "diff_content": "    @ApiOperation(\"分页查询首页广告\")\n",
+      "documentation": "None",
+      "body": "[\"    @ApiOperation(\\\"分页查询首页广告\\\")\", \"    @RequestMapping(value = \\\"/list\\\", method = RequestMethod.GET)\", \"    @ResponseBody\", \"    public CommonResult<CommonPage<SmsHomeAdvertise>> list(@RequestParam(value = \\\"name\\\", required = false) String name,\", \"                                                           @RequestParam(value = \\\"type\\\", required = false) Integer type,\", \"                                                           @RequestParam(value = \\\"endTime\\\", required = false) String endTime,\", \"                                                           @RequestParam(value = \\\"pageSize\\\", defaultValue = \\\"5\\\") Integer pageSize,\", \"                                                           @RequestParam(value = \\\"pageNum\\\", defaultValue = \\\"1\\\") Integer pageNum) {\", \"        List<SmsHomeAdvertise> advertiseList = advertiseService.list(name, type, endTime, pageSize, pageNum);\", \"        return CommonResult.success(CommonPage.restPage(advertiseList));\", \"    }\"]",
+      "is_api": true,
+      "api_path": "[\"[GET]/home/advertise/list\"]",
+      "x": 100,
+      "y": 207.27272727272725,
+      "symbolSize": 20,
+      "label": {
+        "show": true,
+        "formatter": "SmsHomeAdvertiseController.list"
+      },
+      "tooltip": {
+        "show": true,
+        "position": "right",
+        "formatter": "SmsHomeAdvertiseController.list<br>[Changed]    @ApiOperation(\"分页查询首页广告\")\n<br>[API][\"[GET]/home/advertise/list\"]"
+      }
+    },
+    {
+      "category": 9,
+      "id": "20",
+      "name": "SmsHomeNewProductController.create(List<com.macro.mall.model.SmsHomeNewProduct>)",
+      "type": "method",
+      "diff_type": [
+        "changed"
+      ],
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsHomeNewProductController.java",
+      "diff_content": "    @ApiOperation(\"批量添加首页新品\")\n",
+      "documentation": "None",
+      "body": "[\"    @ApiOperation(\\\"批量添加首页新品\\\")\", \"    @RequestMapping(value = \\\"/create\\\", method = RequestMethod.POST)\", \"    @ResponseBody\", \"    public CommonResult create(@RequestBody List<SmsHomeNewProduct> homeNewProductList) {\", \"        int count = homeNewProductService.create(homeNewProductList);\", \"        if (count > 0) {\", \"            return CommonResult.success(count);\", \"        }\", \"        return CommonResult.failed();\", \"    }\"]",
+      "is_api": true,
+      "api_path": "[\"[POST]/home/newProduct/create\"]",
+      "x": 100,
+      "y": 218.18181818181816,
+      "symbolSize": 20,
+      "label": {
+        "show": true,
+        "formatter": "SmsHomeNewProductController.create"
+      },
+      "tooltip": {
+        "show": true,
+        "position": "right",
+        "formatter": "SmsHomeNewProductController.create<br>[Changed]    @ApiOperation(\"批量添加首页新品\")\n<br>[API][\"[POST]/home/newProduct/create\"]"
+      }
+    },
+    {
+      "category": 10,
+      "id": "21",
+      "name": "SmsHomeRecommendSubjectController.create(List<com.macro.mall.model.SmsHomeRecommendSubject>)",
+      "type": "method",
+      "diff_type": [
+        "changed"
+      ],
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsHomeRecommendSubjectController.java",
+      "diff_content": "    @ApiOperation(\"批量添加首页专题推荐\")\n",
+      "documentation": "None",
+      "body": "[\"    @ApiOperation(\\\"批量添加首页专题推荐\\\")\", \"    @RequestMapping(value = \\\"/create\\\", method = RequestMethod.POST)\", \"    @ResponseBody\", \"    public CommonResult create(@RequestBody List<SmsHomeRecommendSubject> homeRecommendSubjectList) {\", \"        int count = recommendSubjectService.create(homeRecommendSubjectList);\", \"        if (count > 0) {\", \"            return CommonResult.success(count);\", \"        }\", \"        return CommonResult.failed();\", \"    }\"]",
+      "is_api": true,
+      "api_path": "[\"[POST]/home/recommendSubject/create\"]",
+      "x": 100,
+      "y": 229.09090909090907,
+      "symbolSize": 20,
+      "label": {
+        "show": true,
+        "formatter": "SmsHomeRecommendSubjectController.create"
+      },
+      "tooltip": {
+        "show": true,
+        "position": "right",
+        "formatter": "SmsHomeRecommendSubjectController.create<br>[Changed]    @ApiOperation(\"批量添加首页专题推荐\")\n<br>[API][\"[POST]/home/recommendSubject/create\"]"
+      }
+    },
+    {
+      "category": 10,
+      "id": "22",
+      "name": "SmsHomeRecommendSubjectController.updateSort(Long,Integer)",
+      "type": "method",
+      "diff_type": [
+        "changed"
+      ],
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsHomeRecommendSubjectController.java",
+      "diff_content": "    @ApiOperation(\"修改专题推荐排序\")\n",
+      "documentation": "None",
+      "body": "[\"    @ApiOperation(\\\"修改专题推荐排序\\\")\", \"    @RequestMapping(value = \\\"/update/sort/{id}\\\", method = RequestMethod.POST)\", \"    @ResponseBody\", \"    public CommonResult updateSort(@PathVariable Long id, Integer sort) {\", \"        int count = recommendSubjectService.updateSort(id, sort);\", \"        if (count > 0) {\", \"            return CommonResult.success(count);\", \"        }\", \"        return CommonResult.failed();\", \"    }\"]",
+      "is_api": true,
+      "api_path": "[\"[POST]/home/recommendSubject/update/sort/{id}\"]",
+      "x": 100,
+      "y": 239.99999999999997,
+      "symbolSize": 20,
+      "label": {
+        "show": true,
+        "formatter": "SmsHomeRecommendSubjectController.updateSort"
+      },
+      "tooltip": {
+        "show": true,
+        "position": "right",
+        "formatter": "SmsHomeRecommendSubjectController.updateSort<br>[Changed]    @ApiOperation(\"修改专题推荐排序\")\n<br>[API][\"[POST]/home/recommendSubject/update/sort/{id}\"]"
+      }
+    },
+    {
+      "category": 10,
+      "id": "23",
+      "name": "SmsHomeRecommendSubjectController.delete(List<Long>)",
+      "type": "method",
+      "diff_type": [
+        "changed"
+      ],
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsHomeRecommendSubjectController.java",
+      "diff_content": "    @ApiOperation(\"批量删除专题推荐\")\n",
+      "documentation": "None",
+      "body": "[\"    @ApiOperation(\\\"批量删除专题推荐\\\")\", \"    @RequestMapping(value = \\\"/delete\\\", method = RequestMethod.POST)\", \"    @ResponseBody\", \"    public CommonResult delete(@RequestParam(\\\"ids\\\") List<Long> ids) {\", \"        int count = recommendSubjectService.delete(ids);\", \"        if (count > 0) {\", \"            return CommonResult.success(count);\", \"        }\", \"        return CommonResult.failed();\", \"    }\"]",
+      "is_api": true,
+      "api_path": "[\"[POST]/home/recommendSubject/delete\"]",
+      "x": 100,
+      "y": 250.90909090909088,
+      "symbolSize": 20,
+      "label": {
+        "show": true,
+        "formatter": "SmsHomeRecommendSubjectController.delete"
+      },
+      "tooltip": {
+        "show": true,
+        "position": "right",
+        "formatter": "SmsHomeRecommendSubjectController.delete<br>[Changed]    @ApiOperation(\"批量删除专题推荐\")\n<br>[API][\"[POST]/home/recommendSubject/delete\"]"
+      }
+    },
+    {
+      "category": 10,
+      "id": "24",
+      "name": "SmsHomeRecommendSubjectController.updateRecommendStatus(List<Long>,Integer)",
+      "type": "method",
+      "diff_type": [
+        "changed"
+      ],
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsHomeRecommendSubjectController.java",
+      "diff_content": "    @ApiOperation(\"批量修改专题推荐状态\")\n",
+      "documentation": "None",
+      "body": "[\"    @ApiOperation(\\\"批量修改专题推荐状态\\\")\", \"    @RequestMapping(value = \\\"/update/recommendStatus\\\", method = RequestMethod.POST)\", \"    @ResponseBody\", \"    public CommonResult updateRecommendStatus(@RequestParam(\\\"ids\\\") List<Long> ids, @RequestParam Integer recommendStatus) {\", \"        int count = recommendSubjectService.updateRecommendStatus(ids, recommendStatus);\", \"        if (count > 0) {\", \"            return CommonResult.success(count);\", \"        }\", \"        return CommonResult.failed();\", \"    }\"]",
+      "is_api": true,
+      "api_path": "[\"[POST]/home/recommendSubject/update/recommendStatus\"]",
+      "x": 100,
+      "y": 261.8181818181818,
+      "symbolSize": 20,
+      "label": {
+        "show": true,
+        "formatter": "SmsHomeRecommendSubjectController.updateRecommendStatus"
+      },
+      "tooltip": {
+        "show": true,
+        "position": "right",
+        "formatter": "SmsHomeRecommendSubjectController.updateRecommendStatus<br>[Changed]    @ApiOperation(\"批量修改专题推荐状态\")\n<br>[API][\"[POST]/home/recommendSubject/update/recommendStatus\"]"
+      }
+    },
+    {
+      "category": 10,
+      "id": "25",
+      "name": "SmsHomeRecommendSubjectController.list(String,Integer,Integer,Integer)",
+      "type": "method",
+      "diff_type": [
+        "changed"
+      ],
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsHomeRecommendSubjectController.java",
+      "diff_content": "    @ApiOperation(\"分页查询专题推荐\")\n",
+      "documentation": "None",
+      "body": "[\"    @ApiOperation(\\\"分页查询专题推荐\\\")\", \"    @RequestMapping(value = \\\"/list\\\", method = RequestMethod.GET)\", \"    @ResponseBody\", \"    public CommonResult<CommonPage<SmsHomeRecommendSubject>> list(@RequestParam(value = \\\"subjectName\\\", required = false) String subjectName,\", \"                                                                  @RequestParam(value = \\\"recommendStatus\\\", required = false) Integer recommendStatus,\", \"                                                                  @RequestParam(value = \\\"pageSize\\\", defaultValue = \\\"5\\\") Integer pageSize,\", \"                                                                  @RequestParam(value = \\\"pageNum\\\", defaultValue = \\\"1\\\") Integer pageNum) {\", \"        List<SmsHomeRecommendSubject> homeRecommendSubjectList = recommendSubjectService.list(subjectName, recommendStatus, pageSize, pageNum);\", \"        return CommonResult.success(CommonPage.restPage(homeRecommendSubjectList));\", \"    }\"]",
+      "is_api": true,
+      "api_path": "[\"[GET]/home/recommendSubject/list\"]",
+      "x": 100,
+      "y": 272.7272727272727,
+      "symbolSize": 20,
+      "label": {
+        "show": true,
+        "formatter": "SmsHomeRecommendSubjectController.list"
+      },
+      "tooltip": {
+        "show": true,
+        "position": "right",
+        "formatter": "SmsHomeRecommendSubjectController.list<br>[Changed]    @ApiOperation(\"分页查询专题推荐\")\n<br>[API][\"[GET]/home/recommendSubject/list\"]"
+      }
+    },
+    {
+      "category": 12,
+      "id": "27",
+      "name": "UmsMenuController.list(Long,Integer,Integer)",
+      "type": "method",
+      "diff_type": [
+        "changed"
+      ],
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/UmsMenuController.java",
+      "diff_content": "    @ApiOperation(\"根据上级菜单ID分页查询菜单\")\n",
+      "documentation": "None",
+      "body": "[\"    @ApiOperation(\\\"根据上级菜单ID分页查询菜单\\\")\", \"    @RequestMapping(value = \\\"/list/{parentId}\\\", method = RequestMethod.GET)\", \"    @ResponseBody\", \"    public CommonResult<CommonPage<UmsMenu>> list(@PathVariable Long parentId,\", \"                                                  @RequestParam(value = \\\"pageSize\\\", defaultValue = \\\"5\\\") Integer pageSize,\", \"                                                  @RequestParam(value = \\\"pageNum\\\", defaultValue = \\\"1\\\") Integer pageNum) {\", \"        List<UmsMenu> menuList = menuService.list(parentId, pageSize, pageNum);\", \"        return CommonResult.success(CommonPage.restPage(menuList));\", \"    }\"]",
+      "is_api": true,
+      "api_path": "[\"[GET]/menu/list/{parentId}\"]",
+      "x": 100,
+      "y": 283.6363636363636,
+      "symbolSize": 20,
+      "label": {
+        "show": true,
+        "formatter": "UmsMenuController.list"
+      },
+      "tooltip": {
+        "show": true,
+        "position": "right",
+        "formatter": "UmsMenuController.list<br>[Changed]    @ApiOperation(\"根据上级菜单ID分页查询菜单\")\n<br>[API][\"[GET]/menu/list/{parentId}\"]"
+      }
+    },
+    {
+      "category": 13,
+      "id": "29",
+      "name": "UmsRoleController.listMenu(Long)",
+      "type": "method",
+      "diff_type": [
+        "changed"
+      ],
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/UmsRoleController.java",
+      "diff_content": "    @ApiOperation(\"根据角色ID获取菜单列表\")\n",
+      "documentation": "None",
+      "body": "[\"    @ApiOperation(\\\"根据角色ID获取菜单列表\\\")\", \"    @RequestMapping(value = \\\"/listMenu/{roleId}\\\", method = RequestMethod.GET)\", \"    @ResponseBody\", \"    public CommonResult<List<UmsMenu>> listMenu(@PathVariable Long roleId) {\", \"        List<UmsMenu> roleList = roleService.listMenu(roleId);\", \"        return CommonResult.success(roleList);\", \"    }\"]",
+      "is_api": true,
+      "api_path": "[\"[GET]/role/listMenu/{roleId}\"]",
+      "x": 100,
+      "y": 294.5454545454545,
+      "symbolSize": 20,
+      "label": {
+        "show": true,
+        "formatter": "UmsRoleController.listMenu"
+      },
+      "tooltip": {
+        "show": true,
+        "position": "right",
+        "formatter": "UmsRoleController.listMenu<br>[Changed]    @ApiOperation(\"根据角色ID获取菜单列表\")\n<br>[API][\"[GET]/role/listMenu/{roleId}\"]"
+      }
+    },
+    {
+      "category": 14,
+      "id": "31",
+      "name": "PmsProductAttributeParam.relatedStatus",
+      "type": "field",
+      "diff_type": [
+        "changed"
+      ],
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/dto/PmsProductAttributeParam.java",
+      "diff_content": "    @ApiModelProperty(\"相同属性商品是否关联；0->不关联；1->关联\")\n",
+      "documentation": "None",
+      "body": "",
+      "x": 100,
+      "y": 305.45454545454544,
+      "symbolSize": 20,
+      "label": {
+        "show": true,
+        "formatter": "PmsProductAttributeParam.relatedStatus"
+      },
+      "tooltip": {
+        "show": true,
+        "position": "right",
+        "formatter": "PmsProductAttributeParam.relatedStatus<br>[Changed]    @ApiModelProperty(\"相同属性商品是否关联；0->不关联；1->关联\")\n"
+      }
+    },
+    {
+      "category": 15,
+      "id": "33",
+      "name": "PmsProductCategoryParam.productAttributeIdList",
+      "type": "field",
+      "diff_type": [
+        "changed"
+      ],
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/dto/PmsProductCategoryParam.java",
+      "diff_content": "    @ApiModelProperty(\"商品相关筛选属性集合\")\n",
+      "documentation": "None",
+      "body": "",
+      "x": 100,
+      "y": 316.3636363636363,
+      "symbolSize": 20,
+      "label": {
+        "show": true,
+        "formatter": "PmsProductCategoryParam.productAttributeIdList"
+      },
+      "tooltip": {
+        "show": true,
+        "position": "right",
+        "formatter": "PmsProductCategoryParam.productAttributeIdList<br>[Changed]    @ApiModelProperty(\"商品相关筛选属性集合\")\n"
+      }
+    },
+    {
+      "category": 16,
+      "id": "34",
+      "name": "UmsAdminService.logout(String)",
+      "type": "method",
+      "diff_type": [
+        "changed"
+      ],
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/service/UmsAdminService.java",
+      "diff_content": "    void logout(String username);\n",
+      "documentation": "/**\n     * 登出功能\n     * @param username 用户名\n     */",
+      "body": "[\"    void logout(String username);\", \"}\"]",
+      "is_api": false,
+      "x": 100,
+      "y": 327.27272727272725,
+      "symbolSize": 20,
+      "label": {
+        "show": true,
+        "formatter": "UmsAdminService.logout"
+      },
+      "tooltip": {
+        "show": true,
+        "position": "right",
+        "formatter": "UmsAdminService.logout<br>[Changed]    void logout(String username);\n"
+      }
+    },
+    {
+      "category": 17,
+      "id": "35",
+      "name": "PmsProductServiceImpl.relateAndInsertList(Object,List,Long)",
+      "type": "method",
+      "diff_type": [
+        "changed"
+      ],
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/service/impl/PmsProductServiceImpl.java",
+      "diff_content": "            LOGGER.warn(\"创建商品出错:{}\", e.getMessage());\n",
+      "documentation": "/**\n     * 建立和插入关系表操作\n     *\n     * @param dao       可以操作的dao\n     * @param dataList  要插入的数据\n     * @param productId 建立关系的id\n     */",
+      "body": "[\"    private void relateAndInsertList(Object dao, List dataList, Long productId) {\", \"        try {\", \"            if (CollectionUtils.isEmpty(dataList)) return;\", \"            for (Object item : dataList) {\", \"                Method setId = item.getClass().getMethod(\\\"setId\\\", Long.class);\", \"                setId.invoke(item, (Long) null);\", \"                Method setProductId = item.getClass().getMethod(\\\"setProductId\\\", Long.class);\", \"                setProductId.invoke(item, productId);\", \"            }\", \"            Method insertList = dao.getClass().getMethod(\\\"insertList\\\", List.class);\", \"            insertList.invoke(dao, dataList);\", \"        } catch (Exception e) {\", \"            LOGGER.warn(\\\"创建商品出错:{}\\\", e.getMessage());\", \"            throw new RuntimeException(e.getMessage());\", \"        }\"]",
+      "is_api": false,
+      "x": 100,
+      "y": 338.18181818181813,
+      "symbolSize": 20,
+      "label": {
+        "show": true,
+        "formatter": "PmsProductServiceImpl.relateAndInsertList"
+      },
+      "tooltip": {
+        "show": true,
+        "position": "right",
+        "formatter": "PmsProductServiceImpl.relateAndInsertList<br>[Changed]            LOGGER.warn(\"创建商品出错:{}\", e.getMessage());\n"
+      }
+    },
+    {
+      "category": 18,
+      "id": "36",
+      "name": "UmsAdminServiceImpl.delete(Long)",
+      "type": "method",
+      "diff_type": [
+        "changed"
+      ],
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/service/impl/UmsAdminServiceImpl.java",
+      "diff_content": "        int count = adminMapper.deleteByPrimaryKey(id);\n",
+      "documentation": "None",
+      "body": "[\"    @Override\", \"    public int delete(Long id) {\", \"        getCacheService().delAdmin(id);\", \"        int count = adminMapper.deleteByPrimaryKey(id);\", \"        getCacheService().delResourceList(id);\", \"        return count;\", \"    }\"]",
+      "is_api": false,
+      "x": 100,
+      "y": 349.09090909090907,
+      "symbolSize": 20,
+      "label": {
+        "show": true,
+        "formatter": "UmsAdminServiceImpl.delete"
+      },
+      "tooltip": {
+        "show": true,
+        "position": "right",
+        "formatter": "UmsAdminServiceImpl.delete<br>[Changed]        int count = adminMapper.deleteByPrimaryKey(id);\n"
+      }
+    },
+    {
+      "category": 18,
+      "id": "37",
+      "name": "UmsAdminServiceImpl.logout(String)",
+      "type": "method",
+      "diff_type": [
+        "changed"
+      ],
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/service/impl/UmsAdminServiceImpl.java",
+      "diff_content": "    @Override\n",
+      "documentation": "None",
+      "body": "[\"    @Override\", \"    public void logout(String username) {\", \"        //清空缓存中的用户相关数据\", \"        UmsAdmin admin = getCacheService().getAdmin(username);\", \"        getCacheService().delAdmin(admin.getId());\", \"        getCacheService().delResourceList(admin.getId());\", \"    }\"]",
+      "is_api": false,
+      "x": 100,
+      "y": 360.0,
+      "symbolSize": 20,
+      "label": {
+        "show": true,
+        "formatter": "UmsAdminServiceImpl.logout"
+      },
+      "tooltip": {
+        "show": true,
+        "position": "right",
+        "formatter": "UmsAdminServiceImpl.logout<br>[Changed]    @Override\n"
+      }
+    },
+    {
+      "category": 19,
+      "id": "38",
+      "name": "UmsMenuServiceImpl.updateHidden(Long,Integer)",
+      "type": "method",
+      "diff_type": [
+        "changed"
+      ],
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/service/impl/UmsMenuServiceImpl.java",
+      "diff_content": "        umsMenu.setUpdateTime(new Date());\n",
+      "documentation": "None",
+      "body": "[\"    @Override\", \"    public int updateHidden(Long id, Integer hidden) {\", \"        UmsMenu umsMenu = new UmsMenu();\", \"        umsMenu.setId(id);\", \"        umsMenu.setHidden(hidden);\", \"        umsMenu.setUpdateTime(new Date());\", \"        return menuMapper.updateByPrimaryKeySelective(umsMenu);\", \"    }\"]",
+      "is_api": false,
+      "x": 100,
+      "y": 370.9090909090909,
+      "symbolSize": 20,
+      "label": {
+        "show": true,
+        "formatter": "UmsMenuServiceImpl.updateHidden"
+      },
+      "tooltip": {
+        "show": true,
+        "position": "right",
+        "formatter": "UmsMenuServiceImpl.updateHidden<br>[Changed]        umsMenu.setUpdateTime(new Date());\n"
+      }
+    },
+    {
+      "category": 20,
+      "id": "39",
+      "name": "HomeController.getSubjectList(Long,Integer,Integer)",
+      "type": "method",
+      "diff_type": [
+        "changed"
+      ],
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-portal/src/main/java/com/macro/mall/portal/controller/HomeController.java",
+      "diff_content": "    @ApiOperation(\"根据分类分页获取专题\")\n",
+      "documentation": "None",
+      "body": "[\"    @ApiOperation(\\\"根据分类分页获取专题\\\")\", \"    @RequestMapping(value = \\\"/subjectList\\\", method = RequestMethod.GET)\", \"    @ResponseBody\", \"    public CommonResult<List<CmsSubject>> getSubjectList(@RequestParam(required = false) Long cateId,\", \"                                                         @RequestParam(value = \\\"pageSize\\\", defaultValue = \\\"4\\\") Integer pageSize,\", \"                                                         @RequestParam(value = \\\"pageNum\\\", defaultValue = \\\"1\\\") Integer pageNum) {\", \"        List<CmsSubject> subjectList = homeService.getSubjectList(cateId,pageSize,pageNum);\", \"        return CommonResult.success(subjectList);\", \"    }\"]",
+      "is_api": true,
+      "api_path": "[\"[GET]/home/subjectList\"]",
+      "x": 100,
+      "y": 381.8181818181818,
+      "symbolSize": 20,
+      "label": {
+        "show": true,
+        "formatter": "HomeController.getSubjectList"
+      },
+      "tooltip": {
+        "show": true,
+        "position": "right",
+        "formatter": "HomeController.getSubjectList<br>[Changed]    @ApiOperation(\"根据分类分页获取专题\")\n<br>[API][\"[GET]/home/subjectList\"]"
+      }
+    },
+    {
+      "category": 21,
+      "id": "40",
+      "name": "MemberAttentionController.list(Integer,Integer)",
+      "type": "method",
+      "diff_type": [
+        "changed"
+      ],
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-portal/src/main/java/com/macro/mall/portal/controller/MemberAttentionController.java",
+      "diff_content": "    @ApiOperation(\"分页查询当前用户品牌关注列表\")\n",
+      "documentation": "None",
+      "body": "[\"    @ApiOperation(\\\"分页查询当前用户品牌关注列表\\\")\", \"    @RequestMapping(value = \\\"/list\\\", method = RequestMethod.GET)\", \"    @ResponseBody\", \"    public CommonResult<CommonPage<MemberBrandAttention>> list(@RequestParam(value = \\\"pageNum\\\", defaultValue = \\\"1\\\") Integer pageNum,\", \"                                                               @RequestParam(value = \\\"pageSize\\\", defaultValue = \\\"5\\\") Integer pageSize) {\", \"        Page<MemberBrandAttention> page = memberAttentionService.list(pageNum,pageSize);\", \"        return CommonResult.success(CommonPage.restPage(page));\", \"    }\"]",
+      "is_api": true,
+      "api_path": "[\"[GET]/member/attention/list\"]",
+      "x": 100,
+      "y": 392.7272727272727,
+      "symbolSize": 20,
+      "label": {
+        "show": true,
+        "formatter": "MemberAttentionController.list"
+      },
+      "tooltip": {
+        "show": true,
+        "position": "right",
+        "formatter": "MemberAttentionController.list<br>[Changed]    @ApiOperation(\"分页查询当前用户品牌关注列表\")\n<br>[API][\"[GET]/member/attention/list\"]"
+      }
+    },
+    {
+      "category": 21,
+      "id": "41",
+      "name": "MemberAttentionController.detail(Long)",
+      "type": "method",
+      "diff_type": [
+        "changed"
+      ],
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-portal/src/main/java/com/macro/mall/portal/controller/MemberAttentionController.java",
+      "diff_content": "    @ApiOperation(\"根据品牌ID获取品牌关注详情\")\n",
+      "documentation": "None",
+      "body": "[\"    @ApiOperation(\\\"根据品牌ID获取品牌关注详情\\\")\", \"    @RequestMapping(value = \\\"/detail\\\", method = RequestMethod.GET)\", \"    @ResponseBody\", \"    public CommonResult<MemberBrandAttention> detail(@RequestParam Long brandId) {\", \"        MemberBrandAttention memberBrandAttention = memberAttentionService.detail(brandId);\", \"        return CommonResult.success(memberBrandAttention);\", \"    }\"]",
+      "is_api": true,
+      "api_path": "[\"[GET]/member/attention/detail\"]",
+      "x": 100,
+      "y": 403.6363636363636,
+      "symbolSize": 20,
+      "label": {
+        "show": true,
+        "formatter": "MemberAttentionController.detail"
+      },
+      "tooltip": {
+        "show": true,
+        "position": "right",
+        "formatter": "MemberAttentionController.detail<br>[Changed]    @ApiOperation(\"根据品牌ID获取品牌关注详情\")\n<br>[API][\"[GET]/member/attention/detail\"]"
+      }
+    },
+    {
+      "category": 22,
+      "id": "42",
+      "name": "UmsMemberReceiveAddressController.list()",
+      "type": "method",
+      "diff_type": [
+        "changed"
+      ],
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-portal/src/main/java/com/macro/mall/portal/controller/UmsMemberReceiveAddressController.java",
+      "diff_content": "    @ApiOperation(\"获取所有收货地址\")\n",
+      "documentation": "None",
+      "body": "[\"    @ApiOperation(\\\"获取所有收货地址\\\")\", \"    @RequestMapping(value = \\\"/list\\\", method = RequestMethod.GET)\", \"    @ResponseBody\", \"    public CommonResult<List<UmsMemberReceiveAddress>> list() {\", \"        List<UmsMemberReceiveAddress> addressList = memberReceiveAddressService.list();\", \"        return CommonResult.success(addressList);\", \"    }\"]",
+      "is_api": true,
+      "api_path": "[\"[GET]/member/address/list\"]",
+      "x": 100,
+      "y": 414.5454545454545,
+      "symbolSize": 20,
+      "label": {
+        "show": true,
+        "formatter": "UmsMemberReceiveAddressController.list"
+      },
+      "tooltip": {
+        "show": true,
+        "position": "right",
+        "formatter": "UmsMemberReceiveAddressController.list<br>[Changed]    @ApiOperation(\"获取所有收货地址\")\n<br>[API][\"[GET]/member/address/list\"]"
+      }
+    },
+    {
+      "category": 24,
+      "id": "47",
+      "name": "FlashPromotionProduct.flashPromotionCount",
+      "type": "field",
+      "diff_type": [
+        "changed"
+      ],
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-portal/src/main/java/com/macro/mall/portal/domain/FlashPromotionProduct.java",
+      "diff_content": "    @ApiModelProperty(\"用于秒杀的数量\")\n",
+      "documentation": "None",
+      "body": "",
+      "x": 100,
+      "y": 425.45454545454544,
+      "symbolSize": 20,
+      "label": {
+        "show": true,
+        "formatter": "FlashPromotionProduct.flashPromotionCount"
+      },
+      "tooltip": {
+        "show": true,
+        "position": "right",
+        "formatter": "FlashPromotionProduct.flashPromotionCount<br>[Changed]    @ApiModelProperty(\"用于秒杀的数量\")\n"
+      }
+    },
+    {
+      "category": 26,
+      "id": "51",
+      "name": "UmsMemberCouponServiceImpl.listCart(List<com.macro.mall.portal.domain.CartPromotionItem>,Integer)",
+      "type": "method",
+      "diff_type": [
+        "changed"
+      ],
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-portal/src/main/java/com/macro/mall/portal/service/impl/UmsMemberCouponServiceImpl.java",
+      "diff_content": "                if(now.before(endTime)&&totalAmount.subtract(minPoint).floatValue()>=0){\n",
+      "documentation": "None",
+      "body": "[\"    @Override\", \"    public List<SmsCouponHistoryDetail> listCart(List<CartPromotionItem> cartItemList, Integer type) {\", \"        UmsMember currentMember = memberService.getCurrentMember();\", \"        Date now = new Date();\", \"        //获取该用户所有优惠券\", \"        List<SmsCouponHistoryDetail> allList = couponHistoryDao.getDetailList(currentMember.getId());\", \"        //根据优惠券使用类型来判断优惠券是否可用\", \"        List<SmsCouponHistoryDetail> enableList = new ArrayList<>();\", \"        List<SmsCouponHistoryDetail> disableList = new ArrayList<>();\", \"        for (SmsCouponHistoryDetail couponHistoryDetail : allList) {\", \"            Integer useType = couponHistoryDetail.getCoupon().getUseType();\", \"            BigDecimal minPoint = couponHistoryDetail.getCoupon().getMinPoint();\", \"            Date endTime = couponHistoryDetail.getCoupon().getEndTime();\", \"            if(useType.equals(0)){\", \"                //0->全场通用\", \"                //判断是否满足优惠起点\", \"                //计算购物车商品的总价\", \"                BigDecimal totalAmount = calcTotalAmount(cartItemList);\", \"                if(now.before(endTime)&&totalAmount.subtract(minPoint).floatValue()>=0){\", \"                    enableList.add(couponHistoryDetail);\", \"                }else{\", \"                    disableList.add(couponHistoryDetail);\", \"                }\", \"            }else if(useType.equals(1)){\", \"                //1->指定分类\", \"                //计算指定分类商品的总价\", \"                List<Long> productCategoryIds = new ArrayList<>();\", \"                for (SmsCouponProductCategoryRelation categoryRelation : couponHistoryDetail.getCategoryRelationList()) {\", \"                    productCategoryIds.add(categoryRelation.getProductCategoryId());\", \"                }\", \"                BigDecimal totalAmount = calcTotalAmountByproductCategoryId(cartItemList,productCategoryIds);\", \"                if(now.before(endTime)&&totalAmount.floatValue()>0&&totalAmount.subtract(minPoint).floatValue()>=0){\", \"                    enableList.add(couponHistoryDetail);\", \"                }else{\", \"                    disableList.add(couponHistoryDetail);\", \"                }\", \"            }else if(useType.equals(2)){\", \"                //2->指定商品\", \"                //计算指定商品的总价\", \"                List<Long> productIds = new ArrayList<>();\", \"                for (SmsCouponProductRelation productRelation : couponHistoryDetail.getProductRelationList()) {\", \"                    productIds.add(productRelation.getProductId());\", \"                }\", \"                BigDecimal totalAmount = calcTotalAmountByProductId(cartItemList,productIds);\", \"                if(now.before(endTime)&&totalAmount.floatValue()>0&&totalAmount.subtract(minPoint).floatValue()>=0){\", \"                    enableList.add(couponHistoryDetail);\", \"                }else{\", \"                    disableList.add(couponHistoryDetail);\", \"                }\", \"            }\", \"        }\", \"        if(type.equals(1)){\", \"            return enableList;\", \"        }else{\", \"            return disableList;\", \"        }\"]",
+      "is_api": false,
+      "x": 100,
+      "y": 436.3636363636363,
+      "symbolSize": 20,
+      "label": {
+        "show": true,
+        "formatter": "UmsMemberCouponServiceImpl.listCart"
+      },
+      "tooltip": {
+        "show": true,
+        "position": "right",
+        "formatter": "UmsMemberCouponServiceImpl.listCart<br>[Changed]                if(now.before(endTime)&&totalAmount.subtract(minPoint).floatValue()>=0){\n"
+      }
+    },
+    {
+      "category": 27,
+      "id": "52",
+      "name": "PortalOrderDao.xml.lockStockBySkuId",
+      "type": "statement",
+      "diff_type": [
+        "changed"
+      ],
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-portal/src/main/resources/dao/PortalOrderDao.xml",
+      "diff_content": "    <update id=\"lockStockBySkuId\">\n",
+      "documentation": "",
+      "body": [
+        "    <update id=\"lockStockBySkuId\">",
+        "        UPDATE pms_sku_stock",
+        "        SET lock_stock = lock_stock + #{quantity}",
+        "        WHERE",
+        "        id = #{productSkuId}",
+        "        AND lock_stock + #{quantity} &lt;= stock",
+        "    </update>"
+      ],
+      "x": 100,
+      "y": 447.27272727272725,
+      "symbolSize": 20,
+      "label": {
+        "show": true,
+        "formatter": "PortalOrderDao.xml.lockStockBySkuId"
+      },
+      "tooltip": {
+        "show": true,
+        "position": "right",
+        "formatter": "PortalOrderDao.xml.lockStockBySkuId<br>[Changed]    <update id=\"lockStockBySkuId\">\n"
+      }
+    },
+    {
+      "category": 27,
+      "id": "53",
+      "name": "PortalOrderDao.xml.reduceSkuStock",
+      "type": "statement",
+      "diff_type": [
+        "changed"
+      ],
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-portal/src/main/resources/dao/PortalOrderDao.xml",
+      "diff_content": "    <update id=\"reduceSkuStock\">\n",
+      "documentation": "",
+      "body": [
+        "    <update id=\"reduceSkuStock\">",
+        "        UPDATE pms_sku_stock",
+        "        SET lock_stock = lock_stock - #{quantity},",
+        "            stock = stock - #{quantity}",
+        "        WHERE",
+        "            id = #{productSkuId}",
+        "          AND stock - #{quantity} &gt;= 0",
+        "          AND lock_stock - #{quantity} &gt;= 0",
+        "    </update>"
+      ],
+      "x": 100,
+      "y": 458.18181818181813,
+      "symbolSize": 20,
+      "label": {
+        "show": true,
+        "formatter": "PortalOrderDao.xml.reduceSkuStock"
+      },
+      "tooltip": {
+        "show": true,
+        "position": "right",
+        "formatter": "PortalOrderDao.xml.reduceSkuStock<br>[Changed]    <update id=\"reduceSkuStock\">\n"
+      }
+    },
+    {
+      "category": 27,
+      "id": "54",
+      "name": "PortalOrderDao.xml.releaseStockBySkuId",
+      "type": "statement",
+      "diff_type": [
+        "changed"
+      ],
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-portal/src/main/resources/dao/PortalOrderDao.xml",
+      "diff_content": "    <update id=\"releaseStockBySkuId\">\n",
+      "documentation": "",
+      "body": [
+        "    <update id=\"releaseStockBySkuId\">",
+        "        UPDATE pms_sku_stock",
+        "        SET lock_stock = lock_stock - #{quantity}",
+        "        WHERE",
+        "            id = #{productSkuId}",
+        "          AND lock_stock - #{quantity} &gt;= 0",
+        "    </update>"
+      ],
+      "x": 100,
+      "y": 469.09090909090907,
+      "symbolSize": 20,
+      "label": {
+        "show": true,
+        "formatter": "PortalOrderDao.xml.releaseStockBySkuId"
+      },
+      "tooltip": {
+        "show": true,
+        "position": "right",
+        "formatter": "PortalOrderDao.xml.releaseStockBySkuId<br>[Changed]    <update id=\"releaseStockBySkuId\">\n"
+      }
+    },
+    {
+      "category": 14,
+      "id": "30",
+      "name": "PmsProductAttributeParam.entity",
+      "type": "class",
+      "diff_type": [
+        "changed",
+        "impacted"
+      ],
+      "file_path": "C:\\Users\\carpe\\VisualStudioProject\\TestPlatform\\jcci\\projects\\mall",
+      "diff_content": "",
+      "documentation": "",
+      "body": "",
+      "x": 100,
+      "y": 479.99999999999994,
+      "symbolSize": 20,
+      "label": {
+        "show": true,
+        "formatter": "PmsProductAttributeParam.entity"
+      },
+      "tooltip": {
+        "show": true,
+        "position": "right",
+        "formatter": "PmsProductAttributeParam.entity<br>[Changed]"
+      }
+    },
+    {
+      "category": 15,
+      "id": "32",
+      "name": "PmsProductCategoryParam.entity",
+      "type": "class",
+      "diff_type": [
+        "changed",
+        "impacted"
+      ],
+      "file_path": "C:\\Users\\carpe\\VisualStudioProject\\TestPlatform\\jcci\\projects\\mall",
+      "diff_content": "",
+      "documentation": "",
+      "body": "",
+      "x": 100,
+      "y": 490.9090909090909,
+      "symbolSize": 20,
+      "label": {
+        "show": true,
+        "formatter": "PmsProductCategoryParam.entity"
+      },
+      "tooltip": {
+        "show": true,
+        "position": "right",
+        "formatter": "PmsProductCategoryParam.entity<br>[Changed]"
+      }
+    },
+    {
+      "category": 11,
+      "id": "26",
+      "name": "UmsAdminController.logout(Principal)",
+      "type": "method",
+      "diff_type": [
+        "changed",
+        "impacted"
+      ],
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/UmsAdminController.java",
+      "diff_content": "    public CommonResult logout(Principal principal) {\n",
+      "documentation": "None",
+      "body": "[\"    @ApiOperation(value = \\\"登出功能\\\")\", \"    @RequestMapping(value = \\\"/logout\\\", method = RequestMethod.POST)\", \"    @ResponseBody\", \"    public CommonResult logout(Principal principal) {\", \"        adminService.logout(principal.getName());\", \"        return CommonResult.success(null);\", \"    }\"]",
+      "is_api": true,
+      "api_path": "[\"[POST]/admin/logout\"]",
+      "x": 100,
+      "y": 501.81818181818176,
+      "symbolSize": 20,
+      "label": {
+        "show": true,
+        "formatter": "UmsAdminController.logout"
+      },
+      "tooltip": {
+        "show": true,
+        "position": "right",
+        "formatter": "UmsAdminController.logout<br>[Changed]    public CommonResult logout(Principal principal) {\n<br>[API][\"[POST]/admin/logout\"]"
+      }
+    },
+    {
+      "category": 12,
+      "id": "28",
+      "name": "UmsMenuController.updateHidden(Long,Integer)",
+      "type": "method",
+      "diff_type": [
+        "changed",
+        "impacted"
+      ],
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/UmsMenuController.java",
+      "diff_content": "    @ApiOperation(\"根据ID修改菜单显示状态\")\n",
+      "documentation": "None",
+      "body": "[\"    @ApiOperation(\\\"根据ID修改菜单显示状态\\\")\", \"    @RequestMapping(value = \\\"/updateHidden/{id}\\\", method = RequestMethod.POST)\", \"    @ResponseBody\", \"    public CommonResult updateHidden(@PathVariable Long id, @RequestParam(\\\"hidden\\\") Integer hidden) {\", \"        int count = menuService.updateHidden(id, hidden);\", \"        if (count > 0) {\", \"            return CommonResult.success(count);\", \"        } else {\", \"            return CommonResult.failed();\", \"        }\"]",
+      "is_api": true,
+      "api_path": "[\"[POST]/menu/updateHidden/{id}\"]",
+      "x": 100,
+      "y": 512.7272727272726,
+      "symbolSize": 20,
+      "label": {
+        "show": true,
+        "formatter": "UmsMenuController.updateHidden"
+      },
+      "tooltip": {
+        "show": true,
+        "position": "right",
+        "formatter": "UmsMenuController.updateHidden<br>[Changed]    @ApiOperation(\"根据ID修改菜单显示状态\")\n<br>[API][\"[POST]/menu/updateHidden/{id}\"]"
+      }
+    },
+    {
+      "category": 25,
+      "id": "50",
+      "name": "OmsPortalOrderServiceImpl.lockStock(List<com.macro.mall.portal.domain.CartPromotionItem>)",
+      "type": "method",
+      "diff_type": [
+        "changed",
+        "impacted"
+      ],
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-portal/src/main/java/com/macro/mall/portal/service/impl/OmsPortalOrderServiceImpl.java",
+      "diff_content": "            int count = portalOrderDao.lockStockBySkuId(cartPromotionItem.getProductSkuId(),cartPromotionItem.getQuantity());\n",
+      "documentation": "/**\n     * 锁定下单商品的所有库存\n     */",
+      "body": "[\"    private void lockStock(List<CartPromotionItem> cartPromotionItemList) {\", \"        for (CartPromotionItem cartPromotionItem : cartPromotionItemList) {\", \"            PmsSkuStock skuStock = skuStockMapper.selectByPrimaryKey(cartPromotionItem.getProductSkuId());\", \"            skuStock.setLockStock(skuStock.getLockStock() + cartPromotionItem.getQuantity());\", \"            int count = portalOrderDao.lockStockBySkuId(cartPromotionItem.getProductSkuId(),cartPromotionItem.getQuantity());\", \"            if(count==0){\", \"                Asserts.fail(\\\"库存不足，无法下单\\\");\", \"            }\"]",
+      "is_api": false,
+      "x": 100,
+      "y": 523.6363636363636,
+      "symbolSize": 20,
+      "label": {
+        "show": true,
+        "formatter": "OmsPortalOrderServiceImpl.lockStock"
+      },
+      "tooltip": {
+        "show": true,
+        "position": "right",
+        "formatter": "OmsPortalOrderServiceImpl.lockStock<br>[Changed]            int count = portalOrderDao.lockStockBySkuId(cartPromotionItem.getProductSkuId(),cartPromotionItem.getQuantity());\n"
+      }
+    },
+    {
+      "category": 25,
+      "id": "48",
+      "name": "OmsPortalOrderServiceImpl.paySuccess(Long,Integer)",
+      "type": "method",
+      "diff_type": [
+        "changed",
+        "impacted"
+      ],
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-portal/src/main/java/com/macro/mall/portal/service/impl/OmsPortalOrderServiceImpl.java",
+      "diff_content": "        OmsOrderExample orderExample = new OmsOrderExample();\n",
+      "documentation": "None",
+      "body": "[\"    @Override\", \"    public Integer paySuccess(Long orderId, Integer payType) {\", \"        //修改订单支付状态\", \"        OmsOrder order = new OmsOrder();\", \"        order.setId(orderId);\", \"        order.setStatus(1);\", \"        order.setPaymentTime(new Date());\", \"        order.setPayType(payType);\", \"        OmsOrderExample orderExample = new OmsOrderExample();\", \"        orderExample.createCriteria()\", \"                .andIdEqualTo(order.getId())\", \"                .andDeleteStatusEqualTo(0)\", \"                .andStatusEqualTo(0);\", \"        //只修改未付款状态的订单\", \"        int updateCount = orderMapper.updateByExampleSelective(order, orderExample);\", \"        if(updateCount==0){\", \"            Asserts.fail(\\\"订单不存在或订单状态不是未支付！\\\");\", \"        }\", \"        //恢复所有下单商品的锁定库存，扣减真实库存\", \"        OmsOrderDetail orderDetail = portalOrderDao.getDetail(orderId);\", \"        int totalCount = 0;\", \"        for (OmsOrderItem orderItem : orderDetail.getOrderItemList()) {\", \"            int count = portalOrderDao.reduceSkuStock(orderItem.getProductSkuId(),orderItem.getProductQuantity());\", \"            if(count==0){\", \"                Asserts.fail(\\\"库存不足，无法扣减！\\\");\", \"            }\", \"            totalCount+=count;\", \"        }\", \"        return totalCount;\", \"    }\"]",
+      "is_api": false,
+      "x": 100,
+      "y": 534.5454545454545,
+      "symbolSize": 20,
+      "label": {
+        "show": true,
+        "formatter": "OmsPortalOrderServiceImpl.paySuccess"
+      },
+      "tooltip": {
+        "show": true,
+        "position": "right",
+        "formatter": "OmsPortalOrderServiceImpl.paySuccess<br>[Changed]        OmsOrderExample orderExample = new OmsOrderExample();\n"
+      }
+    },
+    {
+      "category": 25,
+      "id": "49",
+      "name": "OmsPortalOrderServiceImpl.cancelOrder(Long)",
+      "type": "method",
+      "diff_type": [
+        "changed",
+        "impacted"
+      ],
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-portal/src/main/java/com/macro/mall/portal/service/impl/OmsPortalOrderServiceImpl.java",
+      "diff_content": "                for (OmsOrderItem orderItem : orderItemList) {\n",
+      "documentation": "None",
+      "body": "[\"    @Override\", \"    public void cancelOrder(Long orderId) {\", \"        //查询未付款的取消订单\", \"        OmsOrderExample example = new OmsOrderExample();\", \"        example.createCriteria().andIdEqualTo(orderId).andStatusEqualTo(0).andDeleteStatusEqualTo(0);\", \"        List<OmsOrder> cancelOrderList = orderMapper.selectByExample(example);\", \"        if (CollectionUtils.isEmpty(cancelOrderList)) {\", \"            return;\", \"        }\", \"        OmsOrder cancelOrder = cancelOrderList.get(0);\", \"        if (cancelOrder != null) {\", \"            //修改订单状态为取消\", \"            cancelOrder.setStatus(4);\", \"            orderMapper.updateByPrimaryKeySelective(cancelOrder);\", \"            OmsOrderItemExample orderItemExample = new OmsOrderItemExample();\", \"            orderItemExample.createCriteria().andOrderIdEqualTo(orderId);\", \"            List<OmsOrderItem> orderItemList = orderItemMapper.selectByExample(orderItemExample);\", \"            //解除订单商品库存锁定\", \"            if (!CollectionUtils.isEmpty(orderItemList)) {\", \"                for (OmsOrderItem orderItem : orderItemList) {\", \"                    int count = portalOrderDao.releaseStockBySkuId(orderItem.getProductSkuId(),orderItem.getProductQuantity());\", \"                    if(count==0){\", \"                        Asserts.fail(\\\"库存不足，无法释放！\\\");\", \"                    }\", \"                }\", \"            }\", \"            //修改优惠券使用状态\", \"            updateCouponStatus(cancelOrder.getCouponId(), cancelOrder.getMemberId(), 0);\", \"            //返还使用积分\", \"            if (cancelOrder.getUseIntegration() != null) {\", \"                UmsMember member = memberService.getById(cancelOrder.getMemberId());\", \"                memberService.updateIntegration(cancelOrder.getMemberId(), member.getIntegration() + cancelOrder.getUseIntegration());\", \"            }\"]",
+      "is_api": false,
+      "x": 100,
+      "y": 545.4545454545454,
+      "symbolSize": 20,
+      "label": {
+        "show": true,
+        "formatter": "OmsPortalOrderServiceImpl.cancelOrder"
+      },
+      "tooltip": {
+        "show": true,
+        "position": "right",
+        "formatter": "OmsPortalOrderServiceImpl.cancelOrder<br>[Changed]                for (OmsOrderItem orderItem : orderItemList) {\n"
+      }
+    },
+    {
+      "category": 24,
+      "id": "46",
+      "name": "FlashPromotionProduct.entity",
+      "type": "class",
+      "diff_type": [
+        "changed",
+        "impacted"
+      ],
+      "file_path": "C:\\Users\\carpe\\VisualStudioProject\\TestPlatform\\jcci\\projects\\mall",
+      "diff_content": "",
+      "documentation": "",
+      "body": "",
+      "x": 100,
+      "y": 556.3636363636364,
+      "symbolSize": 20,
+      "label": {
+        "show": true,
+        "formatter": "FlashPromotionProduct.entity"
+      },
+      "tooltip": {
+        "show": true,
+        "position": "right",
+        "formatter": "FlashPromotionProduct.entity<br>[Changed]"
+      }
+    },
+    {
+      "category": 23,
+      "id": "43",
+      "name": "PortalOrderDao.lockStockBySkuId(Long,Integer)",
+      "type": "method",
+      "diff_type": [
+        "changed",
+        "impacted"
+      ],
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-portal/src/main/java/com/macro/mall/portal/dao/PortalOrderDao.java",
+      "diff_content": "    int lockStockBySkuId(@Param(\"productSkuId\")Long productSkuId,@Param(\"quantity\") Integer quantity);\n",
+      "documentation": "/**\n     * 根据商品的skuId来锁定库存\n     */",
+      "body": "[\"    int lockStockBySkuId(@Param(\\\"productSkuId\\\")Long productSkuId,@Param(\\\"quantity\\\") Integer quantity);\", \"\"]",
+      "is_api": false,
+      "x": 100,
+      "y": 567.2727272727273,
+      "symbolSize": 20,
+      "label": {
+        "show": true,
+        "formatter": "PortalOrderDao.lockStockBySkuId"
+      },
+      "tooltip": {
+        "show": true,
+        "position": "right",
+        "formatter": "PortalOrderDao.lockStockBySkuId<br>[Changed]    int lockStockBySkuId(@Param(\"productSkuId\")Long productSkuId,@Param(\"quantity\") Integer quantity);\n"
+      }
+    },
+    {
+      "category": 23,
+      "id": "44",
+      "name": "PortalOrderDao.reduceSkuStock(Long,Integer)",
+      "type": "method",
+      "diff_type": [
+        "changed",
+        "impacted"
+      ],
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-portal/src/main/java/com/macro/mall/portal/dao/PortalOrderDao.java",
+      "diff_content": "    int reduceSkuStock(@Param(\"productSkuId\")Long productSkuId,@Param(\"quantity\") Integer quantity);\n",
+      "documentation": "/**\n     * 根据商品的skuId扣减真实库存\n     */",
+      "body": "[\"    int reduceSkuStock(@Param(\\\"productSkuId\\\")Long productSkuId,@Param(\\\"quantity\\\") Integer quantity);\", \"\"]",
+      "is_api": false,
+      "x": 100,
+      "y": 578.1818181818181,
+      "symbolSize": 20,
+      "label": {
+        "show": true,
+        "formatter": "PortalOrderDao.reduceSkuStock"
+      },
+      "tooltip": {
+        "show": true,
+        "position": "right",
+        "formatter": "PortalOrderDao.reduceSkuStock<br>[Changed]    int reduceSkuStock(@Param(\"productSkuId\")Long productSkuId,@Param(\"quantity\") Integer quantity);\n"
+      }
+    },
+    {
+      "category": 23,
+      "id": "45",
+      "name": "PortalOrderDao.releaseStockBySkuId(Long,Integer)",
+      "type": "method",
+      "diff_type": [
+        "changed",
+        "impacted"
+      ],
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-portal/src/main/java/com/macro/mall/portal/dao/PortalOrderDao.java",
+      "diff_content": "    int releaseStockBySkuId(@Param(\"productSkuId\")Long productSkuId,@Param(\"quantity\") Integer quantity);\n",
+      "documentation": "/**\n     * 根据商品的skuId释放库存\n     */",
+      "body": "[\"    int releaseStockBySkuId(@Param(\\\"productSkuId\\\")Long productSkuId,@Param(\\\"quantity\\\") Integer quantity);\", \"}\"]",
+      "is_api": false,
+      "x": 100,
+      "y": 589.090909090909,
+      "symbolSize": 20,
+      "label": {
+        "show": true,
+        "formatter": "PortalOrderDao.releaseStockBySkuId"
+      },
+      "tooltip": {
+        "show": true,
+        "position": "right",
+        "formatter": "PortalOrderDao.releaseStockBySkuId<br>[Changed]    int releaseStockBySkuId(@Param(\"productSkuId\")Long productSkuId,@Param(\"quantity\") Integer quantity);\n"
+      }
+    },
+    {
+      "category": 2,
+      "id": "7",
+      "name": "PmsProductController.update(Long,com.macro.mall.dto.PmsProductParam)",
+      "type": "method",
+      "diff_type": [
+        "changed",
+        "impacted"
+      ],
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/PmsProductController.java",
+      "diff_content": "    @ApiOperation(\"根据ID修改商品信息\")\n",
+      "documentation": "None",
+      "body": "[\"    @ApiOperation(\\\"根据ID修改商品信息\\\")\", \"    @RequestMapping(value = \\\"/update/{id}\\\", method = RequestMethod.POST)\", \"    @ResponseBody\", \"    public CommonResult update(@PathVariable Long id, @RequestBody PmsProductParam productParam) {\", \"        int count = productService.update(id, productParam);\", \"        if (count > 0) {\", \"            return CommonResult.success(count);\", \"        } else {\", \"            return CommonResult.failed();\", \"        }\"]",
+      "is_api": true,
+      "api_path": "[\"[POST]/product/update/{id}\"]",
+      "x": 100,
+      "y": 600.0,
+      "symbolSize": 20,
+      "label": {
+        "show": true,
+        "formatter": "PmsProductController.update"
+      },
+      "tooltip": {
+        "show": true,
+        "position": "right",
+        "formatter": "PmsProductController.update<br>[Changed]    @ApiOperation(\"根据ID修改商品信息\")\n<br>[API][\"[POST]/product/update/{id}\"]"
+      }
+    },
+    {
+      "category": 17,
+      "id": "55",
+      "name": "PmsProductServiceImpl.create(com.macro.mall.dto.PmsProductParam)",
+      "type": "method",
+      "diff_type": [
+        "impacted"
+      ],
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/service/impl/PmsProductServiceImpl.java",
+      "is_api": false,
+      "x": 833.3333333333334,
+      "y": 184.6153846153846,
+      "label": {
+        "show": true,
+        "formatter": "PmsProductServiceImpl.create"
+      }
+    },
+    {
+      "category": 17,
+      "id": "57",
+      "name": "PmsProductServiceImpl.handleUpdateSkuStockList(Long,com.macro.mall.dto.PmsProductParam)",
+      "type": "method",
+      "diff_type": [
+        "impacted"
+      ],
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/service/impl/PmsProductServiceImpl.java",
+      "is_api": false,
+      "x": 833.3333333333334,
+      "y": 230.76923076923077,
+      "label": {
+        "show": true,
+        "formatter": "PmsProductServiceImpl.handleUpdateSkuStockList"
+      }
+    },
+    {
+      "category": 11,
+      "id": "58",
+      "name": "UmsAdminController.delete(Long)",
+      "type": "method",
+      "diff_type": [
+        "impacted"
+      ],
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/UmsAdminController.java",
+      "is_api": true,
+      "api_path": "[\"[POST]/admin/delete/{id}\"]",
+      "x": 833.3333333333334,
+      "y": 276.9230769230769,
+      "label": {
+        "show": true,
+        "formatter": "UmsAdminController.delete"
+      },
+      "tooltip": {
+        "show": true,
+        "position": "right",
+        "formatter": "UmsAdminController.delete<br>[API][\"[POST]/admin/delete/{id}\"]"
+      }
+    },
+    {
+      "category": 25,
+      "id": "59",
+      "name": "OmsPortalOrderServiceImpl.paySuccessByOrderSn(String,Integer)",
+      "type": "method",
+      "diff_type": [
+        "impacted"
+      ],
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-portal/src/main/java/com/macro/mall/portal/service/impl/OmsPortalOrderServiceImpl.java",
+      "is_api": false,
+      "x": 1566.6666666666667,
+      "y": 0.0,
+      "label": {
+        "show": true,
+        "formatter": "OmsPortalOrderServiceImpl.paySuccessByOrderSn"
+      }
+    },
+    {
+      "category": 28,
+      "id": "60",
+      "name": "CancelOrderReceiver.handle(Long)",
+      "type": "method",
+      "diff_type": [
+        "impacted"
+      ],
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-portal/src/main/java/com/macro/mall/portal/component/CancelOrderReceiver.java",
+      "is_api": false,
+      "x": 1566.6666666666667,
+      "y": 200.0,
+      "label": {
+        "show": true,
+        "formatter": "CancelOrderReceiver.handle"
+      }
+    },
+    {
+      "category": 25,
+      "id": "62",
+      "name": "OmsPortalOrderServiceImpl.generateConfirmOrder(List<Long>)",
+      "type": "method",
+      "diff_type": [
+        "impacted"
+      ],
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-portal/src/main/java/com/macro/mall/portal/service/impl/OmsPortalOrderServiceImpl.java",
+      "is_api": false,
+      "x": 833.3333333333334,
+      "y": 507.6923076923077,
+      "label": {
+        "show": true,
+        "formatter": "OmsPortalOrderServiceImpl.generateConfirmOrder"
+      }
+    },
+    {
+      "category": 25,
+      "id": "63",
+      "name": "OmsPortalOrderServiceImpl.getUseCoupon(List<com.macro.mall.portal.domain.CartPromotionItem>,Long)",
+      "type": "method",
+      "diff_type": [
+        "impacted"
+      ],
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-portal/src/main/java/com/macro/mall/portal/service/impl/OmsPortalOrderServiceImpl.java",
+      "is_api": false,
+      "x": 833.3333333333334,
+      "y": 553.8461538461538,
+      "label": {
+        "show": true,
+        "formatter": "OmsPortalOrderServiceImpl.getUseCoupon"
+      }
+    },
+    {
+      "category": 2,
+      "id": "64",
+      "name": "PmsProductController.create(com.macro.mall.dto.PmsProductParam)",
+      "type": "method",
+      "diff_type": [
+        "impacted"
+      ],
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/PmsProductController.java",
+      "is_api": true,
+      "api_path": "[\"[POST]/product/create\"]",
+      "x": 1200.0,
+      "y": 400.0,
+      "label": {
+        "show": true,
+        "formatter": "PmsProductController.create"
+      },
+      "tooltip": {
+        "show": true,
+        "position": "right",
+        "formatter": "PmsProductController.create<br>[API][\"[POST]/product/create\"]"
+      }
+    },
+    {
+      "category": 17,
+      "id": "56",
+      "name": "PmsProductServiceImpl.update(Long,com.macro.mall.dto.PmsProductParam)",
+      "type": "method",
+      "diff_type": [
+        "impacted"
+      ],
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/service/impl/PmsProductServiceImpl.java",
+      "is_api": false,
+      "x": 1200.0,
+      "y": 0.0,
+      "label": {
+        "show": true,
+        "formatter": "PmsProductServiceImpl.update"
+      }
+    },
+    {
+      "category": 25,
+      "id": "61",
+      "name": "OmsPortalOrderServiceImpl.generateOrder(com.macro.mall.portal.domain.OrderParam)",
+      "type": "method",
+      "diff_type": [
+        "impacted"
+      ],
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-portal/src/main/java/com/macro/mall/portal/service/impl/OmsPortalOrderServiceImpl.java",
+      "is_api": false,
+      "x": 1566.6666666666667,
+      "y": 400.0,
+      "label": {
+        "show": true,
+        "formatter": "OmsPortalOrderServiceImpl.generateOrder"
+      }
+    }
+  ],
+  "links": [
+    {
+      "source": "31",
+      "target": "30"
+    },
+    {
+      "source": "33",
+      "target": "32"
+    },
+    {
+      "source": "47",
+      "target": "46"
+    },
+    {
+      "source": "34",
+      "target": "26"
+    },
+    {
+      "source": "35",
+      "target": "55"
+    },
+    {
+      "source": "35",
+      "target": "56"
+    },
+    {
+      "source": "35",
+      "target": "57"
+    },
+    {
+      "source": "36",
+      "target": "58"
+    },
+    {
+      "source": "37",
+      "target": "26"
+    },
+    {
+      "source": "38",
+      "target": "28"
+    },
+    {
+      "source": "43",
+      "target": "50"
+    },
+    {
+      "source": "44",
+      "target": "48"
+    },
+    {
+      "source": "45",
+      "target": "49"
+    },
+    {
+      "source": "48",
+      "target": "59"
+    },
+    {
+      "source": "49",
+      "target": "60"
+    },
+    {
+      "source": "50",
+      "target": "61"
+    },
+    {
+      "source": "51",
+      "target": "62"
+    },
+    {
+      "source": "51",
+      "target": "63"
+    },
+    {
+      "source": "52",
+      "target": "43"
+    },
+    {
+      "source": "53",
+      "target": "44"
+    },
+    {
+      "source": "54",
+      "target": "45"
+    },
+    {
+      "source": "55",
+      "target": "64"
+    },
+    {
+      "source": "56",
+      "target": "7"
+    },
+    {
+      "source": "57",
+      "target": "56"
+    },
+    {
+      "source": "63",
+      "target": "61"
+    }
+  ],
+  "categories": [
+    {
+      "name": "PmsProductAttributeController"
+    },
+    {
+      "name": "PmsProductCategoryController"
+    },
+    {
+      "name": "PmsProductController"
+    },
+    {
+      "name": "PmsSkuStockController"
+    },
+    {
+      "name": "SmsCouponController"
+    },
+    {
+      "name": "SmsFlashPromotionController"
+    },
+    {
+      "name": "SmsFlashPromotionProductRelationController"
+    },
+    {
+      "name": "SmsFlashPromotionSessionController"
+    },
+    {
+      "name": "SmsHomeAdvertiseController"
+    },
+    {
+      "name": "SmsHomeNewProductController"
+    },
+    {
+      "name": "SmsHomeRecommendSubjectController"
+    },
+    {
+      "name": "UmsAdminController"
+    },
+    {
+      "name": "UmsMenuController"
+    },
+    {
+      "name": "UmsRoleController"
+    },
+    {
+      "name": "PmsProductAttributeParam"
+    },
+    {
+      "name": "PmsProductCategoryParam"
+    },
+    {
+      "name": "UmsAdminService"
+    },
+    {
+      "name": "PmsProductServiceImpl"
+    },
+    {
+      "name": "UmsAdminServiceImpl"
+    },
+    {
+      "name": "UmsMenuServiceImpl"
+    },
+    {
+      "name": "HomeController"
+    },
+    {
+      "name": "MemberAttentionController"
+    },
+    {
+      "name": "UmsMemberReceiveAddressController"
+    },
+    {
+      "name": "PortalOrderDao"
+    },
+    {
+      "name": "FlashPromotionProduct"
+    },
+    {
+      "name": "OmsPortalOrderServiceImpl"
+    },
+    {
+      "name": "UmsMemberCouponServiceImpl"
+    },
+    {
+      "name": "PortalOrderDao.xml"
+    },
+    {
+      "name": "CancelOrderReceiver"
+    }
+  ],
+  "impacted_api_list": [
+    "[\"[GET]/productAttribute/list/{cid}\"]",
+    "[\"[GET]/productAttribute/{id}\"]",
+    "[\"[GET]/productAttribute/attrInfo/{productCategoryId}\"]",
+    "[\"[GET]/productCategory/{id}\"]",
+    "[\"[POST]/productCategory/delete/{id}\"]",
+    "[\"[POST]/productCategory/update/navStatus\"]",
+    "[\"[POST]/productCategory/update/showStatus\"]",
+    "[\"[POST]/sku/update/{pid}\"]",
+    "[\"[POST]/coupon/delete/{id}\"]",
+    "[\"[POST]/coupon/update/{id}\"]",
+    "[\"[POST]/flash/update/status/{id}\"]",
+    "[\"[GET]/flash/list\"]",
+    "[\"[POST]/flashProductRelation/update/{id}\"]",
+    "[\"[POST]/flashProductRelation/delete/{id}\"]",
+    "[\"[POST]/flashSession/update/status/{id}\"]",
+    "[\"[POST]/home/advertise/delete\"]",
+    "[\"[GET]/home/advertise/{id}\"]",
+    "[\"[POST]/home/advertise/update/{id}\"]",
+    "[\"[GET]/home/advertise/list\"]",
+    "[\"[POST]/home/newProduct/create\"]",
+    "[\"[POST]/home/recommendSubject/create\"]",
+    "[\"[POST]/home/recommendSubject/update/sort/{id}\"]",
+    "[\"[POST]/home/recommendSubject/delete\"]",
+    "[\"[POST]/home/recommendSubject/update/recommendStatus\"]",
+    "[\"[GET]/home/recommendSubject/list\"]",
+    "[\"[GET]/menu/list/{parentId}\"]",
+    "[\"[GET]/role/listMenu/{roleId}\"]",
+    "[\"[GET]/home/subjectList\"]",
+    "[\"[GET]/member/attention/list\"]",
+    "[\"[GET]/member/attention/detail\"]",
+    "[\"[GET]/member/address/list\"]",
+    "[\"[POST]/admin/logout\"]",
+    "[\"[POST]/menu/updateHidden/{id}\"]",
+    "[\"[POST]/product/update/{id}\"]",
+    "[\"[POST]/admin/delete/{id}\"]",
+    "[\"[POST]/product/create\"]"
+  ],
+  "method_changes": [
+    {
+      "change_type": "MODIFIED",
+      "method_signature": "HomeController.getSubjectList(Long,Integer,Integer)",
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-portal/src/main/java/com/macro/mall/portal/controller/HomeController.java",
+      "new_start_line": 55,
+      "old_start_line": null
+    },
+    {
+      "change_type": "MODIFIED",
+      "method_signature": "MemberAttentionController.list(Integer,Integer)",
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-portal/src/main/java/com/macro/mall/portal/controller/MemberAttentionController.java",
+      "new_start_line": 50,
+      "old_start_line": null
+    },
+    {
+      "change_type": "MODIFIED",
+      "method_signature": "MemberAttentionController.detail(Long)",
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-portal/src/main/java/com/macro/mall/portal/controller/MemberAttentionController.java",
+      "new_start_line": 59,
+      "old_start_line": null
+    },
+    {
+      "change_type": "MODIFIED",
+      "method_signature": "OmsPortalOrderServiceImpl.paySuccess(Long,Integer)",
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-portal/src/main/java/com/macro/mall/portal/service/impl/OmsPortalOrderServiceImpl.java",
+      "new_start_line": 254,
+      "old_start_line": null
+    },
+    {
+      "change_type": "MODIFIED",
+      "method_signature": "OmsPortalOrderServiceImpl.cancelOrder(Long)",
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-portal/src/main/java/com/macro/mall/portal/service/impl/OmsPortalOrderServiceImpl.java",
+      "new_start_line": 314,
+      "old_start_line": null
+    },
+    {
+      "change_type": "MODIFIED",
+      "method_signature": "OmsPortalOrderServiceImpl.getUseCoupon(List<com.macro.mall.portal.domain.CartPromotionItem>,Long)",
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-portal/src/main/java/com/macro/mall/portal/service/impl/OmsPortalOrderServiceImpl.java",
+      "new_start_line": 726,
+      "old_start_line": null
+    },
+    {
+      "change_type": "MODIFIED",
+      "method_signature": "OmsPortalOrderServiceImpl.lockStock(List<com.macro.mall.portal.domain.CartPromotionItem>)",
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-portal/src/main/java/com/macro/mall/portal/service/impl/OmsPortalOrderServiceImpl.java",
+      "new_start_line": 750,
+      "old_start_line": null
+    },
+    {
+      "change_type": "MODIFIED",
+      "method_signature": "PmsProductAttributeController.getList(Long,Integer,Integer,Integer)",
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/PmsProductAttributeController.java",
+      "new_start_line": 32,
+      "old_start_line": null
+    },
+    {
+      "change_type": "MODIFIED",
+      "method_signature": "PmsProductAttributeController.getItem(Long)",
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/PmsProductAttributeController.java",
+      "new_start_line": 68,
+      "old_start_line": null
+    },
+    {
+      "change_type": "MODIFIED",
+      "method_signature": "PmsProductAttributeController.getAttrInfo(Long)",
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/PmsProductAttributeController.java",
+      "new_start_line": 88,
+      "old_start_line": null
+    },
+    {
+      "change_type": "MODIFIED",
+      "method_signature": "PmsProductCategoryController.getItem(Long)",
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/PmsProductCategoryController.java",
+      "new_start_line": 67,
+      "old_start_line": null
+    },
+    {
+      "change_type": "MODIFIED",
+      "method_signature": "PmsProductCategoryController.delete(Long)",
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/PmsProductCategoryController.java",
+      "new_start_line": 75,
+      "old_start_line": null
+    },
+    {
+      "change_type": "MODIFIED",
+      "method_signature": "PmsProductCategoryController.updateNavStatus(List<Long>,Integer)",
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/PmsProductCategoryController.java",
+      "new_start_line": 87,
+      "old_start_line": null
+    },
+    {
+      "change_type": "MODIFIED",
+      "method_signature": "PmsProductCategoryController.updateShowStatus(List<Long>,Integer)",
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/PmsProductCategoryController.java",
+      "new_start_line": 99,
+      "old_start_line": null
+    },
+    {
+      "change_type": "MODIFIED",
+      "method_signature": "PmsProductController.update(Long,com.macro.mall.dto.PmsProductParam)",
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/PmsProductController.java",
+      "new_start_line": 51,
+      "old_start_line": null
+    },
+    {
+      "change_type": "MODIFIED",
+      "method_signature": "PmsProductServiceImpl.relateAndInsertList(Object,List,Long)",
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/service/impl/PmsProductServiceImpl.java",
+      "new_start_line": 310,
+      "old_start_line": null
+    },
+    {
+      "change_type": "MODIFIED",
+      "method_signature": "PmsSkuStockController.update(Long,List<com.macro.mall.model.PmsSkuStock>)",
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/PmsSkuStockController.java",
+      "new_start_line": 34,
+      "old_start_line": null
+    },
+    {
+      "change_type": "ADDED",
+      "method_signature": "PortalOrderDao.lockStockBySkuId(Long,Integer)",
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-portal/src/main/java/com/macro/mall/portal/dao/PortalOrderDao.java",
+      "new_start_line": 43,
+      "old_start_line": null
+    },
+    {
+      "change_type": "ADDED",
+      "method_signature": "PortalOrderDao.reduceSkuStock(Long,Integer)",
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-portal/src/main/java/com/macro/mall/portal/dao/PortalOrderDao.java",
+      "new_start_line": 48,
+      "old_start_line": null
+    },
+    {
+      "change_type": "ADDED",
+      "method_signature": "PortalOrderDao.releaseStockBySkuId(Long,Integer)",
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-portal/src/main/java/com/macro/mall/portal/dao/PortalOrderDao.java",
+      "new_start_line": 53,
+      "old_start_line": null
+    },
+    {
+      "change_type": "MODIFIED",
+      "method_signature": "SmsCouponController.delete(Long)",
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsCouponController.java",
+      "new_start_line": 39,
+      "old_start_line": null
+    },
+    {
+      "change_type": "MODIFIED",
+      "method_signature": "SmsCouponController.update(Long,com.macro.mall.dto.SmsCouponParam)",
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsCouponController.java",
+      "new_start_line": 50,
+      "old_start_line": null
+    },
+    {
+      "change_type": "MODIFIED",
+      "method_signature": "SmsFlashPromotionController.update(Long,Integer)",
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsFlashPromotionController.java",
+      "new_start_line": 61,
+      "old_start_line": null
+    },
+    {
+      "change_type": "MODIFIED",
+      "method_signature": "SmsFlashPromotionController.getItem(String,Integer,Integer)",
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsFlashPromotionController.java",
+      "new_start_line": 80,
+      "old_start_line": null
+    },
+    {
+      "change_type": "MODIFIED",
+      "method_signature": "SmsFlashPromotionProductRelationController.update(Long,com.macro.mall.model.SmsFlashPromotionProductRelation)",
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsFlashPromotionProductRelationController.java",
+      "new_start_line": 40,
+      "old_start_line": null
+    },
+    {
+      "change_type": "MODIFIED",
+      "method_signature": "SmsFlashPromotionProductRelationController.delete(Long)",
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsFlashPromotionProductRelationController.java",
+      "new_start_line": 51,
+      "old_start_line": null
+    },
+    {
+      "change_type": "MODIFIED",
+      "method_signature": "SmsFlashPromotionSessionController.updateStatus(Long,Integer)",
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsFlashPromotionSessionController.java",
+      "new_start_line": 50,
+      "old_start_line": null
+    },
+    {
+      "change_type": "MODIFIED",
+      "method_signature": "SmsHomeAdvertiseController.delete(List<Long>)",
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsHomeAdvertiseController.java",
+      "new_start_line": 38,
+      "old_start_line": null
+    },
+    {
+      "change_type": "MODIFIED",
+      "method_signature": "SmsHomeAdvertiseController.getItem(Long)",
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsHomeAdvertiseController.java",
+      "new_start_line": 58,
+      "old_start_line": null
+    },
+    {
+      "change_type": "MODIFIED",
+      "method_signature": "SmsHomeAdvertiseController.update(Long,com.macro.mall.model.SmsHomeAdvertise)",
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsHomeAdvertiseController.java",
+      "new_start_line": 66,
+      "old_start_line": null
+    },
+    {
+      "change_type": "MODIFIED",
+      "method_signature": "SmsHomeAdvertiseController.list(String,Integer,String,Integer,Integer)",
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsHomeAdvertiseController.java",
+      "new_start_line": 76,
+      "old_start_line": null
+    },
+    {
+      "change_type": "MODIFIED",
+      "method_signature": "SmsHomeNewProductController.create(List<com.macro.mall.model.SmsHomeNewProduct>)",
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsHomeNewProductController.java",
+      "new_start_line": 28,
+      "old_start_line": null
+    },
+    {
+      "change_type": "MODIFIED",
+      "method_signature": "SmsHomeRecommendSubjectController.create(List<com.macro.mall.model.SmsHomeRecommendSubject>)",
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsHomeRecommendSubjectController.java",
+      "new_start_line": 28,
+      "old_start_line": null
+    },
+    {
+      "change_type": "MODIFIED",
+      "method_signature": "SmsHomeRecommendSubjectController.updateSort(Long,Integer)",
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsHomeRecommendSubjectController.java",
+      "new_start_line": 39,
+      "old_start_line": null
+    },
+    {
+      "change_type": "MODIFIED",
+      "method_signature": "SmsHomeRecommendSubjectController.delete(List<Long>)",
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsHomeRecommendSubjectController.java",
+      "new_start_line": 50,
+      "old_start_line": null
+    },
+    {
+      "change_type": "MODIFIED",
+      "method_signature": "SmsHomeRecommendSubjectController.updateRecommendStatus(List<Long>,Integer)",
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsHomeRecommendSubjectController.java",
+      "new_start_line": 61,
+      "old_start_line": null
+    },
+    {
+      "change_type": "MODIFIED",
+      "method_signature": "SmsHomeRecommendSubjectController.list(String,Integer,Integer,Integer)",
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsHomeRecommendSubjectController.java",
+      "new_start_line": 72,
+      "old_start_line": null
+    },
+    {
+      "change_type": "MODIFIED",
+      "method_signature": "UmsAdminController.logout(Principal)",
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/UmsAdminController.java",
+      "new_start_line": 108,
+      "old_start_line": null
+    },
+    {
+      "change_type": "ADDED",
+      "method_signature": "UmsAdminService.logout(String)",
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/service/UmsAdminService.java",
+      "new_start_line": 97,
+      "old_start_line": null
+    },
+    {
+      "change_type": "MODIFIED",
+      "method_signature": "UmsAdminServiceImpl.delete(Long)",
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/service/impl/UmsAdminServiceImpl.java",
+      "new_start_line": 190,
+      "old_start_line": null
+    },
+    {
+      "change_type": "ADDED",
+      "method_signature": "UmsAdminServiceImpl.logout(String)",
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/service/impl/UmsAdminServiceImpl.java",
+      "new_start_line": 280,
+      "old_start_line": null
+    },
+    {
+      "change_type": "MODIFIED",
+      "method_signature": "UmsMemberCouponServiceImpl.listCart(List<com.macro.mall.portal.domain.CartPromotionItem>,Integer)",
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-portal/src/main/java/com/macro/mall/portal/service/impl/UmsMemberCouponServiceImpl.java",
+      "new_start_line": 114,
+      "old_start_line": null
+    },
+    {
+      "change_type": "MODIFIED",
+      "method_signature": "UmsMemberReceiveAddressController.list()",
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-portal/src/main/java/com/macro/mall/portal/controller/UmsMemberReceiveAddressController.java",
+      "new_start_line": 60,
+      "old_start_line": null
+    },
+    {
+      "change_type": "MODIFIED",
+      "method_signature": "UmsMenuController.list(Long,Integer,Integer)",
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/UmsMenuController.java",
+      "new_start_line": 75,
+      "old_start_line": null
+    },
+    {
+      "change_type": "MODIFIED",
+      "method_signature": "UmsMenuController.updateHidden(Long,Integer)",
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/UmsMenuController.java",
+      "new_start_line": 93,
+      "old_start_line": null
+    },
+    {
+      "change_type": "MODIFIED",
+      "method_signature": "UmsMenuServiceImpl.updateHidden(Long,Integer)",
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/service/impl/UmsMenuServiceImpl.java",
+      "new_start_line": 86,
+      "old_start_line": null
+    },
+    {
+      "change_type": "MODIFIED",
+      "method_signature": "UmsRoleController.listMenu(Long)",
+      "file_path": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/UmsRoleController.java",
+      "new_start_line": 92,
+      "old_start_line": null
+    }
+  ],
+  "cci_file_path": null,
+  "change_summary": {
+    "classes": [
+      {
+        "class_name": "PortalOrderDao",
+        "package_name": "com.macro.mall.portal.dao",
+        "class_type": "Interface",
+        "filepath": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-portal/src/main/java/com/macro/mall/portal/dao/PortalOrderDao.java",
+        "change_type": "ADDED"
+      },
+      {
+        "class_name": "UmsAdminService",
+        "package_name": "com.macro.mall.service",
+        "class_type": "Interface",
+        "filepath": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/service/UmsAdminService.java",
+        "change_type": "ADDED"
+      },
+      {
+        "class_name": "UmsMenuServiceImpl",
+        "package_name": "com.macro.mall.service.impl",
+        "class_type": "Class",
+        "filepath": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/service/impl/UmsMenuServiceImpl.java",
+        "change_type": "ADDED"
+      },
+      {
+        "class_name": "CancelOrderReceiver",
+        "package_name": "com.macro.mall.portal.component",
+        "class_type": "Class",
+        "filepath": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-portal/src/main/java/com/macro/mall/portal/component/CancelOrderReceiver.java",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "CartProduct",
+        "package_name": "com.macro.mall.portal.domain",
+        "class_type": "Class",
+        "filepath": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-portal/src/main/java/com/macro/mall/portal/domain/CartProduct.java",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "CartPromotionItem",
+        "package_name": "com.macro.mall.portal.domain",
+        "class_type": "Class",
+        "filepath": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-portal/src/main/java/com/macro/mall/portal/domain/CartPromotionItem.java",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "DemoController",
+        "package_name": "com.macro.mall.demo.controller",
+        "class_type": "Class",
+        "filepath": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-demo/src/main/java/com/macro/mall/demo/controller/DemoController.java",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "FlashPromotionProduct",
+        "package_name": "com.macro.mall.portal.domain",
+        "class_type": "Class",
+        "filepath": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-portal/src/main/java/com/macro/mall/portal/domain/FlashPromotionProduct.java",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "GlobalCorsConfig",
+        "package_name": "com.macro.mall.portal.config",
+        "class_type": "Class",
+        "filepath": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-portal/src/main/java/com/macro/mall/portal/config/GlobalCorsConfig.java",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "HomeController",
+        "package_name": "com.macro.mall.portal.controller",
+        "class_type": "Class",
+        "filepath": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-portal/src/main/java/com/macro/mall/portal/controller/HomeController.java",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "HomeService",
+        "package_name": "com.macro.mall.portal.service",
+        "class_type": "Interface",
+        "filepath": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-portal/src/main/java/com/macro/mall/portal/service/HomeService.java",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "JacksonConfig",
+        "package_name": "com.macro.mall.portal.config",
+        "class_type": "Class",
+        "filepath": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-portal/src/main/java/com/macro/mall/portal/config/JacksonConfig.java",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "MemberAttentionController",
+        "package_name": "com.macro.mall.portal.controller",
+        "class_type": "Class",
+        "filepath": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-portal/src/main/java/com/macro/mall/portal/controller/MemberAttentionController.java",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "MemberAttentionService",
+        "package_name": "com.macro.mall.portal.service",
+        "class_type": "Interface",
+        "filepath": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-portal/src/main/java/com/macro/mall/portal/service/MemberAttentionService.java",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "OmsOrderReturnApplyResult",
+        "package_name": "com.macro.mall.dto",
+        "class_type": "Class",
+        "filepath": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/dto/OmsOrderReturnApplyResult.java",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "OmsPortalOrderServiceImpl",
+        "package_name": "com.macro.mall.portal.service.impl",
+        "class_type": "Class",
+        "filepath": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-portal/src/main/java/com/macro/mall/portal/service/impl/OmsPortalOrderServiceImpl.java",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "OrderTimeOutCancelTask",
+        "package_name": "com.macro.mall.portal.component",
+        "class_type": "Class",
+        "filepath": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-portal/src/main/java/com/macro/mall/portal/component/OrderTimeOutCancelTask.java",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "PmsProductAttributeController",
+        "package_name": "com.macro.mall.controller",
+        "class_type": "Class",
+        "filepath": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/PmsProductAttributeController.java",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "PmsProductAttributeParam",
+        "package_name": "com.macro.mall.dto",
+        "class_type": "Class",
+        "filepath": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/dto/PmsProductAttributeParam.java",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "PmsProductAttributeService",
+        "package_name": "com.macro.mall.service",
+        "class_type": "Interface",
+        "filepath": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/service/PmsProductAttributeService.java",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "PmsProductCategoryController",
+        "package_name": "com.macro.mall.controller",
+        "class_type": "Class",
+        "filepath": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/PmsProductCategoryController.java",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "PmsProductCategoryParam",
+        "package_name": "com.macro.mall.dto",
+        "class_type": "Class",
+        "filepath": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/dto/PmsProductCategoryParam.java",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "PmsProductController",
+        "package_name": "com.macro.mall.controller",
+        "class_type": "Class",
+        "filepath": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/PmsProductController.java",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "PmsProductService",
+        "package_name": "com.macro.mall.service",
+        "class_type": "Interface",
+        "filepath": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/service/PmsProductService.java",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "PmsProductServiceImpl",
+        "package_name": "com.macro.mall.service.impl",
+        "class_type": "Class",
+        "filepath": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/service/impl/PmsProductServiceImpl.java",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "PmsSkuStockController",
+        "package_name": "com.macro.mall.controller",
+        "class_type": "Class",
+        "filepath": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/PmsSkuStockController.java",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "PmsSkuStockService",
+        "package_name": "com.macro.mall.service",
+        "class_type": "Interface",
+        "filepath": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/service/PmsSkuStockService.java",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "RabbitMqConfig",
+        "package_name": "com.macro.mall.portal.config",
+        "class_type": "Class",
+        "filepath": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-portal/src/main/java/com/macro/mall/portal/config/RabbitMqConfig.java",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "SecurityConfig",
+        "package_name": "com.macro.mall.security.config",
+        "class_type": "Class",
+        "filepath": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-security/src/main/java/com/macro/mall/security/config/SecurityConfig.java",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "SmsCouponController",
+        "package_name": "com.macro.mall.controller",
+        "class_type": "Class",
+        "filepath": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsCouponController.java",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "SmsFlashPromotionController",
+        "package_name": "com.macro.mall.controller",
+        "class_type": "Class",
+        "filepath": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsFlashPromotionController.java",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "SmsFlashPromotionProductRelationController",
+        "package_name": "com.macro.mall.controller",
+        "class_type": "Class",
+        "filepath": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsFlashPromotionProductRelationController.java",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "SmsFlashPromotionProductRelationService",
+        "package_name": "com.macro.mall.service",
+        "class_type": "Interface",
+        "filepath": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/service/SmsFlashPromotionProductRelationService.java",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "SmsFlashPromotionService",
+        "package_name": "com.macro.mall.service",
+        "class_type": "Interface",
+        "filepath": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/service/SmsFlashPromotionService.java",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "SmsFlashPromotionSessionController",
+        "package_name": "com.macro.mall.controller",
+        "class_type": "Class",
+        "filepath": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsFlashPromotionSessionController.java",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "SmsFlashPromotionSessionService",
+        "package_name": "com.macro.mall.service",
+        "class_type": "Interface",
+        "filepath": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/service/SmsFlashPromotionSessionService.java",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "SmsHomeAdvertiseController",
+        "package_name": "com.macro.mall.controller",
+        "class_type": "Class",
+        "filepath": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsHomeAdvertiseController.java",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "SmsHomeAdvertiseService",
+        "package_name": "com.macro.mall.service",
+        "class_type": "Interface",
+        "filepath": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/service/SmsHomeAdvertiseService.java",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "SmsHomeBrandService",
+        "package_name": "com.macro.mall.service",
+        "class_type": "Interface",
+        "filepath": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/service/SmsHomeBrandService.java",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "SmsHomeNewProductController",
+        "package_name": "com.macro.mall.controller",
+        "class_type": "Class",
+        "filepath": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsHomeNewProductController.java",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "SmsHomeNewProductService",
+        "package_name": "com.macro.mall.service",
+        "class_type": "Interface",
+        "filepath": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/service/SmsHomeNewProductService.java",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "SmsHomeRecommendProductService",
+        "package_name": "com.macro.mall.service",
+        "class_type": "Interface",
+        "filepath": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/service/SmsHomeRecommendProductService.java",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "SmsHomeRecommendSubjectController",
+        "package_name": "com.macro.mall.controller",
+        "class_type": "Class",
+        "filepath": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/SmsHomeRecommendSubjectController.java",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "SmsHomeRecommendSubjectService",
+        "package_name": "com.macro.mall.service",
+        "class_type": "Interface",
+        "filepath": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/service/SmsHomeRecommendSubjectService.java",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "UmsAdminCacheService",
+        "package_name": "com.macro.mall.service",
+        "class_type": "Interface",
+        "filepath": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/service/UmsAdminCacheService.java",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "UmsAdminController",
+        "package_name": "com.macro.mall.controller",
+        "class_type": "Class",
+        "filepath": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/UmsAdminController.java",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "UmsAdminServiceImpl",
+        "package_name": "com.macro.mall.service.impl",
+        "class_type": "Class",
+        "filepath": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/service/impl/UmsAdminServiceImpl.java",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "UmsMemberCouponServiceImpl",
+        "package_name": "com.macro.mall.portal.service.impl",
+        "class_type": "Class",
+        "filepath": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-portal/src/main/java/com/macro/mall/portal/service/impl/UmsMemberCouponServiceImpl.java",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "UmsMemberReceiveAddressController",
+        "package_name": "com.macro.mall.portal.controller",
+        "class_type": "Class",
+        "filepath": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-portal/src/main/java/com/macro/mall/portal/controller/UmsMemberReceiveAddressController.java",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "UmsMenuController",
+        "package_name": "com.macro.mall.controller",
+        "class_type": "Class",
+        "filepath": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/UmsMenuController.java",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "UmsRoleController",
+        "package_name": "com.macro.mall.controller",
+        "class_type": "Class",
+        "filepath": "C:/Users/carpe/VisualStudioProject/TestPlatform/jcci/projects/mall/mall-admin/src/main/java/com/macro/mall/controller/UmsRoleController.java",
+        "change_type": "MODIFIED"
+      }
+    ],
+    "methods": [
+      {
+        "class_name": "PortalOrderDao",
+        "method_name": "lockStockBySkuId",
+        "parameters": "[{\"parameter_type\": \"Long\", \"parameter_name\": \"productSkuId\", \"parameter_varargs\": false}, {\"parameter_type\": \"Integer\", \"parameter_name\": \"quantity\", \"parameter_varargs\": false}]",
+        "return_type": "int",
+        "change_type": "ADDED"
+      },
+      {
+        "class_name": "PortalOrderDao",
+        "method_name": "reduceSkuStock",
+        "parameters": "[{\"parameter_type\": \"Long\", \"parameter_name\": \"productSkuId\", \"parameter_varargs\": false}, {\"parameter_type\": \"Integer\", \"parameter_name\": \"quantity\", \"parameter_varargs\": false}]",
+        "return_type": "int",
+        "change_type": "ADDED"
+      },
+      {
+        "class_name": "PortalOrderDao",
+        "method_name": "releaseStockBySkuId",
+        "parameters": "[{\"parameter_type\": \"Long\", \"parameter_name\": \"productSkuId\", \"parameter_varargs\": false}, {\"parameter_type\": \"Integer\", \"parameter_name\": \"quantity\", \"parameter_varargs\": false}]",
+        "return_type": "int",
+        "change_type": "ADDED"
+      },
+      {
+        "class_name": "UmsAdminService",
+        "method_name": "logout",
+        "parameters": "[{\"parameter_type\": \"String\", \"parameter_name\": \"username\", \"parameter_varargs\": false}]",
+        "return_type": "None",
+        "change_type": "ADDED"
+      },
+      {
+        "class_name": "UmsAdminServiceImpl",
+        "method_name": "logout",
+        "parameters": "[{\"parameter_type\": \"String\", \"parameter_name\": \"username\", \"parameter_varargs\": false}]",
+        "return_type": "None",
+        "change_type": "ADDED"
+      },
+      {
+        "class_name": "HomeController",
+        "method_name": "getSubjectList",
+        "parameters": "[{\"parameter_type\": \"Long\", \"parameter_name\": \"cateId\", \"parameter_varargs\": false}, {\"parameter_type\": \"Integer\", \"parameter_name\": \"pageSize\", \"parameter_varargs\": false}, {\"parameter_type\": \"Integer\", \"parameter_name\": \"pageNum\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult<List>",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "MemberAttentionController",
+        "method_name": "detail",
+        "parameters": "[{\"parameter_type\": \"Long\", \"parameter_name\": \"brandId\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult<com.macro.mall.portal.domain.MemberBrandAttention>",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "MemberAttentionController",
+        "method_name": "list",
+        "parameters": "[{\"parameter_type\": \"Integer\", \"parameter_name\": \"pageNum\", \"parameter_varargs\": false}, {\"parameter_type\": \"Integer\", \"parameter_name\": \"pageSize\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult<com.macro.mall.common.api.CommonPage>",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "OmsPortalOrderServiceImpl",
+        "method_name": "cancelOrder",
+        "parameters": "[{\"parameter_type\": \"Long\", \"parameter_name\": \"orderId\", \"parameter_varargs\": false}]",
+        "return_type": "None",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "OmsPortalOrderServiceImpl",
+        "method_name": "getUseCoupon",
+        "parameters": "[{\"parameter_type\": \"List<com.macro.mall.portal.domain.CartPromotionItem>\", \"parameter_name\": \"cartPromotionItemList\", \"parameter_varargs\": false}, {\"parameter_type\": \"Long\", \"parameter_name\": \"couponId\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.portal.domain.SmsCouponHistoryDetail",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "OmsPortalOrderServiceImpl",
+        "method_name": "lockStock",
+        "parameters": "[{\"parameter_type\": \"List<com.macro.mall.portal.domain.CartPromotionItem>\", \"parameter_name\": \"cartPromotionItemList\", \"parameter_varargs\": false}]",
+        "return_type": "None",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "OmsPortalOrderServiceImpl",
+        "method_name": "paySuccess",
+        "parameters": "[{\"parameter_type\": \"Long\", \"parameter_name\": \"orderId\", \"parameter_varargs\": false}, {\"parameter_type\": \"Integer\", \"parameter_name\": \"payType\", \"parameter_varargs\": false}]",
+        "return_type": "Integer",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "PmsProductAttributeController",
+        "method_name": "getAttrInfo",
+        "parameters": "[{\"parameter_type\": \"Long\", \"parameter_name\": \"productCategoryId\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult<List>",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "PmsProductAttributeController",
+        "method_name": "getItem",
+        "parameters": "[{\"parameter_type\": \"Long\", \"parameter_name\": \"id\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult<com.macro.mall.model.PmsProductAttribute>",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "PmsProductAttributeController",
+        "method_name": "getList",
+        "parameters": "[{\"parameter_type\": \"Long\", \"parameter_name\": \"cid\", \"parameter_varargs\": false}, {\"parameter_type\": \"Integer\", \"parameter_name\": \"type\", \"parameter_varargs\": false}, {\"parameter_type\": \"Integer\", \"parameter_name\": \"pageSize\", \"parameter_varargs\": false}, {\"parameter_type\": \"Integer\", \"parameter_name\": \"pageNum\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult<com.macro.mall.common.api.CommonPage>",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "PmsProductCategoryController",
+        "method_name": "delete",
+        "parameters": "[{\"parameter_type\": \"Long\", \"parameter_name\": \"id\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "PmsProductCategoryController",
+        "method_name": "getItem",
+        "parameters": "[{\"parameter_type\": \"Long\", \"parameter_name\": \"id\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult<com.macro.mall.model.PmsProductCategory>",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "PmsProductCategoryController",
+        "method_name": "updateNavStatus",
+        "parameters": "[{\"parameter_type\": \"List<Long>\", \"parameter_name\": \"ids\", \"parameter_varargs\": false}, {\"parameter_type\": \"Integer\", \"parameter_name\": \"navStatus\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "PmsProductCategoryController",
+        "method_name": "updateShowStatus",
+        "parameters": "[{\"parameter_type\": \"List<Long>\", \"parameter_name\": \"ids\", \"parameter_varargs\": false}, {\"parameter_type\": \"Integer\", \"parameter_name\": \"showStatus\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "PmsProductController",
+        "method_name": "update",
+        "parameters": "[{\"parameter_type\": \"Long\", \"parameter_name\": \"id\", \"parameter_varargs\": false}, {\"parameter_type\": \"com.macro.mall.dto.PmsProductParam\", \"parameter_name\": \"productParam\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "PmsProductServiceImpl",
+        "method_name": "relateAndInsertList",
+        "parameters": "[{\"parameter_type\": \"Object\", \"parameter_name\": \"dao\", \"parameter_varargs\": false}, {\"parameter_type\": \"List\", \"parameter_name\": \"dataList\", \"parameter_varargs\": false}, {\"parameter_type\": \"Long\", \"parameter_name\": \"productId\", \"parameter_varargs\": false}]",
+        "return_type": "None",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "PmsSkuStockController",
+        "method_name": "update",
+        "parameters": "[{\"parameter_type\": \"Long\", \"parameter_name\": \"pid\", \"parameter_varargs\": false}, {\"parameter_type\": \"List<com.macro.mall.model.PmsSkuStock>\", \"parameter_name\": \"skuStockList\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "SmsCouponController",
+        "method_name": "delete",
+        "parameters": "[{\"parameter_type\": \"Long\", \"parameter_name\": \"id\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "SmsCouponController",
+        "method_name": "update",
+        "parameters": "[{\"parameter_type\": \"Long\", \"parameter_name\": \"id\", \"parameter_varargs\": false}, {\"parameter_type\": \"com.macro.mall.dto.SmsCouponParam\", \"parameter_name\": \"couponParam\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "SmsFlashPromotionController",
+        "method_name": "getItem",
+        "parameters": "[{\"parameter_type\": \"String\", \"parameter_name\": \"keyword\", \"parameter_varargs\": false}, {\"parameter_type\": \"Integer\", \"parameter_name\": \"pageSize\", \"parameter_varargs\": false}, {\"parameter_type\": \"Integer\", \"parameter_name\": \"pageNum\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult<com.macro.mall.common.api.CommonPage>",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "SmsFlashPromotionController",
+        "method_name": "update",
+        "parameters": "[{\"parameter_type\": \"Long\", \"parameter_name\": \"id\", \"parameter_varargs\": false}, {\"parameter_type\": \"Integer\", \"parameter_name\": \"status\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "SmsFlashPromotionProductRelationController",
+        "method_name": "delete",
+        "parameters": "[{\"parameter_type\": \"Long\", \"parameter_name\": \"id\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "SmsFlashPromotionProductRelationController",
+        "method_name": "update",
+        "parameters": "[{\"parameter_type\": \"Long\", \"parameter_name\": \"id\", \"parameter_varargs\": false}, {\"parameter_type\": \"com.macro.mall.model.SmsFlashPromotionProductRelation\", \"parameter_name\": \"relation\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "SmsFlashPromotionSessionController",
+        "method_name": "updateStatus",
+        "parameters": "[{\"parameter_type\": \"Long\", \"parameter_name\": \"id\", \"parameter_varargs\": false}, {\"parameter_type\": \"Integer\", \"parameter_name\": \"status\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "SmsHomeAdvertiseController",
+        "method_name": "delete",
+        "parameters": "[{\"parameter_type\": \"List<Long>\", \"parameter_name\": \"ids\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "SmsHomeAdvertiseController",
+        "method_name": "getItem",
+        "parameters": "[{\"parameter_type\": \"Long\", \"parameter_name\": \"id\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult<com.macro.mall.model.SmsHomeAdvertise>",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "SmsHomeAdvertiseController",
+        "method_name": "list",
+        "parameters": "[{\"parameter_type\": \"String\", \"parameter_name\": \"name\", \"parameter_varargs\": false}, {\"parameter_type\": \"Integer\", \"parameter_name\": \"type\", \"parameter_varargs\": false}, {\"parameter_type\": \"String\", \"parameter_name\": \"endTime\", \"parameter_varargs\": false}, {\"parameter_type\": \"Integer\", \"parameter_name\": \"pageSize\", \"parameter_varargs\": false}, {\"parameter_type\": \"Integer\", \"parameter_name\": \"pageNum\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult<com.macro.mall.common.api.CommonPage>",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "SmsHomeAdvertiseController",
+        "method_name": "update",
+        "parameters": "[{\"parameter_type\": \"Long\", \"parameter_name\": \"id\", \"parameter_varargs\": false}, {\"parameter_type\": \"com.macro.mall.model.SmsHomeAdvertise\", \"parameter_name\": \"advertise\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "SmsHomeNewProductController",
+        "method_name": "create",
+        "parameters": "[{\"parameter_type\": \"List<com.macro.mall.model.SmsHomeNewProduct>\", \"parameter_name\": \"homeNewProductList\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "SmsHomeRecommendSubjectController",
+        "method_name": "create",
+        "parameters": "[{\"parameter_type\": \"List<com.macro.mall.model.SmsHomeRecommendSubject>\", \"parameter_name\": \"homeRecommendSubjectList\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "SmsHomeRecommendSubjectController",
+        "method_name": "delete",
+        "parameters": "[{\"parameter_type\": \"List<Long>\", \"parameter_name\": \"ids\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "SmsHomeRecommendSubjectController",
+        "method_name": "list",
+        "parameters": "[{\"parameter_type\": \"String\", \"parameter_name\": \"subjectName\", \"parameter_varargs\": false}, {\"parameter_type\": \"Integer\", \"parameter_name\": \"recommendStatus\", \"parameter_varargs\": false}, {\"parameter_type\": \"Integer\", \"parameter_name\": \"pageSize\", \"parameter_varargs\": false}, {\"parameter_type\": \"Integer\", \"parameter_name\": \"pageNum\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult<com.macro.mall.common.api.CommonPage>",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "SmsHomeRecommendSubjectController",
+        "method_name": "updateRecommendStatus",
+        "parameters": "[{\"parameter_type\": \"List<Long>\", \"parameter_name\": \"ids\", \"parameter_varargs\": false}, {\"parameter_type\": \"Integer\", \"parameter_name\": \"recommendStatus\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "SmsHomeRecommendSubjectController",
+        "method_name": "updateSort",
+        "parameters": "[{\"parameter_type\": \"Long\", \"parameter_name\": \"id\", \"parameter_varargs\": false}, {\"parameter_type\": \"Integer\", \"parameter_name\": \"sort\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "UmsAdminController",
+        "method_name": "logout",
+        "parameters": "[{\"parameter_type\": \"Principal\", \"parameter_name\": \"principal\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "UmsAdminServiceImpl",
+        "method_name": "delete",
+        "parameters": "[{\"parameter_type\": \"Long\", \"parameter_name\": \"id\", \"parameter_varargs\": false}]",
+        "return_type": "int",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "UmsMemberCouponServiceImpl",
+        "method_name": "listCart",
+        "parameters": "[{\"parameter_type\": \"List<com.macro.mall.portal.domain.CartPromotionItem>\", \"parameter_name\": \"cartItemList\", \"parameter_varargs\": false}, {\"parameter_type\": \"Integer\", \"parameter_name\": \"type\", \"parameter_varargs\": false}]",
+        "return_type": "List<com.macro.mall.portal.domain.SmsCouponHistoryDetail>",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "UmsMemberReceiveAddressController",
+        "method_name": "list",
+        "parameters": "[]",
+        "return_type": "com.macro.mall.common.api.CommonResult<List>",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "UmsMenuController",
+        "method_name": "list",
+        "parameters": "[{\"parameter_type\": \"Long\", \"parameter_name\": \"parentId\", \"parameter_varargs\": false}, {\"parameter_type\": \"Integer\", \"parameter_name\": \"pageSize\", \"parameter_varargs\": false}, {\"parameter_type\": \"Integer\", \"parameter_name\": \"pageNum\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult<com.macro.mall.common.api.CommonPage>",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "UmsMenuController",
+        "method_name": "updateHidden",
+        "parameters": "[{\"parameter_type\": \"Long\", \"parameter_name\": \"id\", \"parameter_varargs\": false}, {\"parameter_type\": \"Integer\", \"parameter_name\": \"hidden\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "UmsMenuServiceImpl",
+        "method_name": "updateHidden",
+        "parameters": "[{\"parameter_type\": \"Long\", \"parameter_name\": \"id\", \"parameter_varargs\": false}, {\"parameter_type\": \"Integer\", \"parameter_name\": \"hidden\", \"parameter_varargs\": false}]",
+        "return_type": "int",
+        "change_type": "MODIFIED"
+      },
+      {
+        "class_name": "UmsRoleController",
+        "method_name": "listMenu",
+        "parameters": "[{\"parameter_type\": \"Long\", \"parameter_name\": \"roleId\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult<List>",
+        "change_type": "MODIFIED"
+      }
+    ]
+  },
+  "is_duplicate": false,
+  "message": "New analysis completed (full result cached to JSON)",
+  "source_dir": "C:\\Users\\carpe\\VisualStudioProject\\TestPlatform\\jcci\\projects\\mall"
+}
