@@ -29,49 +29,6 @@ router = APIRouter(prefix="/api/analysis", tags=["analysis"])
 # _extract_short_tag 已从 jcci.utils.tag_utils 统一导入（见文件顶部）
 
 
-def _get_full_baseline_from_tasks(task_db_path: str, short_name: str) -> str:
-    """从任务表将短标签目录名映射回完整基线标签"""
-    try:
-        conn = sqlite3.connect(task_db_path)
-        cursor = conn.cursor()
-        cursor.execute('SELECT DISTINCT tag_old FROM analysis_tasks WHERE tag_old IS NOT NULL')
-        for row in cursor.fetchall():
-            full = row[0]
-            short = _extract_short_tag(full)
-            # 匹配：目录名以短标签结尾（如 mall_20260403_01）、精确相等、或完整标签等于目录名
-            if short_name.endswith('_' + short) or short == short_name or full == short_name:
-                conn.close()
-                return full
-        conn.close()
-    except Exception:
-        pass
-    return short_name  # 回退
-
-
-def _get_full_versions_from_tasks(task_db_path: str, baseline_full: str, baseline_dir: str) -> List[str]:
-    """从任务表将版本目录名映射回完整版本标签"""
-    versions = []
-    try:
-        conn = sqlite3.connect(task_db_path)
-        cursor = conn.cursor()
-        # 获取所有含 tag_new 的任务，在 Python 中做基线匹配
-        cursor.execute('SELECT DISTINCT tag_new, tag_old FROM analysis_tasks WHERE tag_new IS NOT NULL')
-        for row in cursor.fetchall():
-            full_new = row[0]
-            tag_old = row[1]
-            # 基线匹配：完整标签相等 或 短标签一致（兼容任务列表和目录名两种基线来源）
-            if tag_old != baseline_full and _extract_short_tag(tag_old) != _extract_short_tag(baseline_full):
-                continue
-            short_new = _extract_short_tag(full_new)
-            version_dir = os.path.join(baseline_dir, short_new)
-            if os.path.isdir(version_dir):
-                versions.append(full_new)
-        conn.close()
-    except Exception:
-        pass
-    return versions
-
-
 def _resolve_data_path(baseline: str, version: str) -> str:
     """接受完整标签或短标签, 映射到磁盘上的实际路径"""
     result_dir = settings.RESULT_DIR
@@ -117,7 +74,7 @@ class VersionInfo(BaseModel):
 async def list_baselines():
     """
     获取所有可用的基线列表及其版本。
-    返回完整标签名（从任务表映射），若无任务记录则回退到磁盘目录名。
+    一次 SQLite 连接批量建立 {短标签→完整标签} 双向映射，避免逐目录查询。
     """
     result_dir = settings.RESULT_DIR
     task_db_path = settings.DB_PATH
@@ -125,37 +82,94 @@ async def list_baselines():
     if not os.path.exists(result_dir):
         return []
     
-    baselines = []
-    has_task_db = os.path.exists(task_db_path)
-    
-    # 扫描所有基线目录
+    # ── 一次性读取所有磁盘目录 ──
+    disk_dirs: Dict[str, set] = {}  # baseline_dir → {version_dir, ...}
     for item in sorted(os.listdir(result_dir)):
         baseline_path = os.path.join(result_dir, item)
-        
         if item.startswith('.') or not os.path.isdir(baseline_path):
             continue
-        
-        # 映射为完整标签
+        versions = set()
+        for version in sorted(os.listdir(baseline_path)):
+            version_path = os.path.join(baseline_path, version)
+            if os.path.isdir(version_path) and not version.startswith('.'):
+                versions.add(version)
+        if versions:
+            disk_dirs[item] = versions
+    
+    if not disk_dirs:
+        return []
+    
+    # ── 一次性从任务表建立完整标签↔短标签映射 ──
+    has_task_db = os.path.exists(task_db_path)
+    short_to_full: Dict[str, str] = {}       # 短标签 → 完整标签
+    full_to_versions: Dict[str, List[tuple]] = {}  # 完整基线 → [(完整版本, 短版本), ...]
+    
+    if has_task_db:
+        try:
+            conn = sqlite3.connect(task_db_path)
+            cursor = conn.cursor()
+            # 一次性查询所有 tag_old, tag_new
+            cursor.execute('SELECT DISTINCT tag_old, tag_new FROM analysis_tasks WHERE tag_old IS NOT NULL AND tag_new IS NOT NULL')
+            for row in cursor.fetchall():
+                old_full = row[0]
+                new_full = row[1]
+                old_short = _extract_short_tag(old_full)
+                new_short = _extract_short_tag(new_full)
+                # 短→完整 映射
+                if old_short not in short_to_full:
+                    short_to_full[old_short] = old_full
+                if new_short not in short_to_full:
+                    short_to_full[new_short] = new_full
+                # 完整基线→版本列表
+                if old_full not in full_to_versions:
+                    full_to_versions[old_full] = []
+                full_to_versions[old_full].append((new_full, new_short))
+            conn.close()
+        except Exception:
+            pass
+    
+    # ── 组装基线列表 ──
+    baselines = []
+    seen_full_names = set()
+    
+    for dir_name, disk_versions in disk_dirs.items():
+        # 解析目录名 → 完整基线标签
         if has_task_db:
-            baseline_full = _get_full_baseline_from_tasks(task_db_path, item)
+            # 策略1: 目录名自身就是完整标签
+            if dir_name in full_to_versions:
+                baseline_full = dir_name
+            else:
+                # 策略2: 目录名的短标签匹配
+                dir_short = _extract_short_tag(dir_name)
+                baseline_full = short_to_full.get(dir_short, dir_name)
         else:
-            baseline_full = item
+            baseline_full = dir_name
         
-        # 获取该基线下的所有版本子目录
-        if has_task_db and baseline_full != item:
-            versions = _get_full_versions_from_tasks(task_db_path, baseline_full, baseline_path)
-        else:
-            versions = []
-            for version in sorted(os.listdir(baseline_path)):
-                version_path = os.path.join(baseline_path, version)
-                if os.path.isdir(version_path) and not version.startswith('.'):
-                    versions.append(version)
+        if baseline_full in seen_full_names:
+            continue
+        seen_full_names.add(baseline_full)
+        
+        # 解析版本列表 → 完整版本标签
+        versions = []
+        if has_task_db and baseline_full in full_to_versions:
+            # 使用任务表中的完整版本标签
+            for new_full, new_short in full_to_versions[baseline_full]:
+                if new_short in disk_versions:
+                    versions.append(new_full)
+        
+        # 补全：磁盘有但任务表没有的版本（用目录名）
+        if not versions:
+            task_versions_set = set()
+            if has_task_db and baseline_full in full_to_versions:
+                task_versions_set = {ns for _, ns in full_to_versions[baseline_full]}
+            for dv in sorted(disk_versions):
+                if dv not in task_versions_set:
+                    # 尝试映射为完整标签
+                    dv_short = _extract_short_tag(dv)
+                    versions.append(short_to_full.get(dv_short, dv))
         
         if versions:
-            baselines.append(BaselineInfo(
-                name=baseline_full,
-                versions=versions
-            ))
+            baselines.append(BaselineInfo(name=baseline_full, versions=versions))
     
     return baselines
 
@@ -216,6 +230,8 @@ async def get_upwards_chains(baseline: str, version: str):
         return data
     except json.JSONDecodeError as e:
         raise HTTPException(status_code=500, detail=f"Invalid JSON: {str(e)}")
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -244,6 +260,8 @@ async def get_downwards_chains(baseline: str, version: str):
         return data
     except json.JSONDecodeError as e:
         raise HTTPException(status_code=500, detail=f"Invalid JSON: {str(e)}")
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -270,6 +288,8 @@ async def get_upwards_text(baseline: str, version: str):
         with open(filepath, 'r', encoding='utf-8') as f:
             content = f.read()
         return {"content": content}
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -296,6 +316,8 @@ async def get_downwards_text(baseline: str, version: str):
         with open(filepath, 'r', encoding='utf-8') as f:
             content = f.read()
         return {"content": content}
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -306,6 +328,8 @@ class MethodAnalysisRequest(BaseModel):
     db_info: Optional[Dict[str, Any]] = None
     direction: str = "upwards"
     force_fresh: bool = False
+    baseline: str = ''
+    version: str = ''
 
 
 class ChainAnalysisRequest(BaseModel):
@@ -386,16 +410,19 @@ async def get_method_code(
     baseline: str = '',
     version: str = '',
     class_name: str = '',
-    method_name: str = ''
+    method_name: str = '',
+    signature: str = ''
 ):
     """
     获取方法的基线版本和当前版本源代码
     用于 AI 分析配置页的代码版本对比展示
-    
+
     基线 DB 中 project 表记录了每次分析（基线/版本），每个 project_id
     对应 methods 表中的不同版本代码：
     - project_id=0: 基线版本代码 (commit_or_branch_new == commit_or_branch_old == baseline)
     - project_id>0: 各差异版本代码 (commit_or_branch_new == version)
+
+    支持通过 signature 参数精确定位重载方法（同名不同参）。
     """
     import sqlite3
     import os as _os
@@ -480,6 +507,10 @@ async def get_method_code(
     print(f"[method-code] baseline_commit={baseline_commit}, version_commit={version_commit}", flush=True)
     print(f"[method-code] short_class_name={short_class_name}, package_name={package_name}", flush=True)
     
+    # ── 解析 signature 中的参数类型列表（用于重载方法精确匹配） ──
+    sig_param_types = _parse_signature_param_types(signature) if signature else []
+    print(f"[method-code] signature={signature}, sig_param_types={sig_param_types}", flush=True)
+    
     # 查找版本对应的 project_id
     cursor.execute('''
         SELECT project_id FROM project
@@ -500,27 +531,16 @@ async def get_method_code(
     baseline_project_id = baseline_proj['project_id'] if baseline_proj else 0
     print(f"[method-code] baseline_project_id={baseline_project_id}", flush=True)
     
-    # 获取基线版本代码（project_id == baseline_project_id）
-    if package_name:
-        cursor.execute('''
-            SELECT m.body, m.annotations, m.access_modifier,
-                   m.return_type, m.parameters, m.change_type
-            FROM methods m
-            JOIN class c ON m.class_id = c.class_id
-            WHERE c.class_name = ? AND c.package_name = ? AND m.method_name = ? AND m.project_id = ?
-            LIMIT 1
-        ''', (short_class_name, package_name, method_name, baseline_project_id))
-    else:
-        cursor.execute('''
-            SELECT m.body, m.annotations, m.access_modifier,
-                   m.return_type, m.parameters, m.change_type
-            FROM methods m
-            JOIN class c ON m.class_id = c.class_id
-            WHERE c.class_name = ? AND m.method_name = ? AND m.project_id = ?
-            LIMIT 1
-        ''', (short_class_name, method_name, baseline_project_id))
-    baseline_row = cursor.fetchone()
-    print(f"[method-code] baseline_row found={baseline_row is not None}, baseline_project_id={baseline_project_id}", flush=True)
+    # ── 查询方法（移除 LIMIT 1，获取所有同名方法后按参数类型精确匹配） ──
+    baseline_row = None
+    version_row = None
+    documentation = ''
+    
+    # 基线代码查询
+    baseline_rows = _query_method_rows(cursor, short_class_name, package_name, method_name, baseline_project_id)
+    if baseline_rows:
+        baseline_row = _match_method_by_params(baseline_rows, sig_param_types)
+    print(f"[method-code] baseline_row found={baseline_row is not None}, total_rows={len(baseline_rows)}, sig_param_types={sig_param_types}", flush=True)
     
     if baseline_row:
         body_lines = _parse_body_to_lines(baseline_row['body'])
@@ -529,29 +549,18 @@ async def get_method_code(
         access_modifier = baseline_row['access_modifier'] or ''
         return_type = baseline_row['return_type'] or ''
         parameters = baseline_row['parameters'] or ''
+        documentation_val = baseline_row['documentation'] or ''
+        if isinstance(documentation_val, str) and documentation_val != 'None':
+            documentation = documentation_val
         change_type_val = baseline_row['change_type'] or 'UNCHANGED'
     
-    # 获取版本代码（project_id == version_project_id，如果版本!=基线）
+    # 版本代码查询
     if version_project_id is not None and version_project_id != baseline_project_id:
-        if package_name:
-            cursor.execute('''
-                SELECT m.body, m.change_type
-                FROM methods m
-                JOIN class c ON m.class_id = c.class_id
-                WHERE c.class_name = ? AND c.package_name = ? AND m.method_name = ? AND m.project_id = ?
-                LIMIT 1
-            ''', (short_class_name, package_name, method_name, version_project_id))
-        else:
-            cursor.execute('''
-                SELECT m.body, m.change_type
-                FROM methods m
-                JOIN class c ON m.class_id = c.class_id
-                WHERE c.class_name = ? AND m.method_name = ? AND m.project_id = ?
-                LIMIT 1
-            ''', (short_class_name, method_name, version_project_id))
-        version_row = cursor.fetchone()
-        print(f"[method-code] version_row found={version_row is not None}, version_project_id={version_project_id}", flush=True)
-        
+        version_rows = _query_method_rows(cursor, short_class_name, package_name, method_name, version_project_id)
+        if version_rows:
+            version_row = _match_method_by_params(version_rows, sig_param_types)
+        print(f"[method-code] version_row found={version_row is not None}, total_rows={len(version_rows)}", flush=True)
+    
         if version_row:
             version_body_lines = _parse_body_to_lines(version_row['body'])
             current_code = '\n'.join(version_body_lines)
@@ -559,6 +568,10 @@ async def get_method_code(
             version_change = version_row['change_type'] or ''
             if version_change:
                 change_type_val = version_change
+            # 版本 documentation 可能更新
+            version_doc = version_row.get('documentation', '') or ''
+            if isinstance(version_doc, str) and version_doc != 'None' and not documentation:
+                documentation = version_doc
         else:
             # 版本中无此方法（可能是 DELETED）
             current_code = ''
@@ -578,7 +591,8 @@ async def get_method_code(
         'annotations': annotations,
         'access_modifier': access_modifier,
         'return_type': return_type,
-        'parameters': parameters
+        'parameters': parameters,
+        'documentation': documentation
     }
 
 
@@ -590,6 +604,118 @@ def _parse_body_to_lines(body):
         return json.loads(body) if isinstance(body, str) else body
     except (json.JSONDecodeError, TypeError):
         return [body] if isinstance(body, str) else []
+
+
+def _parse_signature_param_types(signature: str):
+    """
+    从方法签名中提取参数类型列表。
+    例：'getEdlBusTag(com.cmb.dto.RemitDto, com.cmb.dto.OutRemitOprDto)'
+    → ['com.cmb.dto.RemitDto', 'com.cmb.dto.OutRemitOprDto']
+    无参方法：'delete()' → []
+    """
+    if not signature:
+        return []
+    # 提取括号内的参数
+    paren_idx = signature.find('(')
+    if paren_idx < 0:
+        return []
+    params_str = signature[paren_idx + 1:].rstrip(')')
+    if not params_str.strip():
+        return []
+    # 按逗号分割，注意泛型如 List<com.xx.Yy>
+    param_types = []
+    depth = 0
+    current = []
+    for ch in params_str:
+        if ch == '<':
+            depth += 1
+        elif ch == '>':
+            depth -= 1
+        if ch == ',' and depth == 0:
+            param_types.append(''.join(current).strip())
+            current = []
+        else:
+            current.append(ch)
+    if current:
+        param_types.append(''.join(current).strip())
+    return param_types
+
+
+def _extract_param_types_from_json(parameters_json: str):
+    """
+    从 DB parameters JSON 中提取参数类型列表。
+    '[{"parameter_type":"int","parameter_name":"id"}]' → ['int']
+    """
+    if not parameters_json:
+        return []
+    try:
+        params_list = json.loads(parameters_json) if isinstance(parameters_json, str) else parameters_json
+        if not isinstance(params_list, list):
+            return []
+        return [p.get('parameter_type', '') for p in params_list if isinstance(p, dict)]
+    except (json.JSONDecodeError, TypeError):
+        return []
+
+
+def _match_param_types(sig_types: list, db_types: list) -> bool:
+    """
+    判断签名参数类型与 DB 参数类型是否匹配。
+    支持完整类名与短类名的交叉匹配。
+    """
+    if len(sig_types) != len(db_types):
+        return False
+    for st, dt in zip(sig_types, db_types):
+        # 精确匹配
+        if st == dt:
+            continue
+        # 短类名匹配（签名用全限定名，DB 可能用短类名或反过来）
+        st_short = st.rsplit('.', 1)[-1] if '.' in st else st
+        dt_short = dt.rsplit('.', 1)[-1] if '.' in dt else dt
+        if st_short == dt_short:
+            continue
+        return False
+    return True
+
+
+def _query_method_rows(cursor, short_class_name: str, package_name: str, method_name: str, project_id: int):
+    """查询指定 class/method/project 的所有行（不含 LIMIT）"""
+    if package_name:
+        cursor.execute('''
+            SELECT m.body, m.annotations, m.access_modifier,
+                   m.return_type, m.parameters, m.change_type, m.documentation
+            FROM methods m
+            JOIN class c ON m.class_id = c.class_id
+            WHERE c.class_name = ? AND c.package_name = ? AND m.method_name = ? AND m.project_id = ?
+        ''', (short_class_name, package_name, method_name, project_id))
+    else:
+        cursor.execute('''
+            SELECT m.body, m.annotations, m.access_modifier,
+                   m.return_type, m.parameters, m.change_type, m.documentation
+            FROM methods m
+            JOIN class c ON m.class_id = c.class_id
+            WHERE c.class_name = ? AND m.method_name = ? AND m.project_id = ?
+        ''', (short_class_name, method_name, project_id))
+    return cursor.fetchall()
+
+
+def _match_method_by_params(rows, sig_param_types: list):
+    """
+    从同名方法行列表中按参数类型精确匹配。
+    - 只有 1 行 → 直接返回（无重载）
+    - 多行 + 有签名参数 → 按参数类型匹配
+    - 多行 + 无签名参数 → 返回第一行（兼容旧调用）
+    """
+    if not rows:
+        return None
+    if len(rows) == 1:
+        return rows[0]
+    if sig_param_types:
+        for row in rows:
+            db_types = _extract_param_types_from_json(row['parameters'] or '')
+            if _match_param_types(sig_param_types, db_types):
+                return row
+    # 回退：返回第一行
+    return rows[0]
 
 
 @router.get("/llm-status")
@@ -623,9 +749,13 @@ async def analyze_method(request: MethodAnalysisRequest):
             method_info=request.method_info,
             db_info=request.db_info or {},
             direction=request.direction,
-            force_fresh=request.force_fresh
+            force_fresh=request.force_fresh,
+            baseline=request.baseline,
+            version=request.version
         )
         return result
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     finally:
@@ -658,6 +788,8 @@ async def analyze_upwards_summary(baseline: str, version: str, request: UpwardsS
     try:
         with open(filepath, 'r', encoding='utf-8') as f:
             data = json.load(f)
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     
@@ -750,6 +882,8 @@ async def analyze_chain(request: ChainAnalysisRequest):
             force_fresh=request.force_fresh
         )
         return result
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     finally:
@@ -758,10 +892,29 @@ async def analyze_chain(request: ChainAnalysisRequest):
 
 @router.get("/{baseline}/{version}/sql-summary")
 async def get_sql_summary(baseline: str, version: str):
-    """获取 SQL 分析汇总"""
-    result_dir = settings.RESULT_DIR
-    filepath = os.path.join(_resolve_data_path(baseline, version), "downwards_call_chains.json")
-
+    """获取 SQL 分析汇总（v4.2: 优先使用预计算的 SQL 摘要文件）"""
+    data_dir = _resolve_data_path(baseline, version)
+    
+    # v4.2: 优先尝试 SQL 摘要文件（KB 级）
+    sql_summary_filepath = os.path.join(data_dir, "downwards_sql_summary.json")
+    if os.path.exists(sql_summary_filepath):
+        try:
+            with open(sql_summary_filepath, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            return {
+                'summary': {
+                    'total_sql_impacts': data.get('metadata', {}).get('total_sql_impacts', 0),
+                    'total_sql_operations': data.get('metadata', {}).get('total_sql_operations', 0),
+                    'sql_impacts': data.get('sql_impacts', [])
+                },
+                'source': 'precomputed'
+            }
+        except Exception as e:
+            logger = __import__('logging').getLogger(__name__)
+            logger.warning(f"SQL 摘要文件读取失败，回退到大 JSON: {e}")
+    
+    # Fallback: 旧格式大 JSON
+    filepath = os.path.join(data_dir, "downwards_call_chains.json")
     if not os.path.exists(filepath):
         raise HTTPException(status_code=404, detail="Downwards chains file not found")
 
@@ -775,10 +928,13 @@ async def get_sql_summary(baseline: str, version: str):
 
         return {
             'summary': summary,
-            'dao_methods_count': len(dao_methods)
+            'dao_methods_count': len(dao_methods),
+            'source': 'legacy'
         }
     except json.JSONDecodeError as e:
         raise HTTPException(status_code=500, detail=f"Invalid JSON: {str(e)}")
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -1099,7 +1255,7 @@ def _find_endpoint_nodes(children: list, direction: str) -> list:
     """
     递归查找端点节点。
     - upwards: 查找 root_type 为入口类型 (HTTP_API 等) 的节点
-    - downwards: 查找叶子节点（含 dao_info 或 is_leaf=True）
+    - downwards: 查找有 dao_info 的 DAO/Mapper 节点（含 SQL 信息），或叶子节点
     """
     endpoints = []
     for child in children:
@@ -1113,32 +1269,220 @@ def _find_endpoint_nodes(children: list, direction: str) -> list:
                     'root_type': child.get('root_type', '')
                 })
         else:
-            # downwards: 叶子节点
+            # downwards: 优先收集有 dao_info 的 DAO/Mapper 节点
+            di = child.get('dao_info')
+            if di and isinstance(di, dict) and di.get('sql_type'):
+                # Mapper/DAO 节点有 SQL 信息，作为端点（跳过递归其 SQL 子节点）
+                endpoints.append({
+                    'class_name': child.get('class_name', ''),
+                    'method_name': child.get('method_name', ''),
+                    'api_paths': [],
+                    'documentation': child.get('documentation', ''),
+                    'dao_sql_type': di.get('sql_type', ''),
+                    'dao_tables': di.get('tables', []) if isinstance(di.get('tables'), list) else [],
+                    'dao_method_signature': di.get('method_signature', ''),
+                    'dao_sql_content': di.get('sql_content', ''),
+                    'dao_mapper_method': di.get('mapper_method', '')
+                })
+                continue  # 已作为端点，不再递归 SQL 子节点
+            # 普通叶子节点（无子节点或被标记为叶子）
             grand_children = child.get('children', [])
             if not grand_children or child.get('is_leaf'):
-                di = child.get('dao_info')
                 endpoints.append({
                     'class_name': child.get('class_name', ''),
                     'method_name': child.get('method_name', ''),
                     'api_paths': [],
                     'documentation': child.get('documentation', ''),
                     'dao_sql_type': di.get('sql_type', '') if di else '',
-                    'dao_tables': di.get('tables', []) if di else []
+                    'dao_tables': di.get('tables', []) if di and isinstance(di.get('tables'), list) else [],
+                    'dao_method_signature': di.get('method_signature', '') if di else '',
+                    'dao_sql_content': di.get('sql_content', '') if di else '',
+                    'dao_mapper_method': di.get('mapper_method', '') if di else ''
                 })
-        # 继续递归
+        # 继续递归子节点
         if child.get('children'):
             endpoints.extend(_find_endpoint_nodes(child['children'], direction))
     return endpoints
 
 
+def _find_node_documentation(chain_tree: dict, package_class: str, method_signature: str) -> str:
+    """
+    在调用链树中递归查找匹配节点的 documentation。
+    用于兼容旧版 JSON（entry_points 中无 documentation 字段）的回退逻辑。
+    """
+    if not chain_tree or not package_class or not method_signature:
+        return ''
+    if (chain_tree.get('package_class') == package_class
+            and chain_tree.get('method_signature') == method_signature):
+        doc = chain_tree.get('documentation', '')
+        return doc if doc and doc != 'None' else ''
+    for child in chain_tree.get('children', []):
+        result = _find_node_documentation(child, package_class, method_signature)
+        if result:
+            return result
+    return ''
+
+
 @router.get("/{baseline}/{version}/chain-methods")
-async def get_chain_methods(baseline: str, version: str, direction: str = 'upwards'):
+async def get_chain_methods(baseline: str, version: str, direction: str = 'upwards',
+                             offset: int = 0, limit: int = 100):
     """
-    获取调用链方法列表（供分析配置页使用）
+    获取调用链方法列表（供分析配置页使用）。
+    支持分页：offset 为起始位置，limit 为每次返回数量。
     """
+    data_dir = _resolve_data_path(baseline, version)
+    
+    # v4.2: 优先尝试索引文件
+    index_filename = f"{direction}_index.json"
+    index_filepath = os.path.join(data_dir, index_filename)
+    if os.path.exists(index_filepath):
+        try:
+            with open(index_filepath, 'r', encoding='utf-8') as f:
+                index_data = json.load(f)
+            
+            index_methods = index_data.get('methods', [])
+            methods_with_cache = []
+            seen = set()
+            
+            conn = __import__('sqlite3').connect(settings.DB_PATH)
+            conn.row_factory = __import__('sqlite3').Row
+            cursor = conn.cursor()
+            
+            for im in index_methods:
+                class_name = im.get('class_name', '')
+                method_name = im.get('method_name', '')
+                key = f"{class_name}.{method_name}"
+                if key in seen:
+                    continue
+                seen.add(key)
+                
+                # 查询 AI 分析状态（与 nodes-status API 逻辑一致）
+                method_status = 'none'
+                upwards_chain_status = 'none'
+                downwards_chain_status = 'none'
+                
+                try:
+                    cursor.execute('''
+                        SELECT r.result_id FROM llm_analysis_results r
+                        JOIN llm_analysis_tasks t ON r.task_id = t.task_id
+                        WHERE t.analysis_type IN ('method', 'batch', 'chain')
+                          AND r.class_name = ? AND r.method_name = ?
+                          AND (t.baseline = '' OR t.baseline = ?) AND (t.version = '' OR t.version = ?)
+                        ORDER BY r.created_at DESC LIMIT 1
+                    ''', (class_name, method_name, baseline, version))
+                    if cursor.fetchone():
+                        method_status = 'analyzed'
+                except Exception:
+                    pass
+                
+                try:
+                    cursor.execute('''
+                        SELECT r.result_id FROM llm_analysis_results r
+                        JOIN llm_analysis_tasks t ON r.task_id = t.task_id
+                        WHERE t.analysis_type = 'chain'
+                          AND t.direction = 'upwards'
+                          AND r.parent_task_id IS NULL
+                          AND r.class_name = ? AND r.method_name = ?
+                          AND (t.baseline = '' OR t.baseline = ?) AND (t.version = '' OR t.version = ?)
+                        ORDER BY r.created_at DESC LIMIT 1
+                    ''', (class_name, method_name, baseline, version))
+                    if cursor.fetchone():
+                        upwards_chain_status = 'analyzed'
+                except Exception:
+                    pass
+                
+                try:
+                    cursor.execute('''
+                        SELECT r.result_id FROM llm_analysis_results r
+                        JOIN llm_analysis_tasks t ON r.task_id = t.task_id
+                        WHERE t.analysis_type = 'chain'
+                          AND t.direction = 'downwards'
+                          AND r.parent_task_id IS NULL
+                          AND r.class_name = ? AND r.method_name = ?
+                          AND (t.baseline = '' OR t.baseline = ?) AND (t.version = '' OR t.version = ?)
+                        ORDER BY r.created_at DESC LIMIT 1
+                    ''', (class_name, method_name, baseline, version))
+                    if cursor.fetchone():
+                        downwards_chain_status = 'analyzed'
+                except Exception:
+                    pass
+                
+                methods_with_cache.append({
+                    'class_name': class_name,
+                    'method_name': method_name,
+                    'signature': im.get('method_signature', f"{method_name}()"),
+                    'change_type': im.get('change_type', 'UNKNOWN'),
+                    'parameters': '[]',
+                    'return_type': '',
+                    'documentation': '',
+                    'method_status': method_status,
+                    'upwards_chain_status': upwards_chain_status,
+                    'downwards_chain_status': downwards_chain_status,
+                    'endpoints': []
+                })
+            
+            conn.close()
+            
+            # 向下方向：从大 JSON 补充 endpoints（索引文件不含链数据）
+            if direction == 'downwards':
+                json_filepath = os.path.join(data_dir, "downwards_call_chains.json")
+                if os.path.exists(json_filepath):
+                    try:
+                        with open(json_filepath, 'r', encoding='utf-8') as f:
+                            chain_data = json.load(f)
+                        chains_list = chain_data.get('call_chains', chain_data.get('dependency_chains', []))
+                        # 构建 class_name.method_name -> chain 映射
+                        chain_map = {}
+                        for c in chains_list:
+                            mi = c.get('method_info', {})
+                            k = f"{mi.get('class_name', '')}.{mi.get('method_name', '')}"
+                            chain_map[k] = c
+                        # 为每个方法提取 endpoints
+                        for m in methods_with_cache:
+                            k = f"{m['class_name']}.{m['method_name']}"
+                            c = chain_map.get(k)
+                            if c:
+                                cr = c.get('chain', {})
+                                di = cr.get('dao_info')
+                                if di and isinstance(di, dict) and di.get('sql_type'):
+                                    # 链根节点自身就是 DAO/Mapper，直接作为端点
+                                    m['endpoints'] = [{
+                                        'class_name': cr.get('class_name', ''),
+                                        'method_name': cr.get('method_name', ''),
+                                        'api_paths': [],
+                                        'documentation': cr.get('documentation', ''),
+                                        'dao_sql_type': di.get('sql_type', ''),
+                                        'dao_tables': di.get('tables', []) if isinstance(di.get('tables'), list) else [],
+                                        'dao_method_signature': di.get('method_signature', ''),
+                                        'dao_sql_content': di.get('sql_content', ''),
+                                        'dao_mapper_method': di.get('mapper_method', '')
+                                    }]
+                                else:
+                                    chain_children = cr.get('children', [])
+                                    m['endpoints'] = _find_endpoint_nodes(chain_children, direction)
+                    except Exception:
+                        pass  # 温和回退，保持空 endpoints
+            
+            total = len(methods_with_cache)
+            # 分页切片
+            paged = methods_with_cache[offset:offset + limit]
+            
+            return {
+                'methods': paged,
+                'total': total,
+                'offset': offset,
+                'limit': limit,
+                'has_more': (offset + limit) < total,
+                'source': 'index'
+            }
+        except Exception as e:
+            logger = __import__('logging').getLogger(__name__)
+            logger.warning(f"索引文件读取失败，回退到大 JSON: {e}")
+    
+    # Fallback: 旧格式大 JSON
     result_dir = settings.RESULT_DIR
     filename = f"{direction}_call_chains.json"
-    filepath = os.path.join(_resolve_data_path(baseline, version), filename)
+    filepath = os.path.join(data_dir, filename)
     
     if not os.path.exists(filepath):
         raise HTTPException(status_code=404, detail=f"{direction} call chains file not found")
@@ -1146,6 +1490,8 @@ async def get_chain_methods(baseline: str, version: str, direction: str = 'upwar
     try:
         with open(filepath, 'r', encoding='utf-8') as f:
             data = json.load(f)
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     
@@ -1231,6 +1577,7 @@ async def get_chain_methods(baseline: str, version: str, direction: str = 'upwar
         raw_entry_points = chain.get('entry_points', [])
         if raw_entry_points:
             endpoints = []
+            chain_tree = chain.get('chain', {})
             for ep in raw_entry_points:
                 # 从 package_class 提取短类名
                 pkg = ep.get('package_class', '')
@@ -1238,14 +1585,40 @@ async def get_chain_methods(baseline: str, version: str, direction: str = 'upwar
                 # 从 method_signature 提取方法名（去掉参数部分）
                 sig = ep.get('method_signature', '')
                 short_mth = sig.split('(')[0] if '(' in sig else sig
+                # documentation: 优先从 entry_points 取，回退到 chain 树节点
+                doc = ep.get('documentation', '')
+                if not doc:
+                    sig_for_match = ep.get('method_signature', '')
+                    doc = _find_node_documentation(chain_tree, pkg, sig_for_match)
                 endpoints.append({
                     'class_name': short_cls,
                     'method_name': short_mth,
                     'api_paths': ep.get('api_paths', []),
-                    'documentation': ep.get('documentation', ''),
+                    'documentation': doc,
                     'root_type': ep.get('root_type', '')
                 })
-        # 2) 否则检查链根节点自身是否为入口
+        # 2) 向下方向：优先检查链根节点自身是否有 dao_info（直接 DAO 方法）
+        elif direction == 'downwards':
+            cr = chain.get('chain', {})
+            di = cr.get('dao_info')
+            if di and isinstance(di, dict) and di.get('sql_type'):
+                # 链根节点自身就是 DAO/Mapper，直接作为端点
+                endpoints = [{
+                    'class_name': cr.get('class_name', ''),
+                    'method_name': cr.get('method_name', ''),
+                    'api_paths': [],
+                    'documentation': cr.get('documentation', ''),
+                    'dao_sql_type': di.get('sql_type', ''),
+                    'dao_tables': di.get('tables', []) if isinstance(di.get('tables'), list) else [],
+                    'dao_method_signature': di.get('method_signature', ''),
+                    'dao_sql_content': di.get('sql_content', ''),
+                    'dao_mapper_method': di.get('mapper_method', '')
+                }]
+            else:
+                # 根节点不是 DAO，递归查找 children
+                chain_children = cr.get('children', [])
+                endpoints = _find_endpoint_nodes(chain_children, direction)
+        # 3) 否则检查链根节点自身是否为入口
         elif chain.get('chain', {}).get('root_type') in _ENTRY_ROOT_TYPES:
             cr = chain['chain']
             endpoints = [{
@@ -1255,7 +1628,7 @@ async def get_chain_methods(baseline: str, version: str, direction: str = 'upwar
                 'documentation': cr.get('documentation', ''),
                 'root_type': cr.get('root_type', '')
             }]
-        # 3) 否则递归遍历 children 树
+        # 4) 否则递归遍历 children 树
         else:
             chain_children = chain.get('chain', {}).get('children', [])
             endpoints = _find_endpoint_nodes(chain_children, direction)
@@ -1276,7 +1649,84 @@ async def get_chain_methods(baseline: str, version: str, direction: str = 'upwar
     
     conn.close()
     
+    total = len(methods_with_cache)
+    # 分页切片
+    paged = methods_with_cache[offset:offset + limit]
+    
     return {
-        'methods': methods_with_cache,
-        'total': len(methods_with_cache)
+        'methods': paged,
+        'total': total,
+        'offset': offset,
+        'limit': limit,
+        'has_more': (offset + limit) < total,
+        'source': 'legacy'
     }
+
+
+# ── v4.2: 按需单链加载 API ──
+
+@router.get("/{baseline}/{version}/chain/{direction}")
+async def get_single_chain(baseline: str, version: str, direction: str, class_name: str = '', method_name: str = ''):
+    """
+    v4.2: 按需加载单条调用链（KB-MB 级，而非加载整个 GB 级文件）。
+    
+    优先从独立单链文件加载，回退到大 JSON。
+    """
+    if not class_name or not method_name:
+        raise HTTPException(status_code=400, detail="class_name and method_name are required")
+    
+    if direction not in ('upwards', 'downwards'):
+        raise HTTPException(status_code=400, detail="direction must be 'upwards' or 'downwards'")
+    
+    data_dir = _resolve_data_path(baseline, version)
+    
+    # v4.2: 优先尝试独立单链文件
+    # 索引文件中记录了 chain_file，但我们通过扫描目录来查找
+    chain_dir = os.path.join(data_dir, direction)
+    if os.path.isdir(chain_dir):
+        # 尝试匹配文件名（文件名包含完整类名和方法签名）
+        for filename in os.listdir(chain_dir):
+            if not filename.endswith('.json'):
+                continue
+            # 从文件名提取信息: package_class.method_signature.json
+            name_no_ext = filename[:-5]
+            # 检查是否包含目标类名和方法名
+            if f".{class_name}." in name_no_ext or name_no_ext.endswith(f".{class_name}"):
+                # 进一步检查方法名
+                if method_name in name_no_ext:
+                    try:
+                        with open(os.path.join(chain_dir, filename), 'r', encoding='utf-8') as f:
+                            chain_data = json.load(f)
+                        return {
+                            'chain': chain_data,
+                            'source': 'individual',
+                            'filename': filename
+                        }
+                    except Exception:
+                        continue
+    
+    # Fallback: 从大 JSON 中查找
+    json_filename = f"{direction}_call_chains.json"
+    json_filepath = os.path.join(data_dir, json_filename)
+    
+    if not os.path.exists(json_filepath):
+        raise HTTPException(status_code=404, detail=f"{direction} call chains file not found")
+    
+    try:
+        with open(json_filepath, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
+    chains_list = data.get('impact_chains' if direction == 'upwards' else 'call_chains',
+                          data.get('dependency_chains', []))
+    
+    for chain in chains_list:
+        mi = chain.get('method_info', {})
+        if mi.get('class_name') == class_name and mi.get('method_name') == method_name:
+            return {
+                'chain': chain.get('chain', {}),
+                'source': 'legacy'
+            }
+    
+    raise HTTPException(status_code=404, detail=f"Chain not found for {class_name}.{method_name}")

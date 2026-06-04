@@ -364,15 +364,19 @@ class JavaParse(object):
     def _parse_method(self, methods, lines, class_id, import_map, field_map, package_name, filepath):
         # 处理 methods
         all_method = []
-        class_db = self.sqlite.select_data(f'SELECT controller_base_url, implements FROM class WHERE project_id = {self.project_id} and class_id = {class_id}')[0]
+        class_db = self.sqlite.select_data(f'SELECT controller_base_url, implements, documentation FROM class WHERE project_id = {self.project_id} and class_id = {class_id}')[0]
         base_url = class_db['controller_base_url'] if class_db['controller_base_url'] else ''
         class_implements = class_db['implements']
+        class_documentation = class_db.get('documentation')
         method_name_entity_map = {method.name: method for method in methods}
         for method_obj in methods:
             method_invocation = {}
             variable_map = {}
             method_name = method_obj.name
             documentation = method_obj.documentation  # document
+            # 如果方法级 Javadoc 为空，回退到类/接口级注释（常见于接口方法）
+            if not documentation:
+                documentation = class_documentation
             annotations = json.dumps(method_obj.annotations, default=lambda obj: obj.__dict__, ensure_ascii=False)  # annotations
             is_override_method = 'Override' in annotations
             is_api, api_path = self._judge_is_api(method_obj.annotations, base_url, method_name)

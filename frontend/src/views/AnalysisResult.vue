@@ -46,8 +46,11 @@
         :methods="chainMethods"
         :total="chainMethodsTotal"
         :loading="summaryLoading"
+        :loadingMore="loadingMoreMethods"
         :selectedKey="selectedMethodKey"
+        :direction="chainDirection"
         @select="handleMethodSelect"
+        @loadMore="handleLoadMoreMethods"
       />
 
       <!-- 选中方法的调用链详情 -->
@@ -120,6 +123,7 @@ const chainDirection = ref<'upwards' | 'downwards'>('upwards')
 const chainMethods = ref<ChainMethodSummary[]>([])
 const chainMethodsTotal = ref(0)
 const summaryLoading = ref(false)
+const loadingMoreMethods = ref(false)
 const selectedMethodKey = ref('')
 const selectedChainData = ref<any[]>([])
 const chainLoading = ref(false)
@@ -174,6 +178,28 @@ const loadSummary = async (baseline: string, version: string) => {
     ElMessage.error('加载方法摘要失败')
   } finally {
     summaryLoading.value = false
+  }
+}
+
+// ── 分批加载更多方法 ──
+const handleLoadMoreMethods = async (offset: number, limit: number) => {
+  const baseline = sessionStore.selectedBaseline
+  const version = sessionStore.selectedVersion
+  if (!baseline || !version) return
+
+  loadingMoreMethods.value = true
+  try {
+    const dir = chainDirection.value
+    const res = await getChainMethods(baseline, version, dir, offset, limit)
+    if (res?.data) {
+      // 追加到现有方法列表
+      chainMethods.value = [...chainMethods.value, ...(res.data.methods || [])]
+      chainMethodsTotal.value = res.data.total || chainMethodsTotal.value
+    }
+  } catch (error) {
+    console.error('加载更多方法失败:', error)
+  } finally {
+    loadingMoreMethods.value = false
   }
 }
 
@@ -269,8 +295,7 @@ const buildTreeNodeLabel = (
   let label = `${cls}.${sig}`
   const doc = documentation || altDocumentation || ''
   if (doc && typeof doc === 'string' && doc.trim() && doc.trim() !== 'None') {
-    const docShort = doc.trim().replace(/\n/g, ' ').substring(0, 60)
-    label += `  📝${docShort}${doc.trim().length > 60 ? '...' : ''}`
+    label += `  \u{1F4DD}${doc.trim()}`
   }
   // ⚠️提示已由 CallChainTree tooltip 处理，不追加内联文本
   return label

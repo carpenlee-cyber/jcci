@@ -57,7 +57,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { getBaselines } from '@/api/analysis'
 import type { BaselineInfo } from '@/api/analysis'
 
@@ -82,6 +82,22 @@ const currentVersions = computed(() => {
   return baseline ? baseline.versions : []
 })
 
+// ── 提取短标签（与 Python extract_short_tag 对齐：内嵌标识符优先） ──
+const extractShortTag = (tag: string): string => {
+  if (!tag) return ''
+  // 优先提取内嵌的短标识符（如 20260525_03 等格式）
+  const innerMatch = tag.match(/[0-9]{8}_[0-9A-Z]{2,3}(?:_\d{2})?$/i)
+  if (innerMatch) {
+    return innerMatch[0]
+  }
+  // 若为完整 SHA256 + 日期后缀，截取前4+后11
+  const shaMatch = tag.match(/^([0-9a-f]{4})[0-9a-f]{56}(_\d{8}_\d{2})$/i)
+  if (shaMatch) {
+    return shaMatch[1] + shaMatch[2]
+  }
+  return tag
+}
+
 // 格式化基线名称（替换下划线为空格）
 const formatBaselineName = (name: string) => {
   return name.replace(/_/g, ' ')
@@ -98,15 +114,33 @@ const loadBaselines = async () => {
   try {
     const response = await getBaselines()
     baselines.value = response.data
-    
+
     // 如果有初始基线，尝试选中它
     if (props.initialBaseline) {
-      const found = baselines.value.find(b => b.name === props.initialBaseline)
+      // 策略1: 直接完整标签匹配
+      let found = baselines.value.find(b => b.name === props.initialBaseline)
+      if (!found) {
+        // 策略2: 短标签回退匹配（initialBaseline 可能是短标签或带前缀的变体）
+        const initShort = extractShortTag(props.initialBaseline!)
+        found = baselines.value.find(b => {
+          const bShort = extractShortTag(b.name)
+          // 检查任一方向的包含关系
+          return bShort === initShort || b.name.includes(initShort) || initShort.includes(bShort)
+        })
+      }
       if (found) {
-        selectedBaseline.value = props.initialBaseline
-        // 如果有初始版本且在版本列表中
-        if (props.initialVersion && found.versions.includes(props.initialVersion)) {
-          selectedVersion.value = props.initialVersion
+        selectedBaseline.value = found.name
+        // 如果有初始版本且在版本列表中，直接匹配
+        if (props.initialVersion) {
+          const verFound = found.versions.find(v => v === props.initialVersion)
+          if (verFound) {
+            selectedVersion.value = props.initialVersion
+          } else {
+            // 版本也可能需要短标签回退
+            const initVerShort = extractShortTag(props.initialVersion)
+            const verByShort = found.versions.find(v => extractShortTag(v) === initVerShort)
+            selectedVersion.value = verByShort || found.versions[0]
+          }
         } else if (found.versions.length > 0) {
           selectedVersion.value = found.versions[0]
         }
@@ -115,7 +149,7 @@ const loadBaselines = async () => {
         return
       }
     }
-    
+
     // 如果没有初始值或初始值无效，自动选择第一个
     if (baselines.value.length > 0 && !selectedBaseline.value) {
       selectedBaseline.value = baselines.value[0].name

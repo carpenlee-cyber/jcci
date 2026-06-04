@@ -58,7 +58,16 @@
       <template #default="{ node, data }">
         <span class="custom-tree-node">
           <el-icon><Connection /></el-icon>
-          <span class="node-label">{{ data.label }}</span>
+          <el-tooltip
+            :content="data.label"
+            placement="top"
+            :show-after="500"
+            effect="dark"
+            :popper-style="{ maxWidth: '700px', whiteSpace: 'pre-wrap', fontSize: '13px', fontFamily: 'Consolas, Courier New, monospace' }"
+            :disabled="!needsTruncation(data.label)"
+          >
+            <span class="node-label">{{ truncateLabel(data.label) }}</span>
+          </el-tooltip>
           
           <!-- 文档说明 (tooltip + inline) -->
           <el-tooltip 
@@ -502,6 +511,39 @@ const getChangeTypeTag = (type: string) => {
     UNCHANGED: 'info'
   }
   return map[type] || 'info'
+}
+
+/** 截断方法签名中的参数，如 LockRateCallBackService.processBiz(a,b,c) → LockRateCallBackService.processBiz(—, —, —)
+ *  同时截断文档注释部分，保留前80字符用于屏显 */
+const truncateLabel = (label: string): string => {
+  // 分离文档注释部分（📝...）
+  const docIdx = label.indexOf('  📝')
+  const mainPart = docIdx > 0 ? label.substring(0, docIdx) : label
+  let docPart = docIdx > 0 ? label.substring(docIdx) : ''
+
+  // 截断文档部分（屏幕显示前80字符）
+  if (docPart && docPart.length > 83) {  // '  📝' + 80 chars
+    docPart = docPart.substring(0, 83) + '...'
+  }
+
+  // 匹配 ClassName.methodName(params)
+  const match = mainPart.match(/^(.+?\.)(\w+)\((.+)\)$/)
+  if (!match) return mainPart + docPart
+
+  const [, classPath, methodName, params] = match
+  const paramList = params.split(/\s*,\s*/)
+
+  // 如果参数列表不长（每个参数 < 25 字符），不截断
+  if (paramList.length <= 2 && params.length < 60) return mainPart + docPart
+
+  // 截断：每个参数替换为 —
+  const shortParams = paramList.map(() => '—').join(', ')
+  return `${classPath}${methodName}(${shortParams})${docPart}`
+}
+
+/** 判断 label 是否需要截断 */
+const needsTruncation = (label: string): boolean => {
+  return truncateLabel(label) !== label
 }
 
 const getSqlTypeTag = (type: string) => {

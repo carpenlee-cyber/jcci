@@ -7,8 +7,9 @@ import sys
 import uuid
 import logging
 import sqlite3
+import subprocess
 import threading
-from typing import Dict, Optional, List
+from typing import Dict, Optional, List, Tuple
 from datetime import datetime
 
 # 添加项目根目录到路径（用于导入 workflow1）
@@ -178,8 +179,98 @@ class TaskService:
         """更新任务状态（公开方法，供 API 调用）"""
         self._update_task_status(task_id, status, progress, result_url, error_message)
     
+    # ==================== Git 引用验证 ====================
+
+    def validate_git_refs(self, git_url: str, tag_old: str, tag_new: str) -> Tuple[bool, str]:
+        """
+        验证 Git tag/commit 是否在远程仓库中真实存在。
+
+        使用 git ls-remote 查询远程引用，支持：
+        - HTTPS URL（可含 PAT token）
+        - 标签（refs/tags/xxx）
+        - Commit hash（直接匹配）
+
+        Args:
+            git_url: Git 远程仓库 URL
+            tag_old: 旧版本标识（tag 或 commit hash）
+            tag_new: 新版本标识（tag 或 commit hash）
+
+        Returns:
+            (is_valid, error_message): 验证通过返回 (True, "")，否则返回 (False, 错误说明)
+        """
+        # 检查 git 是否可用
+        try:
+            subprocess.run(
+                ["git", "--version"],
+                capture_output=True, text=True, timeout=5
+            )
+        except FileNotFoundError:
+            return False, "系统未安装 Git"
+        except subprocess.TimeoutExpired:
+            return False, "Git 命令超时"
+        except Exception as e:
+            return False, f"Git 环境异常: {e}"
+
+        # 规范化 URL（去掉末尾 .git 和斜杠）
+        url = git_url.rstrip('/')
+
+        # 提取项目名用于错误提示
+        project_name = url.split('/')[-1] if '/' in url else url
+
+        refs_to_check = [tag_old, tag_new]
+        invalid_refs = []
+
+        for ref in refs_to_check:
+            if not self._git_ref_exists(url, ref):
+                invalid_refs.append(ref)
+
+        if invalid_refs:
+            refs_str = "、".join(invalid_refs)
+            return False, f"在仓库 {project_name} 中未找到引用: {refs_str}"
+
+        return True, ""
+
+    def _git_ref_exists(self, remote_url: str, ref: str) -> bool:
+        """
+        检查单个 Git 引用是否存在。
+
+        策略：
+        1. 先尝试作为 tag 查询 (refs/tags/{ref})
+        2. 再尝试作为 commit hash 查询（全量 ls-remote 匹配）
+        """
+        try:
+            # 策略 1：尝试作为 tag
+            result = subprocess.run(
+                ["git", "ls-remote", "--tags", remote_url, f"refs/tags/{ref}"],
+                capture_output=True, text=True, timeout=30
+            )
+            if result.stdout.strip():
+                return True
+
+            # 策略 2：全量查询（匹配 commit hash）
+            result = subprocess.run(
+                ["git", "ls-remote", remote_url],
+                capture_output=True, text=True, timeout=30
+            )
+            for line in result.stdout.strip().split('\n'):
+                if line.startswith(ref):
+                    return True
+
+            return False
+
+        except subprocess.TimeoutExpired:
+            logger.warning(f"Git ls-remote 超时: {remote_url}")
+            # 超时时放行（避免网络慢阻塞提交）
+            return True
+        except Exception as e:
+            logger.warning(f"Git ls-remote 失败: {remote_url}, 错误: {e}")
+            # 网络异常时放行
+            return True
+
     def find_active_task(self, git_url: str, tag_old: str,
-                          tag_new: str, max_depth: int) -> Optional[dict]:
+                          tag_new: str, max_depth: int,
+                          project_code: str = "",
+                          task_stage: str = "") -> Optional[dict]:
         """
         查找相同参数的活跃任务（pending 或 running）
         
@@ -188,6 +279,8 @@ class TaskService:
             tag_old: 旧版本标签
             tag_new: 新版本标签
             max_depth: 最大分析深度
+            project_code: 项目编号（默认为空，参与去重匹配）
+            task_stage: 子任务阶段（默认为空，参与去重匹配）
             
         Returns:
             正在排队或执行中的重复任务 dict，没有则返回 None
@@ -198,10 +291,12 @@ class TaskService:
         cursor.execute('''
             SELECT * FROM analysis_tasks 
             WHERE git_url=? AND tag_old=? AND tag_new=? AND max_depth=?
+              AND COALESCE(project_code, '') = ?
+              AND COALESCE(task_stage, '') = ?
               AND status IN ('pending', 'running')
             ORDER BY created_at DESC 
             LIMIT 1
-        ''', (git_url, tag_old, tag_new, max_depth))
+        ''', (git_url, tag_old, tag_new, max_depth, project_code or "", task_stage or ""))
         row = cursor.fetchone()
         conn.close()
         
@@ -210,7 +305,9 @@ class TaskService:
         return None
 
     def find_duplicate_task(self, git_url: str, tag_old: str, 
-                           tag_new: str, max_depth: int) -> Optional[dict]:
+                           tag_new: str, max_depth: int,
+                           project_code: str = "",
+                           task_stage: str = "") -> Optional[dict]:
         """
         查找相同参数的已完成任务（去重）
         
@@ -219,6 +316,8 @@ class TaskService:
             tag_old: 旧版本标签
             tag_new: 新版本标签
             max_depth: 最大分析深度
+            project_code: 项目编号（默认为空，参与去重匹配）
+            task_stage: 子任务阶段（默认为空，参与去重匹配）
             
         Returns:
             已完成的重复任务 dict，没有则返回 None
@@ -229,10 +328,12 @@ class TaskService:
         cursor.execute('''
             SELECT * FROM analysis_tasks 
             WHERE git_url=? AND tag_old=? AND tag_new=? AND max_depth=?
+              AND COALESCE(project_code, '') = ?
+              AND COALESCE(task_stage, '') = ?
               AND status='completed'
             ORDER BY completed_at DESC 
             LIMIT 1
-        ''', (git_url, tag_old, tag_new, max_depth))
+        ''', (git_url, tag_old, tag_new, max_depth, project_code or "", task_stage or ""))
         row = cursor.fetchone()
         conn.close()
         
@@ -276,16 +377,28 @@ class TaskService:
             self._try_start_next_task()
     
     def _try_start_next_task(self):
-        """尝试启动下一个等待中的任务"""
+        """
+        尝试启动下一个等待中的任务
+        
+        并发控制规则：
+        - 同 git_url 的任务必须串行执行（同一仓库不能有 2 个 running 任务）
+        - 全局最大并发数为 2（不同仓库可并行）
+        """
+        MAX_CONCURRENT = 2
+        
         with self._lock:
-            has_running = any(
-                t['status'] == TaskStatus.RUNNING
-                for t in self._tasks.values()
-            )
+            running_tasks = [
+                t for t in self._tasks.values()
+                if t['status'] == TaskStatus.RUNNING
+            ]
             
-            if has_running:
-                logger.info("当前有任务正在运行，新任务将在队列中等待")
+            # 检查是否达到全局最大并发数
+            if len(running_tasks) >= MAX_CONCURRENT:
+                logger.info(f"当前有 {len(running_tasks)} 个任务正在运行（最大并发 {MAX_CONCURRENT}），新任务将在队列中等待")
                 return
+            
+            # 收集当前运行中任务的 git_url（同一仓库不能并发）
+            running_git_urls = set(t['git_url'] for t in running_tasks)
             
             pending_tasks = [
                 t for t in self._tasks.values()
@@ -296,10 +409,21 @@ class TaskService:
                 logger.info("队列中没有等待的任务")
                 return
             
+            # 按创建时间排序
             pending_tasks.sort(key=lambda x: x.get('created_at', ''))
-            next_task = pending_tasks[0]
             
-            logger.info(f"启动队列中的下一个任务: {next_task['task_id']}")
+            # 选择第一个不与正在运行任务冲突的 pending 任务
+            next_task = None
+            for task in pending_tasks:
+                if task['git_url'] not in running_git_urls:
+                    next_task = task
+                    break
+            
+            if not next_task:
+                logger.info(f"所有 {len(pending_tasks)} 个等待任务都属于正在运行的仓库 ({running_git_urls})，等待中")
+                return
+            
+            logger.info(f"启动队列中的下一个任务: {next_task['task_id']} (git_url={next_task['git_url']})")
             
             thread = threading.Thread(
                 target=self._execute_task,

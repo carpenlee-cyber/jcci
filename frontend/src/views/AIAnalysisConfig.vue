@@ -41,6 +41,9 @@
             {{ currentMethod.change_type }}
           </el-tag>
         </el-descriptions-item>
+        <el-descriptions-item v-if="methodCode?.documentation" label="方法注释" :span="2">
+          <span class="method-doc">📝 {{ methodCode.documentation }}</span>
+        </el-descriptions-item>
       </el-descriptions>
 
       <!-- 📝 代码版本对比 -->
@@ -56,13 +59,13 @@
               <template #title>
                 <span style="font-weight: 600">{{ baseline_label }} 代码 (变更前)</span>
               </template>
-              <pre class="code-block baseline-code">{{ methodCode.baseline_code || '(未获取到变更前代码)' }}</pre>
+              <pre class="code-block baseline-code">{{ codePlaceholder('baseline') }}</pre>
             </el-collapse-item>
             <el-collapse-item name="current">
               <template #title>
                 <span style="font-weight: 600">{{ version_label }} 代码 (变更后)</span>
               </template>
-              <pre class="code-block current-code">{{ methodCode.current_code || '(未获取到变更后代码)' }}</pre>
+              <pre class="code-block current-code">{{ codePlaceholder('current') }}</pre>
             </el-collapse-item>
           </el-collapse>
         </div>
@@ -225,6 +228,21 @@ const isMethodSelected = (method: any) => {
   )
 }
 
+/**
+ * 根据变更类型返回代码占位文本
+ */
+const codePlaceholder = (panel: 'baseline' | 'current') => {
+  const ct = currentMethod.value.change_type
+  if (panel === 'baseline') {
+    if (ct === 'ADDED') return '(新增前没有代码)'
+    return methodCode.value?.baseline_code || '(未获取到变更前代码)'
+  } else {
+    if (ct === 'UNCHANGED') return '(代码没有变化)'
+    if (ct === 'DELETED') return '(方法已被删除)'
+    return methodCode.value?.current_code || '(未获取到变更后代码)'
+  }
+}
+
 const startAnalysis = async () => {
   if (analysisScope.value === 'chain' && store.selectedMethods.length === 0) {
     ElMessage.warning('请至少选择一个方法进行分析')
@@ -242,7 +260,20 @@ const startAnalysis = async () => {
       methodInfo: {
         class_name: currentMethod.value.class_name,
         method_name: currentMethod.value.method_name,
-        change_type: currentMethod.value.change_type
+        change_type: currentMethod.value.change_type,
+        signature: currentMethod.value.signature || '',
+        baseline_code: methodCode.value?.baseline_code || '',
+        current_code: methodCode.value?.current_code || '',
+        annotations: methodCode.value?.annotations || '',
+        parameters: methodCode.value?.parameters || '',
+        return_type: methodCode.value?.return_type || '',
+        access_modifier: methodCode.value?.access_modifier || ''
+      },
+      dbInfo: {
+        filepath: route.query.filepath || '',
+        package_name: route.query.package_name || '',
+        class_type: route.query.class_type || '',
+        is_controller: route.query.is_controller === 'true' || undefined
       }
     })
 
@@ -291,7 +322,8 @@ onMounted(async () => {
       const res = await getMethodCode({
         baseline, version,
         class_name: currentMethod.value.class_name,
-        method_name: currentMethod.value.method_name
+        method_name: currentMethod.value.method_name,
+        signature: currentMethod.value.signature || undefined
       })
       methodCode.value = res.data
     } catch (err) {
@@ -392,6 +424,11 @@ watch(analysisScope, async (newScope) => {
   font-family: 'Consolas', 'Courier New', monospace;
   font-size: 13px;
   font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+  max-width: 500px;
 }
 
 .method-details {
@@ -444,6 +481,14 @@ watch(analysisScope, async (newScope) => {
 
 .current-code {
   border-left: 3px solid #E6A23C;
+}
+
+.method-doc {
+  font-size: 12px;
+  color: #606266;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 .action-bar {

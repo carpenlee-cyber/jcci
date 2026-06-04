@@ -117,11 +117,11 @@ class UnifiedMethodIndex:
         """
         logger.info(f"Loading methods for project_id={project_id}, commit={commit}")
         
-        # 查询所有方法（包括 change_type）
+        # 查询所有方法（包括 change_type 和 documentation）
         sql = '''
             SELECT m.method_id, c.package_name, c.class_name, 
                    m.method_name, m.parameters, m.method_invocation_map,
-                   m.change_type
+                   m.change_type, m.documentation
             FROM methods m
             JOIN class c ON m.class_id = c.class_id
             WHERE m.project_id = ?
@@ -144,7 +144,7 @@ class UnifiedMethodIndex:
         
         for row in rows:
             method_id, package_name, class_name, method_name, parameters, \
-                invocation_map, change_type = row
+                invocation_map, change_type, documentation = row
             
             package_class = f"{package_name}.{class_name}"
             key = (package_class, method_name)
@@ -156,7 +156,8 @@ class UnifiedMethodIndex:
                 'method_name': method_name,
                 'parameters': parameters,
                 'method_invocation_map': invocation_map,
-                'change_type': change_type
+                'change_type': change_type,
+                'documentation': documentation
             }
             
             if key not in target_index:

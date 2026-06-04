@@ -41,8 +41,8 @@ class Settings(BaseSettings):
         return [o.strip() for o in self.ALLOWED_ORIGINS.split(",") if o.strip()]
     
     # # LLM API 配置
-    # LLM_API_URL: str = "https://openai.good.hidns.vip/v1"
-    # LLM_API_KEY: str = "sk-B882bCwUweSeMRscoNwxZw4vxpjXmvWTLBxO5aXC7WAYhfwa"
+    # LLM_API_URL: str = "http://testhub-ai-runtime-gateway.paasuat.china.cn/v1"
+    # LLM_API_KEY: str = "app-gf4FuFGcnrgim1KX2t2ae6DV"
     # # LLM_MODEL: str = "minimaxai/minimax-m2.7"
     # LLM_MODEL: str = "moonshotai/kimi-k2.6"
     

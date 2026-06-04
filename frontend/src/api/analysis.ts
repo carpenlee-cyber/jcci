@@ -67,6 +67,12 @@ export interface EndpointNode {
   root_type?: string
   dao_sql_type?: string
   dao_tables?: string[]
+  /** 向下调用链专用：DAO 方法签名 */
+  dao_method_signature?: string
+  /** 向下调用链专用：SQL 语句内容 */
+  dao_sql_content?: string
+  /** 向下调用链专用：完整 Mapper 方法名 */
+  dao_mapper_method?: string
 }
 
 /** 变更方法摘要项 */
@@ -85,11 +91,11 @@ export interface ChainMethodSummary {
 }
 
 /**
- * 获取变更方法摘要列表（极轻量，仅方法元信息）
+ * 获取变更方法摘要列表（支持分页）
  */
-export function getChainMethods(baseline: string, version: string, direction: string = 'upwards') {
-  return apiClient.get<{ methods: ChainMethodSummary[]; total: number }>(
+export function getChainMethods(baseline: string, version: string, direction: string = 'upwards', offset: number = 0, limit: number = 100) {
+  return apiClient.get<{ methods: ChainMethodSummary[]; total: number; offset: number; limit: number; has_more: boolean }>(
     `/analysis/${baseline}/${version}/chain-methods`,
-    { params: { direction } }
+    { params: { direction, offset, limit } }
   )
 }

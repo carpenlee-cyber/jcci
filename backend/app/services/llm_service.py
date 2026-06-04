@@ -795,8 +795,18 @@ class LLMService:
                     }
                 }
         
+        # 如果提供了 baseline 和 version，从数据库获取方法源码
+        source_code = None
+        if baseline and version:
+            # _fetch_method_bodies 按短类名查询，需从全限定名提取
+            short_class = class_name.rsplit('.', 1)[-1] if '.' in class_name else class_name
+            source_code = self._fetch_method_bodies(baseline, version, [{
+                'class_name': short_class,
+                'method_name': method_name
+            }]).get(f"{short_class}.{method_name}")
+        
         # 构建提示词
-        prompt = custom_analysis_prompt or self._build_method_prompt(method_info, db_info)
+        prompt = custom_analysis_prompt or self._build_method_prompt(method_info, db_info, source_code)
         system_prompt = custom_system_prompt or self._get_system_prompt('method')
         
         # 调用 LLM API
@@ -1223,101 +1233,120 @@ class LLMService:
         except (json.JSONDecodeError, TypeError):
             return [body] if isinstance(body, str) else []
     
-    def _build_method_prompt(self, method_info: Dict, db_info: Dict) -> str:
-        """构建方法分析提示词"""
+    def _build_method_prompt(self, method_info: Dict, db_info: Dict, source_code: Dict = None) -> str:
+        """构建方法分析提示词（六部分结构化输出）"""
         change_type = method_info.get('change_type', 'UNKNOWN')
         class_name = method_info.get('class_name', '')
         method_name = method_info.get('method_name', '')
-        parameters = method_info.get('parameters', '[]')
+        parameters = method_info.get('parameters', [])
         return_type = method_info.get('return_type', '')
-        
-        # 变更类型中文映射
-        change_type_cn = {
-            'ADDED': '新增',
-            'MODIFIED': '修改',
-            'DELETED': '删除',
-            'UNCHANGED': '未变更'
-        }.get(change_type, change_type)
-        
-        # 数据库补充信息
-        db_parts = []
-        if db_info:
-            if db_info.get('filepath'):
-                db_parts.append(f"- 文件路径: {db_info['filepath']}")
-            if db_info.get('package_name'):
-                db_parts.append(f"- 包名: {db_info['package_name']}")
-            if db_info.get('class_type'):
-                db_parts.append(f"- 类类型: {db_info['class_type']}")
-            if db_info.get('is_controller') is not None:
-                db_parts.append(f"- 是否为Controller: {'是' if db_info['is_controller'] else '否'}")
-        db_section = '\n'.join(db_parts) if db_parts else '（无补充信息）'
-        
-        prompt = f"""请基于以下信息，分析Java方法的变更情况并提供专业的测试建议：
+        # 从 source_code 补充字段
+        if source_code:
+            if source_code.get('parameters'):
+                parameters = source_code['parameters']
+            if source_code.get('return_type'):
+                return_type = source_code['return_type']
 
-【方法基本信息】
-- 类名: {class_name}
-- 方法名: {method_name}
-- 参数: {parameters}
-- 返回类型: {return_type}
-- 变更类型: {change_type}（{change_type_cn}）
+        # 格式化参数列表
+        if isinstance(parameters, str):
+            try:
+                parameters = json.loads(parameters)
+            except (json.JSONDecodeError, TypeError):
+                parameters = parameters
+        if isinstance(parameters, list) and parameters:
+            params_str = ', '.join(p.get('type', '?') + ' ' + p.get('name', '?') for p in parameters if isinstance(p, dict))
+        elif isinstance(parameters, list):
+            params_str = '(无参数)'
+        else:
+            params_str = str(parameters) if parameters else '(无参数)'
 
-【数据库补充信息】
-{db_section}
+        # 多版本类名
+        full_class_name = db_info.get('package_name', '') + '.' + class_name.split('.')[-1] if db_info.get('package_name') else class_name
 
-【分析要求】
-请严格按照以下五部分结构进行分析：
+        # 构建代码版本信息
+        baseline_code = method_info.get('baseline_code', '')
+        current_code = method_info.get('current_code', '')
+        baseline_label = method_info.get('baseline_version', '基线版本')
+        current_label = method_info.get('current_version', '目标版本')
 
-### 一、变更内容分析
-- 识别功能变化、逻辑调整、新增/删除的代码块
-- 说明业务影响范围（如涉及哪些模块、表、缓存、消息队列等）
-- 如为Controller方法，分析API端点变更对外部调用方的影响
+        # 根据变更类型构建变更前/后代码段
+        if change_type == 'ADDED':
+            before_code = '(新增前没有代码)'
+            after_code_block = f'【变更后代码（{current_label}）】\n```java\n{current_code or source_code.get("body", "") if source_code else ""}\n```'
+        elif change_type == 'DELETED':
+            before_code_block = f'【变更前代码（{baseline_label}）】\n```java\n{baseline_code or source_code.get("body", "") if source_code else ""}\n```'
+            after_code = '(方法已被删除，无变更后代码)'
+        elif change_type == 'UNCHANGED':
+            before_code_block = f'【变更前代码（{baseline_label}）】\n```java\n{baseline_code or source_code.get("body", "") if source_code else ""}\n```'
+            after_code = '(代码没有变化)'
+        else:
+            # MODIFIED
+            before_code_block = f'【变更前代码（{baseline_label}）】\n```java\n{baseline_code or source_code.get("body", "") if source_code else ""}\n```'
+            after_code_block = f'【变更后代码（{current_label}）】\n```java\n{current_code or source_code.get("body", "") if source_code else ""}\n```'
 
-### 二、代码质量评估
-| 评估维度 | 分析要点 |
-|---------|---------|
-| 方法设计 | 命名规范、RESTful合规性、职责单一性 |
-| 参数校验 | 是否缺失 @NotNull、@Valid、范围校验等 |
-| 异常处理 | 是否捕获业务异常、是否吞异常、是否返回友好提示 |
-| 性能考量 | 循环调用、N+1查询、大事务、同步阻塞 |
-| 幂等性 | 重复调用是否安全 |
-| 线程安全 | 是否存在竞态条件、共享变量修改 |
+        # 构建代码输入段
+        if change_type == 'ADDED':
+            code_input = f'{after_code_block}\n\n【变更前代码】\n{before_code}'
+        elif change_type == 'DELETED':
+            code_input = f'{before_code_block}\n\n【变更后代码】\n{after_code}'
+        elif change_type == 'UNCHANGED':
+            code_input = f'{before_code_block}\n\n【变更后代码】\n{after_code}'
+        else:
+            code_input = f'{before_code_block}\n\n{after_code_block}'
 
-### 三、测试建议
-#### 1. 集成测试要点
-| 测试场景 | 输入条件 | 预期结果 | 优先级 |
-|---------|---------|---------|--------|
-| （请填写） | （请填写） | （请填写） | P0/P1/P2 |
+        prompt = f"""# 角色与任务
+你是一名资深Java开发工程师及代码审计专家。请根据我提供的"变更前代码"与"变更后代码"，生成一份专业、结构化、可直接用于技术评审或发布说明的《变更前后代码对比与分析报告》。
 
-#### 2. 边界条件与异常场景
-- 空值/边界值：null参数、空集合、超长字符串等
-- 异常路径：数据库异常、网络超时、依赖服务不可用
-- 并发场景：多线程同时调用、重复提交
+# 输入格式
+请严格基于以下输入内容进行分析：
+- 方法: {full_class_name}.{method_name}({params_str})
+- 返回类型: {return_type or '(未提供)'}
+- 变更类型: {change_type}
+- 变更前版本号: {baseline_label}
+- 变更后版本号: {current_label}
 
-#### 3. 接口规范测试
-- Swagger注解与实际行为是否一致
-- HTTP方法语义是否正确（GET/POST/PUT/DELETE）
-- 返回结构是否向前兼容
+{code_input}
 
-### 四、风险评估
-#### 🔴 高风险操作
-- 识别物理删除、资金操作、批量更新无限制、跨服务调用等
+# 输出要求（严格按以下六部分结构输出，使用Markdown格式）
 
-#### ⚠️ 可能的副作用
-- 关联数据完整性影响
-- 缓存一致性问题
-- 消息通知或事件触发链
-- 前端兼容性（返回字段变更）
+## 一、代码说明
+- 分别展示变更前/后代码（使用Java代码块）。
+- 关键要求：为代码添加逐逻辑块的详细注释，采用"步骤编号+核心逻辑说明"格式（如：// 1. 按发票币种分组并求和...），确保非原作者也能快速理解执行流与数据走向。
 
-#### 📋 回归测试建议
-- 明确需要回归的核心链路和相关功能点
-- 上下游模块的影响范围
+## 二、代码差异对比表
+- 使用Markdown表格，列名固定为：变更点 | 变更前代码 | 变更后代码 | 说明
+- 表格内容需提炼核心差异（如：币种处理、校验逻辑、计算方式、复杂度等），语言精炼。
+- 表格后附一段"核心逻辑差异总结"（3-4句话，点明业务/技术层面的本质变化）。
 
-### 五、改进建议（可选）
-- 如发现代码设计或实现可改进之处，提供优化方案
-- 可给出优化后的代码片段示例
+## 三、逻辑流程图对比
+- 分别绘制变更前/后的逻辑流程图。
+- 格式要求：使用纯文本/ASCII字符绘制，采用箭头(↓, →, ↓ 是 ↓ 否)表示流程走向，保持简洁清晰，避免复杂图形或换行混乱。
 
-请使用中文回答，确保分析具体、可执行。"""
-        
+## 四、逻辑差异详解
+- 分点阐述（建议3-5点），需覆盖：
+  1. 核心业务逻辑变化（如：多币种转换 vs 直接求和）
+  2. 数据校验与安全性提升
+  3. 代码复杂度/性能/可维护性对比
+  4. 潜在依赖或前置条件变化（如：上游数据格式假设、外部服务调用变更）
+- 语言需专业、精准，避免主观臆断，基于代码事实分析。若涉及未明确的外部依赖，需合理推断并标注"基于代码上下文推断"。
+
+## 五、测试场景建议
+- 提供两个Markdown表格：功能案例场景 与 流程案例场景。
+- 列名固定：测试点 | 预期结果 | 备注
+- 覆盖维度：正常场景、异常场景、边界场景、流程完整性、数据一致性。
+- 测试点描述需具体可执行（如："正常场景：单币种核销"而非"测试正常情况"），预期结果需明确可验证。
+
+## 六、总结
+- 结构化输出：
+  1. 变更影响：分"优点/收益"与"潜在风险/依赖"
+  2. 实施建议：给出3条可落地的建议（如：数据验证、单元测试覆盖、回滚预案、上下游协同等）
+
+# 约束与风格要求
+- 严格遵循上述六部分结构，不增删章节，不添加额外寒暄。
+- 语言风格：专业、客观、技术向，符合企业级代码评审标准。
+- 所有表格、代码块、流程图必须符合Markdown规范，排版整洁。
+- 直接输出报告内容，无需解释生成过程。"""
+
         return prompt
     
     def _build_chain_prompt(
@@ -1503,14 +1532,13 @@ class LLMService:
     def _get_system_prompt(self, analysis_type: str) -> str:
         """获取系统提示词"""
         if analysis_type == 'method':
-            return """你是一位资深的Java代码审查专家和测试工程师。你的任务是基于代码变更信息，识别潜在风险并提供精准、可执行的测试策略。
+            return """你是一名资深Java开发工程师及代码审计专家。请根据提供的变更前/后代码，生成专业、结构化、可直接用于技术评审或发布说明的《变更前后代码对比与分析报告》。
 
-回答要求：
-1. 使用中文，结构清晰，分点说明
-2. 重点关注变更带来的影响和风险
-3. 测试建议必须具体可执行（含场景、预期结果、优先级）
-4. 风险评估需结合业务场景，避免泛泛而谈
-5. 如信息不足，明确指出需要补充的内容"""
+约束要求：
+1. 使用中文，严格遵循六部分输出结构，不增删章节
+2. 语言专业、客观、技术向，符合企业级代码评审标准
+3. 所有表格、代码块、流程图必须符合Markdown规范
+4. 直接输出报告内容，无需解释生成过程"""
         else:
             return """你是一位拥有 15 年经验的资深 Java 代码审查专家和测试架构师。你的任务是基于完整的调用链拓扑（含调用顺序、深度关系、调用行号）、每个方法的源码、以及入口点分类信息，识别变更的级联影响、评估系统风险，并给出可执行的端到端测试策略。
 
@@ -1550,47 +1578,47 @@ class LLMService:
         }
     
     def _call_llm_api(self, prompt: str, system_prompt: str) -> str:
-        """调用 LLM API"""
+        """调用 LLM API（公司内网版本）"""
         # 如果未配置 LLM API，返回模拟结果
         if not self.api_url or not self.api_key:
             return self._get_mock_result(prompt)
-        
+
         try:
             import requests
-            
+
             headers = {
                 "Content-Type": "application/json",
                 "Authorization": f"Bearer {self.api_key}"
             }
-            
-            messages = [
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": prompt}
-            ]
-            
+
+            # 公司内网 API 请求格式
             payload = {
-                "model": self.model,
-                "messages": messages,
-                "max_tokens": 2000,
-                "temperature": 0.7
+                "inputs": {"query": f"{system_prompt}\n\n{prompt}"},
+                "response_mode": "blocking",
+                "user": "pipeline-analysis-v3"
             }
-            
+
             max_retries = 3
             base_delay = 5  # 首次重试等待 5 秒
             last_error = None
-            
+
             for attempt in range(max_retries):
                 try:
-                    with self._api_lock:  # 全局互斥：同一时间仅一个 LLM API 请求
-                        response = requests.post(
-                            f"{self.api_url}/chat/completions",
-                            json=payload,
-                            headers=headers,
-                            timeout=300
-                        )
+                    response = requests.post(
+                        f"{self.api_url}/completion-messages",
+                        json=payload,
+                        headers=headers,
+                        timeout=300
+                    )
                     if response.status_code == 200:
                         result = response.json()
-                        return result['choices'][0]['message']['content']
+                        # 根据公司内网 API 响应格式提取结果
+                        if 'answer' in result:
+                            return result['answer']
+                        elif 'text' in result:
+                            return result['text']
+                        else:
+                            return f"API响应格式异常: {result}"
                     else:
                         # HTTP 错误不重试
                         return f"API调用失败: HTTP {response.status_code}\n{response.text}"

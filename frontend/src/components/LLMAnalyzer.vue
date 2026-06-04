@@ -76,6 +76,8 @@ const props = defineProps<{
   analysisType: 'method' | 'chain'
   data: any
   direction?: string
+  baseline?: string
+  version?: string
 }>()
 
 const analyzing = ref(false)
@@ -155,7 +157,9 @@ const startAnalysis = async () => {
           method_info: props.data.method_info || props.data,
           db_info: props.data.db_info || {},
           direction: props.direction || 'upwards',
-          force_fresh: forceFresh.value
+          force_fresh: forceFresh.value,
+          baseline: props.baseline || '',
+          version: props.version || ''
         }
       : {
           chain_data: props.data,

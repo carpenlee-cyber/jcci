@@ -178,6 +178,17 @@ class SqliteHelper(object):
         except Exception as e:
             logging.error(f'select_data fail')
 
+    def _format_value(self, x):
+        """将 Python 值格式化为 SQL 字面量"""
+        if x is None:
+            return 'NULL'
+        if isinstance(x, bool):
+            return '1' if x else '0'
+        if isinstance(x, str):
+            escaped = x.replace("'", "''")
+            return f"'{escaped}'"
+        return f"'{x}'"
+
     def insert_data(self, table_name: str, data) -> bool:
         try:
             conn = self.connect()
@@ -185,12 +196,12 @@ class SqliteHelper(object):
             if isinstance(data, list):
                 for item in data:
                     keys = ",".join(list(item.keys()))
-                    values = ",".join([f'''"{x.replace('"', '""').replace("'", "''")}"''' if isinstance(x, str) else f"'{x}'" for x in list(item.values())])
+                    values = ",".join([self._format_value(x) for x in list(item.values())])
                     sql = f"INSERT INTO {table_name} ({keys}) VALUES ({values});"
                     c.execute(sql)
             elif isinstance(data, dict):
                 keys = ",".join(list(data.keys()))
-                values = ",".join([f"'{x}'" for x in list(data.values())])
+                values = ",".join([self._format_value(x) for x in list(data.values())])
                 sql = f"INSERT INTO {table_name} ({keys}) VALUES ({values});"
                 c.execute(sql)
             conn.commit()

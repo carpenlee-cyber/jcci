@@ -143,6 +143,7 @@ export function getMethodCode(params: {
   version: string
   class_name: string
   method_name: string
+  signature?: string
 }) {
   return apiClient.get<{
     baseline_code: string
@@ -151,6 +152,7 @@ export function getMethodCode(params: {
     access_modifier: string
     return_type: string
     parameters: string
+    documentation: string
     class_name: string
     method_name: string
   }>('/analysis/method-code', { params })

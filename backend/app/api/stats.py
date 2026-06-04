@@ -43,5 +43,7 @@ async def get_tracking_stats():
             "by_project": project_stats,
             "by_user": user_stats
         }
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

@@ -6,6 +6,7 @@ import atexit
 import logging
 import datetime
 import fnmatch
+import subprocess
 from . import config as config
 from .database import SqliteHelper
 from .java_parse import JavaParse, calculate_similar_score_method_params
@@ -104,17 +105,31 @@ class JCCI(object):
 
     # Step 2
     def _get_diff_parse_map(self, filepath, branch, commit_new, commit_old):
-        logging.info('Git pull project to HEAD')
-        os.system(f'cd {filepath} && git checkout {branch} && git pull')
+        logging.info('Git fetch and reset project to HEAD')
+        r1 = os.system(f'cd {filepath} && git fetch origin {branch} && git checkout {branch} && git reset --hard origin/{branch}')
+        if r1 != 0:
+            error_msg = f"Git fetch/reset 失败 (returncode={r1})，请确认分支 {branch} 是否存在"
+            logging.error(error_msg)
+            raise RuntimeError(error_msg)
         time.sleep(1)
         logging.info(f'Git diff between {commit_new} and {commit_old}')
         # 使用标准化后的短标识符命名diff文件
         commit_old_short = _normalize_commit_or_tag(commit_old)
         commit_new_short = _normalize_commit_or_tag(commit_new)
-        diff_base = f'cd {self.file_path} && git diff {commit_old}..{commit_new} > diff_{commit_old_short}..{commit_new_short}.txt'
-        os.system(diff_base)
+        diff_base = f'cd {self.file_path} && git diff {commit_old}..{commit_new} > diff_{commit_old_short}..{commit_new_short}.txt 2> git_diff_err_{commit_old_short}..{commit_new_short}.txt'
+        r2 = os.system(diff_base)
         diff_txt = os.path.join(self.file_path, f'diff_{commit_old_short}..{commit_new_short}.txt')
         logging.info(f'Analyzing diff file, location: {diff_txt}')
+        
+        # 检查 git diff 错误信息
+        diff_err_path = os.path.join(self.file_path, f'git_diff_err_{commit_old_short}..{commit_new_short}.txt')
+        if os.path.exists(diff_err_path) and os.path.getsize(diff_err_path) > 0:
+            with open(diff_err_path, 'r', encoding='utf-8', errors='ignore') as f:
+                err_content = f.read().strip()
+            if err_content and ('fatal:' in err_content or 'unknown revision' in err_content or 'ambiguous' in err_content):
+                error_msg = f"Git diff 失败: {err_content}。请确认 {commit_old} 和 {commit_new} 在仓库中真实存在"
+                logging.error(error_msg)
+                raise RuntimeError(error_msg)
         
         # 检查diff文件是否存在且有内容
         if os.path.exists(diff_txt):
@@ -125,6 +140,7 @@ class JCCI(object):
                 logging.warning(f'   Please verify that these commits/tags exist in the repository')
         else:
             logging.error(f'❌ Diff file not created: {diff_txt}')
+            raise RuntimeError(f"Diff 文件未生成: {diff_txt}。请确认 {commit_old} 和 {commit_new} 在仓库中真实存在")
         
         diff_parse_map = diff_parse.get_diff_info(diff_txt)
         logging.info(f'Diff parse result: {len(diff_parse_map)} files changed')
@@ -140,10 +156,10 @@ class JCCI(object):
 
     # Step 2
     def _get_branch_diff_parse_map(self, filepath, commit_new, commit_old):
-        logging.info('Git pull project to HEAD')
-        os.system(f'cd {filepath} && git fetch --all && git checkout -b {commit_old} origin/{commit_old} && git checkout {commit_old} && git pull')
+        logging.info('Git fetch and reset project to HEAD')
+        os.system(f'cd {filepath} && git fetch --all && git checkout -B {commit_old} origin/{commit_old}')
         time.sleep(1)
-        os.system(f'cd {filepath} && git fetch --all && git checkout -b {commit_new} origin/{commit_new} && git checkout {commit_new} && git pull')
+        os.system(f'cd {filepath} && git fetch --all && git checkout -B {commit_new} origin/{commit_new}')
         time.sleep(1)
         logging.info(f'Git diff between {commit_new} and {commit_old}')
         # 使用标准化后的短标识符命名diff文件
@@ -678,7 +694,7 @@ class JCCI(object):
     def _handle_impacted_methods(self, impacted_methods: list, source_node_id):
         for impacted_method in impacted_methods:
             node_extend_dict = {'is_api': False}
-            if impacted_method.get('is_api') == 'True':
+            if impacted_method.get('is_api'):
                 node_extend_dict = {
                     'is_api': True,
                     'api_path': impacted_method['api_path']
@@ -949,7 +965,9 @@ class JCCI(object):
             
             # 4.4 全量解析 commit_old → project_id = 0（使用短标识符）
             logging.info(f'Full parsing baseline commit: {self.commit_or_branch_old}')
-            os.system(f'cd {self.file_path} && git reset --hard {self.commit_or_branch_old}')
+            r = os.system(f'cd {self.file_path} && git reset --hard {self.commit_or_branch_old}')
+            if r != 0:
+                raise RuntimeError(f"git reset --hard {self.commit_or_branch_old} 失败 (returncode={r})，该版本在仓库中不存在")
             time.sleep(2)
             
             file_path_list = self._get_project_files(self.file_path)
@@ -971,7 +989,9 @@ class JCCI(object):
             )
             
             # 切换到新提交（使用原始tag进行Git操作）
-            os.system(f'cd {self.file_path} && git reset --hard {self.commit_or_branch_new}')
+            r = os.system(f'cd {self.file_path} && git reset --hard {self.commit_or_branch_new}')
+            if r != 0:
+                raise RuntimeError(f"git reset --hard {self.commit_or_branch_new} 失败 (returncode={r})，该版本在仓库中不存在")
             time.sleep(2)
             
             # 只解析差异文件
@@ -1046,7 +1066,9 @@ class JCCI(object):
             )
             
             # 切换到新提交
-            os.system(f'cd {self.file_path} && git reset --hard {self.commit_or_branch_new}')
+            r = os.system(f'cd {self.file_path} && git reset --hard {self.commit_or_branch_new}')
+            if r != 0:
+                raise RuntimeError(f"git reset --hard {self.commit_or_branch_new} 失败 (returncode={r})，该版本在仓库中不存在")
             time.sleep(2)
             
             # 获取当前项目文件列表

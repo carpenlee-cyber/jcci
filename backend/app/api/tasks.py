@@ -16,12 +16,24 @@ task_service = TaskService(settings.DB_PATH)
 async def submit_task(request: TaskSubmitRequest):
     """提交分析任务（含去重检查）"""
     try:
+        # 第零步：验证 Git tag/commit 是否在远程仓库中真实存在
+        is_valid, validation_error = task_service.validate_git_refs(
+            request.git_url, request.tag_old, request.tag_new
+        )
+        if not is_valid:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Git 引用验证失败: {validation_error}"
+            )
+        
         # 第一步：检查是否有相同参数的活跃任务（pending 或 running）
         active = task_service.find_active_task(
             git_url=request.git_url,
             tag_old=request.tag_old,
             tag_new=request.tag_new,
-            max_depth=request.max_depth
+            max_depth=request.max_depth,
+            project_code=request.project_code or "",
+            task_stage=request.task_stage or ""
         )
         
         if active and active.get('task_id'):
@@ -39,7 +51,9 @@ async def submit_task(request: TaskSubmitRequest):
             git_url=request.git_url,
             tag_old=request.tag_old,
             tag_new=request.tag_new,
-            max_depth=request.max_depth
+            max_depth=request.max_depth,
+            project_code=request.project_code or "",
+            task_stage=request.task_stage or ""
         )
         
         if duplicate and duplicate.get('result_url'):
@@ -72,6 +86,8 @@ async def submit_task(request: TaskSubmitRequest):
             queue_position=1,
             estimated_wait_minutes=5
         )
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

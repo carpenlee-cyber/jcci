@@ -700,7 +700,8 @@ def _extract_entry_points(chain) -> List[dict]:
                 "method_signature": node.method_signature,
                 "root_type": node.root_type,
                 "depth_from_change": node.depth,
-                "api_paths": getattr(node, 'api_paths', [])  # 添加API路径
+                "api_paths": getattr(node, 'api_paths', []),  # API路径
+                "documentation": getattr(node, 'documentation', None)  # 方法注释/文档
             }
             entries.append(entry_info)
         for child in node.children:

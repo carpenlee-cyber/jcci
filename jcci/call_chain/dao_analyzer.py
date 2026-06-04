@@ -143,6 +143,7 @@ class DaoAnalyzer:
         }, f"{package_class}.{method_name}")
         
         return {
+            'method_signature': method_signature,
             'sql_type': sql_type,
             'tables': tables,
             'sql_content': sql_content,
@@ -199,6 +200,7 @@ class DaoAnalyzer:
         
         # 附加 SQL 详细信息
         sql_node.sql_details = sql_info
+        sql_node.dao_info = sql_info  # 也设置 dao_info，确保叶子节点在 JSON 序列化时携带 DAO 数据
         sql_node.is_leaf = True  # SQL 节点是叶子节点
         
         return sql_node
