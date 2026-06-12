@@ -154,10 +154,15 @@ const getStatusType = (status: string) => {
 const loadTasks = async () => {
   loading.value = true
   try {
-    const response = await taskApi.listTasks(pageSize, (currentPage.value - 1) * pageSize)
-    tasks.value = response.data.tasks
-    total.value = response.data.total
-    updateStats(response.data.tasks)
+    // 同时获取任务列表和统计信息
+    const [listResponse, statsResponse] = await Promise.all([
+      taskApi.listTasks(pageSize, (currentPage.value - 1) * pageSize),
+      taskApi.getTaskStats()
+    ])
+
+    tasks.value = listResponse.data.tasks
+    total.value = listResponse.data.total
+    updateStats(statsResponse.data)
   } catch (error) {
     ElMessage.error('加载任务列表失败')
   } finally {
@@ -165,12 +170,12 @@ const loadTasks = async () => {
   }
 }
 
-const updateStats = (taskList: any[]) => {
-  stats.total = taskList.length
-  stats.completed = taskList.filter(t => t.status === 'completed').length
-  stats.running = taskList.filter(t => t.status === 'running').length
-  stats.pending = taskList.filter(t => t.status === 'pending').length
-  stats.failed = taskList.filter(t => t.status === 'failed').length
+const updateStats = (statsData: any) => {
+  stats.total = statsData.total
+  stats.completed = statsData.by_status.completed
+  stats.running = statsData.by_status.running
+  stats.pending = statsData.by_status.pending
+  stats.failed = statsData.by_status.failed
 }
 
 const toggleAutoRefresh = (enabled: boolean) => {

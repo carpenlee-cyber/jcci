@@ -1,0 +1,2000 @@
+================================================================================
+向下调用链分析 - 元数据信息
+================================================================================
+项目: mall
+用户名: carpenlee-cyber
+Git URL: https://github.com/carpenlee-cyber/mall.git
+Commit范围: SHAa4e1_20260508_01..SHA5197_20260508_02
+分析版本: 3.1
+最大深度: 5
+总变更方法数: 16
+成功分析: 16
+失败分析: 0
+
+================================================================================
+
+
+向下调用链分析（功能风险：变更方法调用了谁？）
+
+调用链 1：MODIFIED方法 SmsCouponController.delete
+SmsCouponController.delete (MODIFIED)
+	--行号43-->
+	SmsCouponService.delete (UNCHANGED)
+		SmsCouponServiceImpl.delete (UNCHANGED)
+			🟥 SQL: delete from sms_coupon where id = #{id,jdbcType=BIGINT}
+			    ┌──────────────────────────────────────────────────┐
+			    │ 📊 操作类型: DELETE                                   │
+			    │ 📋 影响表: sms_coupon                                │
+			    │ ⚠️  风险等级: ⚠️ HIGH                                 │
+			    │ 🔍 WHERE条件: ✅                                     │
+			    │ 📄 LIMIT限制: ❌ 无                                   │
+			    │ 📝 预估行数: UNKNOWN                                  │
+			    └──────────────────────────────────────────────────┘
+			--行号66-->
+			SmsCouponServiceImpl.deleteProductRelation (UNCHANGED)
+				--行号80-->
+				SmsCouponProductRelationExample.createCriteria (UNCHANGED)
+					--行号48-->
+					SmsCouponProductRelationExample.createCriteriaInternal (UNCHANGED)
+					--行号49-->
+					List<Criteria>.size (UNKNOWN)
+					--行号50-->
+					List<Criteria>.add (UNKNOWN)
+				🟥 SQL: delete from sms_coupon_product_relation /* IF: _parameter != null */ /* FOREACH: oredCriteria */ /* IF: criteria.valid */ /* FOREACH: criteria.criteria */ and ${criterion.condition} and ${criterion.condition} #{criterion.value} and ${criterion.condition} #{criterion.value} and #{criterion.secondValue} and ${criterion.condition} /* FOREACH: criterion.value */ #{listItem}
+				    ┌──────────────────────────────────────────────────┐
+				    │ 📊 操作类型: DELETE                                   │
+				    │ 📋 影响表: sms_coupon_product_relation               │
+				    │ ⚠️  风险等级: 🔴 CRITICAL                             │
+				    │ 🔍 WHERE条件: ❌ 缺失                                  │
+				    │ 📄 LIMIT限制: ❌ 无                                   │
+				    │ 📝 预估行数: ALL                                      │
+				    └──────────────────────────────────────────────────┘
+				    🔄 动态SQL条件:
+				      • IF: _parameter != null
+			--行号68-->
+			SmsCouponServiceImpl.deleteProductCategoryRelation (UNCHANGED)
+				--行号74-->
+				SmsCouponProductCategoryRelationExample.createCriteria (UNCHANGED)
+					--行号48-->
+					SmsCouponProductCategoryRelationExample.createCriteriaInternal (UNCHANGED)
+					--行号49-->
+					List<Criteria>.size (UNKNOWN)
+					--行号50-->
+					List<Criteria>.add (UNKNOWN)
+				🟥 SQL: delete from sms_coupon_product_category_relation /* IF: _parameter != null */ /* FOREACH: oredCriteria */ /* IF: criteria.valid */ /* FOREACH: criteria.criteria */ and ${criterion.condition} and ${criterion.condition} #{criterion.value} and ${criterion.condition} #{criterion.value} and #{criterion.secondValue} and ${criterion.condition} /* FOREACH: criterion.value */ #{listItem}
+				    ┌──────────────────────────────────────────────────┐
+				    │ 📊 操作类型: DELETE                                   │
+				    │ 📋 影响表: sms_coupon_product_category_relation      │
+				    │ ⚠️  风险等级: 🔴 CRITICAL                             │
+				    │ 🔍 WHERE条件: ❌ 缺失                                  │
+				    │ 📄 LIMIT限制: ❌ 无                                   │
+				    │ 📝 预估行数: ALL                                      │
+				    └──────────────────────────────────────────────────┘
+				    🔄 动态SQL条件:
+				      • IF: _parameter != null
+	--行号43-->
+	SmsCouponService.delete (UNCHANGED)
+		SmsCouponServiceImpl.delete (UNCHANGED)
+			🟥 SQL: delete from sms_coupon where id = #{id,jdbcType=BIGINT}
+			    ┌──────────────────────────────────────────────────┐
+			    │ 📊 操作类型: DELETE                                   │
+			    │ 📋 影响表: sms_coupon                                │
+			    │ ⚠️  风险等级: ⚠️ HIGH                                 │
+			    │ 🔍 WHERE条件: ✅                                     │
+			    │ 📄 LIMIT限制: ❌ 无                                   │
+			    │ 📝 预估行数: UNKNOWN                                  │
+			    └──────────────────────────────────────────────────┘
+			--行号66-->
+			SmsCouponServiceImpl.deleteProductRelation (UNCHANGED)
+				--行号80-->
+				SmsCouponProductRelationExample.createCriteria (UNCHANGED)
+					--行号48-->
+					SmsCouponProductRelationExample.createCriteriaInternal (UNCHANGED)
+					--行号49-->
+					List<Criteria>.size (UNKNOWN)
+					--行号50-->
+					List<Criteria>.add (UNKNOWN)
+				🟥 SQL: delete from sms_coupon_product_relation /* IF: _parameter != null */ /* FOREACH: oredCriteria */ /* IF: criteria.valid */ /* FOREACH: criteria.criteria */ and ${criterion.condition} and ${criterion.condition} #{criterion.value} and ${criterion.condition} #{criterion.value} and #{criterion.secondValue} and ${criterion.condition} /* FOREACH: criterion.value */ #{listItem}
+				    ┌──────────────────────────────────────────────────┐
+				    │ 📊 操作类型: DELETE                                   │
+				    │ 📋 影响表: sms_coupon_product_relation               │
+				    │ ⚠️  风险等级: 🔴 CRITICAL                             │
+				    │ 🔍 WHERE条件: ❌ 缺失                                  │
+				    │ 📄 LIMIT限制: ❌ 无                                   │
+				    │ 📝 预估行数: ALL                                      │
+				    └──────────────────────────────────────────────────┘
+				    🔄 动态SQL条件:
+				      • IF: _parameter != null
+			--行号68-->
+			SmsCouponServiceImpl.deleteProductCategoryRelation (UNCHANGED)
+				--行号74-->
+				SmsCouponProductCategoryRelationExample.createCriteria (UNCHANGED)
+					--行号48-->
+					SmsCouponProductCategoryRelationExample.createCriteriaInternal (UNCHANGED)
+					--行号49-->
+					List<Criteria>.size (UNKNOWN)
+					--行号50-->
+					List<Criteria>.add (UNKNOWN)
+				🟥 SQL: delete from sms_coupon_product_category_relation /* IF: _parameter != null */ /* FOREACH: oredCriteria */ /* IF: criteria.valid */ /* FOREACH: criteria.criteria */ and ${criterion.condition} and ${criterion.condition} #{criterion.value} and ${criterion.condition} #{criterion.value} and #{criterion.secondValue} and ${criterion.condition} /* FOREACH: criterion.value */ #{listItem}
+				    ┌──────────────────────────────────────────────────┐
+				    │ 📊 操作类型: DELETE                                   │
+				    │ 📋 影响表: sms_coupon_product_category_relation      │
+				    │ ⚠️  风险等级: 🔴 CRITICAL                             │
+				    │ 🔍 WHERE条件: ❌ 缺失                                  │
+				    │ 📄 LIMIT限制: ❌ 无                                   │
+				    │ 📝 预估行数: ALL                                      │
+				    └──────────────────────────────────────────────────┘
+				    🔄 动态SQL条件:
+				      • IF: _parameter != null
+	--行号43-->
+	SmsCouponServiceImpl.delete (UNCHANGED)
+		🟥 SQL: delete from sms_coupon where id = #{id,jdbcType=BIGINT}
+		    ┌──────────────────────────────────────────────────┐
+		    │ 📊 操作类型: DELETE                                   │
+		    │ 📋 影响表: sms_coupon                                │
+		    │ ⚠️  风险等级: ⚠️ HIGH                                 │
+		    │ 🔍 WHERE条件: ✅                                     │
+		    │ 📄 LIMIT限制: ❌ 无                                   │
+		    │ 📝 预估行数: UNKNOWN                                  │
+		    └──────────────────────────────────────────────────┘
+		--行号66-->
+		SmsCouponServiceImpl.deleteProductRelation (UNCHANGED)
+			--行号80-->
+			SmsCouponProductRelationExample.createCriteria (UNCHANGED)
+				--行号48-->
+				SmsCouponProductRelationExample.createCriteriaInternal (UNCHANGED)
+				--行号49-->
+				List<Criteria>.size (UNKNOWN)
+				--行号50-->
+				List<Criteria>.add (UNKNOWN)
+			🟥 SQL: delete from sms_coupon_product_relation /* IF: _parameter != null */ /* FOREACH: oredCriteria */ /* IF: criteria.valid */ /* FOREACH: criteria.criteria */ and ${criterion.condition} and ${criterion.condition} #{criterion.value} and ${criterion.condition} #{criterion.value} and #{criterion.secondValue} and ${criterion.condition} /* FOREACH: criterion.value */ #{listItem}
+			    ┌──────────────────────────────────────────────────┐
+			    │ 📊 操作类型: DELETE                                   │
+			    │ 📋 影响表: sms_coupon_product_relation               │
+			    │ ⚠️  风险等级: 🔴 CRITICAL                             │
+			    │ 🔍 WHERE条件: ❌ 缺失                                  │
+			    │ 📄 LIMIT限制: ❌ 无                                   │
+			    │ 📝 预估行数: ALL                                      │
+			    └──────────────────────────────────────────────────┘
+			    🔄 动态SQL条件:
+			      • IF: _parameter != null
+		--行号68-->
+		SmsCouponServiceImpl.deleteProductCategoryRelation (UNCHANGED)
+			--行号74-->
+			SmsCouponProductCategoryRelationExample.createCriteria (UNCHANGED)
+				--行号48-->
+				SmsCouponProductCategoryRelationExample.createCriteriaInternal (UNCHANGED)
+				--行号49-->
+				List<Criteria>.size (UNKNOWN)
+				--行号50-->
+				List<Criteria>.add (UNKNOWN)
+			🟥 SQL: delete from sms_coupon_product_category_relation /* IF: _parameter != null */ /* FOREACH: oredCriteria */ /* IF: criteria.valid */ /* FOREACH: criteria.criteria */ and ${criterion.condition} and ${criterion.condition} #{criterion.value} and ${criterion.condition} #{criterion.value} and #{criterion.secondValue} and ${criterion.condition} /* FOREACH: criterion.value */ #{listItem}
+			    ┌──────────────────────────────────────────────────┐
+			    │ 📊 操作类型: DELETE                                   │
+			    │ 📋 影响表: sms_coupon_product_category_relation      │
+			    │ ⚠️  风险等级: 🔴 CRITICAL                             │
+			    │ 🔍 WHERE条件: ❌ 缺失                                  │
+			    │ 📄 LIMIT限制: ❌ 无                                   │
+			    │ 📝 预估行数: ALL                                      │
+			    └──────────────────────────────────────────────────┘
+			    🔄 动态SQL条件:
+			      • IF: _parameter != null
+	--行号45-->
+	CommonResult.success (UNCHANGED)
+		--行号36-->
+		SUCCESS.getCode (UNKNOWN)
+		--行号36-->
+		SUCCESS.getMessage (UNKNOWN)
+	--行号45-->
+	CommonResult.success (UNCHANGED)
+		--行号36-->
+		SUCCESS.getCode (UNKNOWN)
+		--行号36-->
+		SUCCESS.getMessage (UNKNOWN)
+	--行号47-->
+	CommonResult.failed (UNCHANGED)
+		--行号78-->
+		CommonResult.failed (UNCHANGED)
+			--行号54-->
+			IErrorCode.getCode (UNCHANGED)
+				ResultCode.getCode (UNCHANGED)
+			--行号54-->
+			ResultCode.getCode (UNCHANGED)
+			--行号54-->
+			IErrorCode.getMessage (UNCHANGED)
+				ResultCode.getMessage (UNCHANGED)
+			--行号54-->
+			ResultCode.getMessage (UNCHANGED)
+
+调用链 2：MODIFIED方法 SmsCouponController.update
+SmsCouponController.update (MODIFIED)
+	--行号54-->
+	SmsCouponService.update (UNCHANGED)
+		SmsCouponServiceImpl.update (UNCHANGED)
+			--行号86-->
+			SmsCouponParam.setId (UNKNOWN)
+			🟧 SQL: update sms_coupon set type = #{type,jdbcType=INTEGER}, name = #{name,jdbcType=VARCHAR}, platform = #{platform,jdbcType=INTEGER}, count = #{count,jdbcType=INTEGER}, amount = #{amount,jdbcType=DECIMAL}, per_limit = #{perLimit,jdbcType=INTEGER}, min_point = #{minPoint,jdbcType=DECIMAL}, start_time = #{startTime,jdbcType=TIMESTAMP}, end_time = #{endTime,jdbcType=TIMESTAMP}, use_type = #{useType,jdbcType=INTEGER}, note = #{note,jdbcType=VARCHAR}, publish_count = #{publishCount,jdbcType=INTEGER}, use_count = #{useCount,jdbcType=INTEGER}, receive_count = #{receiveCount,jdbcType=INTEGER}, enable_time = #{enableTime,jdbcType=TIMESTAMP}, code = #{code,jdbcType=VARCHAR}, member_level = #{memberLevel,jdbcType=INTEGER} where id = #{id,jdbcType=BIGINT}
+			    ┌──────────────────────────────────────────────────┐
+			    │ 📊 操作类型: UPDATE                                   │
+			    │ 📋 影响表: sms_coupon                                │
+			    │ ⚠️  风险等级: ℹ️ MEDIUM                               │
+			    │ 🔍 WHERE条件: ✅                                     │
+			    │ 📄 LIMIT限制: ✅                                     │
+			    │ 📝 预估行数: FEW                                      │
+			    └──────────────────────────────────────────────────┘
+			🟧 SQL: update sms_coupon set type = #{type,jdbcType=INTEGER}, name = #{name,jdbcType=VARCHAR}, platform = #{platform,jdbcType=INTEGER}, count = #{count,jdbcType=INTEGER}, amount = #{amount,jdbcType=DECIMAL}, per_limit = #{perLimit,jdbcType=INTEGER}, min_point = #{minPoint,jdbcType=DECIMAL}, start_time = #{startTime,jdbcType=TIMESTAMP}, end_time = #{endTime,jdbcType=TIMESTAMP}, use_type = #{useType,jdbcType=INTEGER}, note = #{note,jdbcType=VARCHAR}, publish_count = #{publishCount,jdbcType=INTEGER}, use_count = #{useCount,jdbcType=INTEGER}, receive_count = #{receiveCount,jdbcType=INTEGER}, enable_time = #{enableTime,jdbcType=TIMESTAMP}, code = #{code,jdbcType=VARCHAR}, member_level = #{memberLevel,jdbcType=INTEGER} where id = #{id,jdbcType=BIGINT}
+			    ┌──────────────────────────────────────────────────┐
+			    │ 📊 操作类型: UPDATE                                   │
+			    │ 📋 影响表: sms_coupon                                │
+			    │ ⚠️  风险等级: ℹ️ MEDIUM                               │
+			    │ 🔍 WHERE条件: ✅                                     │
+			    │ 📄 LIMIT限制: ✅                                     │
+			    │ 📝 预估行数: FEW                                      │
+			    └──────────────────────────────────────────────────┘
+			--行号89,97-->
+			SmsCouponParam.getUseType (UNKNOWN)
+			--行号90,94-->
+			SmsCouponParam.getProductRelationList (UNKNOWN)
+			--行号91,99-->
+			SmsCouponParam.getId (UNKNOWN)
+			--行号91-->
+			SmsCouponProductRelation.setCouponId (UNCHANGED)
+			--行号93-->
+			SmsCouponServiceImpl.deleteProductRelation (UNCHANGED)
+				--行号80-->
+				SmsCouponProductRelationExample.createCriteria (UNCHANGED)
+					--行号48-->
+					SmsCouponProductRelationExample.createCriteriaInternal (UNCHANGED)
+					--行号49-->
+					List<Criteria>.size (UNKNOWN)
+					--行号50-->
+					List<Criteria>.add (UNKNOWN)
+				🟥 SQL: delete from sms_coupon_product_relation /* IF: _parameter != null */ /* FOREACH: oredCriteria */ /* IF: criteria.valid */ /* FOREACH: criteria.criteria */ and ${criterion.condition} and ${criterion.condition} #{criterion.value} and ${criterion.condition} #{criterion.value} and #{criterion.secondValue} and ${criterion.condition} /* FOREACH: criterion.value */ #{listItem}
+				    ┌──────────────────────────────────────────────────┐
+				    │ 📊 操作类型: DELETE                                   │
+				    │ 📋 影响表: sms_coupon_product_relation               │
+				    │ ⚠️  风险等级: 🔴 CRITICAL                             │
+				    │ 🔍 WHERE条件: ❌ 缺失                                  │
+				    │ 📄 LIMIT限制: ❌ 无                                   │
+				    │ 📝 预估行数: ALL                                      │
+				    └──────────────────────────────────────────────────┘
+				    🔄 动态SQL条件:
+				      • IF: _parameter != null
+			🟩 SQL: INSERT INTO sms_coupon_product_relation (product_id,product_name,product_sn,coupon_id) VALUES /* FOREACH: list */ (#{item.productId,jdbcType=BIGINT}, #{item.productName,jdbcType=VARCHAR}, #{item.productSn,jdbcType=VARCHAR}, #{item.couponId,jdbcType=INTEGER})
+			    ┌──────────────────────────────────────────────────┐
+			    │ 📊 操作类型: INSERT                                   │
+			    │ 📋 影响表: sms_coupon_product_relation               │
+			    │ ⚠️  风险等级: ✅ LOW                                   │
+			    │ 🔍 WHERE条件: ✅                                     │
+			    │ 📄 LIMIT限制: ❌ 无                                   │
+			    │ 📝 预估行数: MANY                                     │
+			    └──────────────────────────────────────────────────┘
+			    🔄 动态SQL条件:
+			      • IF: FOREACH: list
+			🟩 SQL: INSERT INTO sms_coupon_product_relation (product_id,product_name,product_sn,coupon_id) VALUES /* FOREACH: list */ (#{item.productId,jdbcType=BIGINT}, #{item.productName,jdbcType=VARCHAR}, #{item.productSn,jdbcType=VARCHAR}, #{item.couponId,jdbcType=INTEGER})
+			    ┌──────────────────────────────────────────────────┐
+			    │ 📊 操作类型: INSERT                                   │
+			    │ 📋 影响表: sms_coupon_product_relation               │
+			    │ ⚠️  风险等级: ✅ LOW                                   │
+			    │ 🔍 WHERE条件: ✅                                     │
+			    │ 📄 LIMIT限制: ❌ 无                                   │
+			    │ 📝 预估行数: MANY                                     │
+			    └──────────────────────────────────────────────────┘
+			    🔄 动态SQL条件:
+			      • IF: FOREACH: list
+			--行号98,102-->
+			SmsCouponParam.getProductCategoryRelationList (UNKNOWN)
+			--行号99-->
+			SmsCouponProductCategoryRelation.setCouponId (UNCHANGED)
+			--行号101-->
+			SmsCouponServiceImpl.deleteProductCategoryRelation (UNCHANGED)
+				--行号74-->
+				SmsCouponProductCategoryRelationExample.createCriteria (UNCHANGED)
+					--行号48-->
+					SmsCouponProductCategoryRelationExample.createCriteriaInternal (UNCHANGED)
+					--行号49-->
+					List<Criteria>.size (UNKNOWN)
+					--行号50-->
+					List<Criteria>.add (UNKNOWN)
+				🟥 SQL: delete from sms_coupon_product_category_relation /* IF: _parameter != null */ /* FOREACH: oredCriteria */ /* IF: criteria.valid */ /* FOREACH: criteria.criteria */ and ${criterion.condition} and ${criterion.condition} #{criterion.value} and ${criterion.condition} #{criterion.value} and #{criterion.secondValue} and ${criterion.condition} /* FOREACH: criterion.value */ #{listItem}
+				    ┌──────────────────────────────────────────────────┐
+				    │ 📊 操作类型: DELETE                                   │
+				    │ 📋 影响表: sms_coupon_product_category_relation      │
+				    │ ⚠️  风险等级: 🔴 CRITICAL                             │
+				    │ 🔍 WHERE条件: ❌ 缺失                                  │
+				    │ 📄 LIMIT限制: ❌ 无                                   │
+				    │ 📝 预估行数: ALL                                      │
+				    └──────────────────────────────────────────────────┘
+				    🔄 动态SQL条件:
+				      • IF: _parameter != null
+			🟩 SQL: INSERT INTO sms_coupon_product_category_relation (product_category_id,product_category_name,parent_category_name,coupon_id) VALUES /* FOREACH: list */ (#{item.productCategoryId,jdbcType=BIGINT}, #{item.productCategoryName,jdbcType=VARCHAR}, #{item.parentCategoryName,jdbcType=VARCHAR}, #{item.couponId,jdbcType=BIGINT})
+			    ┌──────────────────────────────────────────────────┐
+			    │ 📊 操作类型: INSERT                                   │
+			    │ 📋 影响表: sms_coupon_product_category_relation      │
+			    │ ⚠️  风险等级: ✅ LOW                                   │
+			    │ 🔍 WHERE条件: ✅                                     │
+			    │ 📄 LIMIT限制: ❌ 无                                   │
+			    │ 📝 预估行数: MANY                                     │
+			    └──────────────────────────────────────────────────┘
+			    🔄 动态SQL条件:
+			      • IF: FOREACH: list
+			🟩 SQL: INSERT INTO sms_coupon_product_category_relation (product_category_id,product_category_name,parent_category_name,coupon_id) VALUES /* FOREACH: list */ (#{item.productCategoryId,jdbcType=BIGINT}, #{item.productCategoryName,jdbcType=VARCHAR}, #{item.parentCategoryName,jdbcType=VARCHAR}, #{item.couponId,jdbcType=BIGINT})
+			    ┌──────────────────────────────────────────────────┐
+			    │ 📊 操作类型: INSERT                                   │
+			    │ 📋 影响表: sms_coupon_product_category_relation      │
+			    │ ⚠️  风险等级: ✅ LOW                                   │
+			    │ 🔍 WHERE条件: ✅                                     │
+			    │ 📄 LIMIT限制: ❌ 无                                   │
+			    │ 📝 预估行数: MANY                                     │
+			    └──────────────────────────────────────────────────┘
+			    🔄 动态SQL条件:
+			      • IF: FOREACH: list
+	--行号54-->
+	SmsCouponService.update (UNCHANGED)
+		SmsCouponServiceImpl.update (UNCHANGED)
+			--行号86-->
+			SmsCouponParam.setId (UNKNOWN)
+			🟧 SQL: update sms_coupon set type = #{type,jdbcType=INTEGER}, name = #{name,jdbcType=VARCHAR}, platform = #{platform,jdbcType=INTEGER}, count = #{count,jdbcType=INTEGER}, amount = #{amount,jdbcType=DECIMAL}, per_limit = #{perLimit,jdbcType=INTEGER}, min_point = #{minPoint,jdbcType=DECIMAL}, start_time = #{startTime,jdbcType=TIMESTAMP}, end_time = #{endTime,jdbcType=TIMESTAMP}, use_type = #{useType,jdbcType=INTEGER}, note = #{note,jdbcType=VARCHAR}, publish_count = #{publishCount,jdbcType=INTEGER}, use_count = #{useCount,jdbcType=INTEGER}, receive_count = #{receiveCount,jdbcType=INTEGER}, enable_time = #{enableTime,jdbcType=TIMESTAMP}, code = #{code,jdbcType=VARCHAR}, member_level = #{memberLevel,jdbcType=INTEGER} where id = #{id,jdbcType=BIGINT}
+			    ┌──────────────────────────────────────────────────┐
+			    │ 📊 操作类型: UPDATE                                   │
+			    │ 📋 影响表: sms_coupon                                │
+			    │ ⚠️  风险等级: ℹ️ MEDIUM                               │
+			    │ 🔍 WHERE条件: ✅                                     │
+			    │ 📄 LIMIT限制: ✅                                     │
+			    │ 📝 预估行数: FEW                                      │
+			    └──────────────────────────────────────────────────┘
+			🟧 SQL: update sms_coupon set type = #{type,jdbcType=INTEGER}, name = #{name,jdbcType=VARCHAR}, platform = #{platform,jdbcType=INTEGER}, count = #{count,jdbcType=INTEGER}, amount = #{amount,jdbcType=DECIMAL}, per_limit = #{perLimit,jdbcType=INTEGER}, min_point = #{minPoint,jdbcType=DECIMAL}, start_time = #{startTime,jdbcType=TIMESTAMP}, end_time = #{endTime,jdbcType=TIMESTAMP}, use_type = #{useType,jdbcType=INTEGER}, note = #{note,jdbcType=VARCHAR}, publish_count = #{publishCount,jdbcType=INTEGER}, use_count = #{useCount,jdbcType=INTEGER}, receive_count = #{receiveCount,jdbcType=INTEGER}, enable_time = #{enableTime,jdbcType=TIMESTAMP}, code = #{code,jdbcType=VARCHAR}, member_level = #{memberLevel,jdbcType=INTEGER} where id = #{id,jdbcType=BIGINT}
+			    ┌──────────────────────────────────────────────────┐
+			    │ 📊 操作类型: UPDATE                                   │
+			    │ 📋 影响表: sms_coupon                                │
+			    │ ⚠️  风险等级: ℹ️ MEDIUM                               │
+			    │ 🔍 WHERE条件: ✅                                     │
+			    │ 📄 LIMIT限制: ✅                                     │
+			    │ 📝 预估行数: FEW                                      │
+			    └──────────────────────────────────────────────────┘
+			--行号89,97-->
+			SmsCouponParam.getUseType (UNKNOWN)
+			--行号90,94-->
+			SmsCouponParam.getProductRelationList (UNKNOWN)
+			--行号91,99-->
+			SmsCouponParam.getId (UNKNOWN)
+			--行号91-->
+			SmsCouponProductRelation.setCouponId (UNCHANGED)
+			--行号93-->
+			SmsCouponServiceImpl.deleteProductRelation (UNCHANGED)
+				--行号80-->
+				SmsCouponProductRelationExample.createCriteria (UNCHANGED)
+					--行号48-->
+					SmsCouponProductRelationExample.createCriteriaInternal (UNCHANGED)
+					--行号49-->
+					List<Criteria>.size (UNKNOWN)
+					--行号50-->
+					List<Criteria>.add (UNKNOWN)
+				🟥 SQL: delete from sms_coupon_product_relation /* IF: _parameter != null */ /* FOREACH: oredCriteria */ /* IF: criteria.valid */ /* FOREACH: criteria.criteria */ and ${criterion.condition} and ${criterion.condition} #{criterion.value} and ${criterion.condition} #{criterion.value} and #{criterion.secondValue} and ${criterion.condition} /* FOREACH: criterion.value */ #{listItem}
+				    ┌──────────────────────────────────────────────────┐
+				    │ 📊 操作类型: DELETE                                   │
+				    │ 📋 影响表: sms_coupon_product_relation               │
+				    │ ⚠️  风险等级: 🔴 CRITICAL                             │
+				    │ 🔍 WHERE条件: ❌ 缺失                                  │
+				    │ 📄 LIMIT限制: ❌ 无                                   │
+				    │ 📝 预估行数: ALL                                      │
+				    └──────────────────────────────────────────────────┘
+				    🔄 动态SQL条件:
+				      • IF: _parameter != null
+			🟩 SQL: INSERT INTO sms_coupon_product_relation (product_id,product_name,product_sn,coupon_id) VALUES /* FOREACH: list */ (#{item.productId,jdbcType=BIGINT}, #{item.productName,jdbcType=VARCHAR}, #{item.productSn,jdbcType=VARCHAR}, #{item.couponId,jdbcType=INTEGER})
+			    ┌──────────────────────────────────────────────────┐
+			    │ 📊 操作类型: INSERT                                   │
+			    │ 📋 影响表: sms_coupon_product_relation               │
+			    │ ⚠️  风险等级: ✅ LOW                                   │
+			    │ 🔍 WHERE条件: ✅                                     │
+			    │ 📄 LIMIT限制: ❌ 无                                   │
+			    │ 📝 预估行数: MANY                                     │
+			    └──────────────────────────────────────────────────┘
+			    🔄 动态SQL条件:
+			      • IF: FOREACH: list
+			🟩 SQL: INSERT INTO sms_coupon_product_relation (product_id,product_name,product_sn,coupon_id) VALUES /* FOREACH: list */ (#{item.productId,jdbcType=BIGINT}, #{item.productName,jdbcType=VARCHAR}, #{item.productSn,jdbcType=VARCHAR}, #{item.couponId,jdbcType=INTEGER})
+			    ┌──────────────────────────────────────────────────┐
+			    │ 📊 操作类型: INSERT                                   │
+			    │ 📋 影响表: sms_coupon_product_relation               │
+			    │ ⚠️  风险等级: ✅ LOW                                   │
+			    │ 🔍 WHERE条件: ✅                                     │
+			    │ 📄 LIMIT限制: ❌ 无                                   │
+			    │ 📝 预估行数: MANY                                     │
+			    └──────────────────────────────────────────────────┘
+			    🔄 动态SQL条件:
+			      • IF: FOREACH: list
+			--行号98,102-->
+			SmsCouponParam.getProductCategoryRelationList (UNKNOWN)
+			--行号99-->
+			SmsCouponProductCategoryRelation.setCouponId (UNCHANGED)
+			--行号101-->
+			SmsCouponServiceImpl.deleteProductCategoryRelation (UNCHANGED)
+				--行号74-->
+				SmsCouponProductCategoryRelationExample.createCriteria (UNCHANGED)
+					--行号48-->
+					SmsCouponProductCategoryRelationExample.createCriteriaInternal (UNCHANGED)
+					--行号49-->
+					List<Criteria>.size (UNKNOWN)
+					--行号50-->
+					List<Criteria>.add (UNKNOWN)
+				🟥 SQL: delete from sms_coupon_product_category_relation /* IF: _parameter != null */ /* FOREACH: oredCriteria */ /* IF: criteria.valid */ /* FOREACH: criteria.criteria */ and ${criterion.condition} and ${criterion.condition} #{criterion.value} and ${criterion.condition} #{criterion.value} and #{criterion.secondValue} and ${criterion.condition} /* FOREACH: criterion.value */ #{listItem}
+				    ┌──────────────────────────────────────────────────┐
+				    │ 📊 操作类型: DELETE                                   │
+				    │ 📋 影响表: sms_coupon_product_category_relation      │
+				    │ ⚠️  风险等级: 🔴 CRITICAL                             │
+				    │ 🔍 WHERE条件: ❌ 缺失                                  │
+				    │ 📄 LIMIT限制: ❌ 无                                   │
+				    │ 📝 预估行数: ALL                                      │
+				    └──────────────────────────────────────────────────┘
+				    🔄 动态SQL条件:
+				      • IF: _parameter != null
+			🟩 SQL: INSERT INTO sms_coupon_product_category_relation (product_category_id,product_category_name,parent_category_name,coupon_id) VALUES /* FOREACH: list */ (#{item.productCategoryId,jdbcType=BIGINT}, #{item.productCategoryName,jdbcType=VARCHAR}, #{item.parentCategoryName,jdbcType=VARCHAR}, #{item.couponId,jdbcType=BIGINT})
+			    ┌──────────────────────────────────────────────────┐
+			    │ 📊 操作类型: INSERT                                   │
+			    │ 📋 影响表: sms_coupon_product_category_relation      │
+			    │ ⚠️  风险等级: ✅ LOW                                   │
+			    │ 🔍 WHERE条件: ✅                                     │
+			    │ 📄 LIMIT限制: ❌ 无                                   │
+			    │ 📝 预估行数: MANY                                     │
+			    └──────────────────────────────────────────────────┘
+			    🔄 动态SQL条件:
+			      • IF: FOREACH: list
+			🟩 SQL: INSERT INTO sms_coupon_product_category_relation (product_category_id,product_category_name,parent_category_name,coupon_id) VALUES /* FOREACH: list */ (#{item.productCategoryId,jdbcType=BIGINT}, #{item.productCategoryName,jdbcType=VARCHAR}, #{item.parentCategoryName,jdbcType=VARCHAR}, #{item.couponId,jdbcType=BIGINT})
+			    ┌──────────────────────────────────────────────────┐
+			    │ 📊 操作类型: INSERT                                   │
+			    │ 📋 影响表: sms_coupon_product_category_relation      │
+			    │ ⚠️  风险等级: ✅ LOW                                   │
+			    │ 🔍 WHERE条件: ✅                                     │
+			    │ 📄 LIMIT限制: ❌ 无                                   │
+			    │ 📝 预估行数: MANY                                     │
+			    └──────────────────────────────────────────────────┘
+			    🔄 动态SQL条件:
+			      • IF: FOREACH: list
+	--行号54-->
+	SmsCouponServiceImpl.update (UNCHANGED)
+		--行号86-->
+		SmsCouponParam.setId (UNKNOWN)
+		🟧 SQL: update sms_coupon set type = #{type,jdbcType=INTEGER}, name = #{name,jdbcType=VARCHAR}, platform = #{platform,jdbcType=INTEGER}, count = #{count,jdbcType=INTEGER}, amount = #{amount,jdbcType=DECIMAL}, per_limit = #{perLimit,jdbcType=INTEGER}, min_point = #{minPoint,jdbcType=DECIMAL}, start_time = #{startTime,jdbcType=TIMESTAMP}, end_time = #{endTime,jdbcType=TIMESTAMP}, use_type = #{useType,jdbcType=INTEGER}, note = #{note,jdbcType=VARCHAR}, publish_count = #{publishCount,jdbcType=INTEGER}, use_count = #{useCount,jdbcType=INTEGER}, receive_count = #{receiveCount,jdbcType=INTEGER}, enable_time = #{enableTime,jdbcType=TIMESTAMP}, code = #{code,jdbcType=VARCHAR}, member_level = #{memberLevel,jdbcType=INTEGER} where id = #{id,jdbcType=BIGINT}
+		    ┌──────────────────────────────────────────────────┐
+		    │ 📊 操作类型: UPDATE                                   │
+		    │ 📋 影响表: sms_coupon                                │
+		    │ ⚠️  风险等级: ℹ️ MEDIUM                               │
+		    │ 🔍 WHERE条件: ✅                                     │
+		    │ 📄 LIMIT限制: ✅                                     │
+		    │ 📝 预估行数: FEW                                      │
+		    └──────────────────────────────────────────────────┘
+		🟧 SQL: update sms_coupon set type = #{type,jdbcType=INTEGER}, name = #{name,jdbcType=VARCHAR}, platform = #{platform,jdbcType=INTEGER}, count = #{count,jdbcType=INTEGER}, amount = #{amount,jdbcType=DECIMAL}, per_limit = #{perLimit,jdbcType=INTEGER}, min_point = #{minPoint,jdbcType=DECIMAL}, start_time = #{startTime,jdbcType=TIMESTAMP}, end_time = #{endTime,jdbcType=TIMESTAMP}, use_type = #{useType,jdbcType=INTEGER}, note = #{note,jdbcType=VARCHAR}, publish_count = #{publishCount,jdbcType=INTEGER}, use_count = #{useCount,jdbcType=INTEGER}, receive_count = #{receiveCount,jdbcType=INTEGER}, enable_time = #{enableTime,jdbcType=TIMESTAMP}, code = #{code,jdbcType=VARCHAR}, member_level = #{memberLevel,jdbcType=INTEGER} where id = #{id,jdbcType=BIGINT}
+		    ┌──────────────────────────────────────────────────┐
+		    │ 📊 操作类型: UPDATE                                   │
+		    │ 📋 影响表: sms_coupon                                │
+		    │ ⚠️  风险等级: ℹ️ MEDIUM                               │
+		    │ 🔍 WHERE条件: ✅                                     │
+		    │ 📄 LIMIT限制: ✅                                     │
+		    │ 📝 预估行数: FEW                                      │
+		    └──────────────────────────────────────────────────┘
+		--行号89,97-->
+		SmsCouponParam.getUseType (UNKNOWN)
+		--行号90,94-->
+		SmsCouponParam.getProductRelationList (UNKNOWN)
+		--行号91,99-->
+		SmsCouponParam.getId (UNKNOWN)
+		--行号91-->
+		SmsCouponProductRelation.setCouponId (UNCHANGED)
+		--行号93-->
+		SmsCouponServiceImpl.deleteProductRelation (UNCHANGED)
+			--行号80-->
+			SmsCouponProductRelationExample.createCriteria (UNCHANGED)
+				--行号48-->
+				SmsCouponProductRelationExample.createCriteriaInternal (UNCHANGED)
+				--行号49-->
+				List<Criteria>.size (UNKNOWN)
+				--行号50-->
+				List<Criteria>.add (UNKNOWN)
+			🟥 SQL: delete from sms_coupon_product_relation /* IF: _parameter != null */ /* FOREACH: oredCriteria */ /* IF: criteria.valid */ /* FOREACH: criteria.criteria */ and ${criterion.condition} and ${criterion.condition} #{criterion.value} and ${criterion.condition} #{criterion.value} and #{criterion.secondValue} and ${criterion.condition} /* FOREACH: criterion.value */ #{listItem}
+			    ┌──────────────────────────────────────────────────┐
+			    │ 📊 操作类型: DELETE                                   │
+			    │ 📋 影响表: sms_coupon_product_relation               │
+			    │ ⚠️  风险等级: 🔴 CRITICAL                             │
+			    │ 🔍 WHERE条件: ❌ 缺失                                  │
+			    │ 📄 LIMIT限制: ❌ 无                                   │
+			    │ 📝 预估行数: ALL                                      │
+			    └──────────────────────────────────────────────────┘
+			    🔄 动态SQL条件:
+			      • IF: _parameter != null
+		🟩 SQL: INSERT INTO sms_coupon_product_relation (product_id,product_name,product_sn,coupon_id) VALUES /* FOREACH: list */ (#{item.productId,jdbcType=BIGINT}, #{item.productName,jdbcType=VARCHAR}, #{item.productSn,jdbcType=VARCHAR}, #{item.couponId,jdbcType=INTEGER})
+		    ┌──────────────────────────────────────────────────┐
+		    │ 📊 操作类型: INSERT                                   │
+		    │ 📋 影响表: sms_coupon_product_relation               │
+		    │ ⚠️  风险等级: ✅ LOW                                   │
+		    │ 🔍 WHERE条件: ✅                                     │
+		    │ 📄 LIMIT限制: ❌ 无                                   │
+		    │ 📝 预估行数: MANY                                     │
+		    └──────────────────────────────────────────────────┘
+		    🔄 动态SQL条件:
+		      • IF: FOREACH: list
+		🟩 SQL: INSERT INTO sms_coupon_product_relation (product_id,product_name,product_sn,coupon_id) VALUES /* FOREACH: list */ (#{item.productId,jdbcType=BIGINT}, #{item.productName,jdbcType=VARCHAR}, #{item.productSn,jdbcType=VARCHAR}, #{item.couponId,jdbcType=INTEGER})
+		    ┌──────────────────────────────────────────────────┐
+		    │ 📊 操作类型: INSERT                                   │
+		    │ 📋 影响表: sms_coupon_product_relation               │
+		    │ ⚠️  风险等级: ✅ LOW                                   │
+		    │ 🔍 WHERE条件: ✅                                     │
+		    │ 📄 LIMIT限制: ❌ 无                                   │
+		    │ 📝 预估行数: MANY                                     │
+		    └──────────────────────────────────────────────────┘
+		    🔄 动态SQL条件:
+		      • IF: FOREACH: list
+		--行号98,102-->
+		SmsCouponParam.getProductCategoryRelationList (UNKNOWN)
+		--行号99-->
+		SmsCouponProductCategoryRelation.setCouponId (UNCHANGED)
+		--行号101-->
+		SmsCouponServiceImpl.deleteProductCategoryRelation (UNCHANGED)
+			--行号74-->
+			SmsCouponProductCategoryRelationExample.createCriteria (UNCHANGED)
+				--行号48-->
+				SmsCouponProductCategoryRelationExample.createCriteriaInternal (UNCHANGED)
+				--行号49-->
+				List<Criteria>.size (UNKNOWN)
+				--行号50-->
+				List<Criteria>.add (UNKNOWN)
+			🟥 SQL: delete from sms_coupon_product_category_relation /* IF: _parameter != null */ /* FOREACH: oredCriteria */ /* IF: criteria.valid */ /* FOREACH: criteria.criteria */ and ${criterion.condition} and ${criterion.condition} #{criterion.value} and ${criterion.condition} #{criterion.value} and #{criterion.secondValue} and ${criterion.condition} /* FOREACH: criterion.value */ #{listItem}
+			    ┌──────────────────────────────────────────────────┐
+			    │ 📊 操作类型: DELETE                                   │
+			    │ 📋 影响表: sms_coupon_product_category_relation      │
+			    │ ⚠️  风险等级: 🔴 CRITICAL                             │
+			    │ 🔍 WHERE条件: ❌ 缺失                                  │
+			    │ 📄 LIMIT限制: ❌ 无                                   │
+			    │ 📝 预估行数: ALL                                      │
+			    └──────────────────────────────────────────────────┘
+			    🔄 动态SQL条件:
+			      • IF: _parameter != null
+		🟩 SQL: INSERT INTO sms_coupon_product_category_relation (product_category_id,product_category_name,parent_category_name,coupon_id) VALUES /* FOREACH: list */ (#{item.productCategoryId,jdbcType=BIGINT}, #{item.productCategoryName,jdbcType=VARCHAR}, #{item.parentCategoryName,jdbcType=VARCHAR}, #{item.couponId,jdbcType=BIGINT})
+		    ┌──────────────────────────────────────────────────┐
+		    │ 📊 操作类型: INSERT                                   │
+		    │ 📋 影响表: sms_coupon_product_category_relation      │
+		    │ ⚠️  风险等级: ✅ LOW                                   │
+		    │ 🔍 WHERE条件: ✅                                     │
+		    │ 📄 LIMIT限制: ❌ 无                                   │
+		    │ 📝 预估行数: MANY                                     │
+		    └──────────────────────────────────────────────────┘
+		    🔄 动态SQL条件:
+		      • IF: FOREACH: list
+		🟩 SQL: INSERT INTO sms_coupon_product_category_relation (product_category_id,product_category_name,parent_category_name,coupon_id) VALUES /* FOREACH: list */ (#{item.productCategoryId,jdbcType=BIGINT}, #{item.productCategoryName,jdbcType=VARCHAR}, #{item.parentCategoryName,jdbcType=VARCHAR}, #{item.couponId,jdbcType=BIGINT})
+		    ┌──────────────────────────────────────────────────┐
+		    │ 📊 操作类型: INSERT                                   │
+		    │ 📋 影响表: sms_coupon_product_category_relation      │
+		    │ ⚠️  风险等级: ✅ LOW                                   │
+		    │ 🔍 WHERE条件: ✅                                     │
+		    │ 📄 LIMIT限制: ❌ 无                                   │
+		    │ 📝 预估行数: MANY                                     │
+		    └──────────────────────────────────────────────────┘
+		    🔄 动态SQL条件:
+		      • IF: FOREACH: list
+	--行号56-->
+	CommonResult.success (UNCHANGED)
+		--行号36-->
+		SUCCESS.getCode (UNKNOWN)
+		--行号36-->
+		SUCCESS.getMessage (UNKNOWN)
+	--行号56-->
+	CommonResult.success (UNCHANGED)
+		--行号36-->
+		SUCCESS.getCode (UNKNOWN)
+		--行号36-->
+		SUCCESS.getMessage (UNKNOWN)
+	--行号58-->
+	CommonResult.failed (UNCHANGED)
+		--行号78-->
+		CommonResult.failed (UNCHANGED)
+			--行号54-->
+			IErrorCode.getCode (UNCHANGED)
+				ResultCode.getCode (UNCHANGED)
+			--行号54-->
+			ResultCode.getCode (UNCHANGED)
+			--行号54-->
+			IErrorCode.getMessage (UNCHANGED)
+				ResultCode.getMessage (UNCHANGED)
+			--行号54-->
+			ResultCode.getMessage (UNCHANGED)
+
+调用链 3：MODIFIED方法 SmsFlashPromotionController.getItem
+SmsFlashPromotionController.getItem (MODIFIED)
+	--行号86-->
+	SmsFlashPromotionService.list (UNCHANGED)
+		SmsFlashPromotionServiceImpl.list (UNCHANGED)
+			--行号56-->
+			PageHelper.startPage (UNKNOWN)
+			--行号58-->
+			StrUtil.isEmpty (UNKNOWN)
+			--行号59-->
+			SmsFlashPromotionExample.createCriteria (UNCHANGED)
+				--行号50-->
+				SmsFlashPromotionExample.createCriteriaInternal (UNCHANGED)
+				--行号51-->
+				List<Criteria>.size (UNKNOWN)
+				--行号52-->
+				List<Criteria>.add (UNKNOWN)
+			🟦 SQL: select /* IF: distinct */ distinct id, title, start_date, end_date, status, create_time from sms_flash_promotion /* IF: _parameter != null */ /* FOREACH: oredCriteria */ /* IF: criteria.valid */ /* FOREACH: criteria.criteria */ and ${criterion.condition} and ${criterion.condition} #{criterion.value} and ${criterion.condition} #{criterion.value} and #{criterion.secondValue} and ${criterion.condition} /* FOREACH: criterion.value */ #{listItem} /* IF: orderByClause != null */ order by ${orderByClause}
+			    ┌──────────────────────────────────────────────────┐
+			    │ 📊 操作类型: SELECT                                   │
+			    │ 📋 影响表: sms_flash_promotion                       │
+			    │ ⚠️  风险等级: ℹ️ MEDIUM                               │
+			    │ 🔍 WHERE条件: ❌ 缺失                                  │
+			    │ 📄 LIMIT限制: ❌ 无                                   │
+			    │ 📝 预估行数: UNKNOWN                                  │
+			    └──────────────────────────────────────────────────┘
+			    ⚡ 性能预警:
+			      • [LOW] ⚠️ 全表扫描: SELECT语句缺少WHERE或LIMIT条件
+			        💡 建议: 添加WHERE条件或LIMIT子句限制返回行数
+			    🔄 动态SQL条件:
+			      • IF: distinct
+			      • IF: _parameter != null
+			      • IF: orderByClause != null
+	--行号86-->
+	SmsFlashPromotionService.list (UNCHANGED)
+		SmsFlashPromotionServiceImpl.list (UNCHANGED)
+			--行号56-->
+			PageHelper.startPage (UNKNOWN)
+			--行号58-->
+			StrUtil.isEmpty (UNKNOWN)
+			--行号59-->
+			SmsFlashPromotionExample.createCriteria (UNCHANGED)
+				--行号50-->
+				SmsFlashPromotionExample.createCriteriaInternal (UNCHANGED)
+				--行号51-->
+				List<Criteria>.size (UNKNOWN)
+				--行号52-->
+				List<Criteria>.add (UNKNOWN)
+			🟦 SQL: select /* IF: distinct */ distinct id, title, start_date, end_date, status, create_time from sms_flash_promotion /* IF: _parameter != null */ /* FOREACH: oredCriteria */ /* IF: criteria.valid */ /* FOREACH: criteria.criteria */ and ${criterion.condition} and ${criterion.condition} #{criterion.value} and ${criterion.condition} #{criterion.value} and #{criterion.secondValue} and ${criterion.condition} /* FOREACH: criterion.value */ #{listItem} /* IF: orderByClause != null */ order by ${orderByClause}
+			    ┌──────────────────────────────────────────────────┐
+			    │ 📊 操作类型: SELECT                                   │
+			    │ 📋 影响表: sms_flash_promotion                       │
+			    │ ⚠️  风险等级: ℹ️ MEDIUM                               │
+			    │ 🔍 WHERE条件: ❌ 缺失                                  │
+			    │ 📄 LIMIT限制: ❌ 无                                   │
+			    │ 📝 预估行数: UNKNOWN                                  │
+			    └──────────────────────────────────────────────────┘
+			    ⚡ 性能预警:
+			      • [LOW] ⚠️ 全表扫描: SELECT语句缺少WHERE或LIMIT条件
+			        💡 建议: 添加WHERE条件或LIMIT子句限制返回行数
+			    🔄 动态SQL条件:
+			      • IF: distinct
+			      • IF: _parameter != null
+			      • IF: orderByClause != null
+	--行号86-->
+	SmsFlashPromotionServiceImpl.list (UNCHANGED)
+		--行号56-->
+		PageHelper.startPage (UNKNOWN)
+		--行号58-->
+		StrUtil.isEmpty (UNKNOWN)
+		--行号59-->
+		SmsFlashPromotionExample.createCriteria (UNCHANGED)
+			--行号50-->
+			SmsFlashPromotionExample.createCriteriaInternal (UNCHANGED)
+			--行号51-->
+			List<Criteria>.size (UNKNOWN)
+			--行号52-->
+			List<Criteria>.add (UNKNOWN)
+		🟦 SQL: select /* IF: distinct */ distinct id, title, start_date, end_date, status, create_time from sms_flash_promotion /* IF: _parameter != null */ /* FOREACH: oredCriteria */ /* IF: criteria.valid */ /* FOREACH: criteria.criteria */ and ${criterion.condition} and ${criterion.condition} #{criterion.value} and ${criterion.condition} #{criterion.value} and #{criterion.secondValue} and ${criterion.condition} /* FOREACH: criterion.value */ #{listItem} /* IF: orderByClause != null */ order by ${orderByClause}
+		    ┌──────────────────────────────────────────────────┐
+		    │ 📊 操作类型: SELECT                                   │
+		    │ 📋 影响表: sms_flash_promotion                       │
+		    │ ⚠️  风险等级: ℹ️ MEDIUM                               │
+		    │ 🔍 WHERE条件: ❌ 缺失                                  │
+		    │ 📄 LIMIT限制: ❌ 无                                   │
+		    │ 📝 预估行数: UNKNOWN                                  │
+		    └──────────────────────────────────────────────────┘
+		    ⚡ 性能预警:
+		      • [LOW] ⚠️ 全表扫描: SELECT语句缺少WHERE或LIMIT条件
+		        💡 建议: 添加WHERE条件或LIMIT子句限制返回行数
+		    🔄 动态SQL条件:
+		      • IF: distinct
+		      • IF: _parameter != null
+		      • IF: orderByClause != null
+	--行号87-->
+	CommonPage.restPage (UNCHANGED)
+		--行号40-->
+		CommonPage<T>.setTotalPage (UNKNOWN)
+		--行号40-->
+		PageInfo<T>.getPages (UNKNOWN)
+		--行号41-->
+		CommonPage<T>.setPageNum (UNKNOWN)
+		--行号41-->
+		PageInfo<T>.getPageNum (UNKNOWN)
+		--行号42-->
+		CommonPage<T>.setPageSize (UNKNOWN)
+		--行号42-->
+		PageInfo<T>.getPageSize (UNKNOWN)
+		--行号43-->
+		CommonPage<T>.setTotal (UNKNOWN)
+		--行号43-->
+		PageInfo<T>.getTotal (UNKNOWN)
+		--行号44-->
+		CommonPage<T>.setList (UNKNOWN)
+		--行号44-->
+		PageInfo<T>.getList (UNKNOWN)
+	--行号87-->
+	CommonPage.restPage (UNCHANGED)
+		--行号40-->
+		CommonPage<T>.setTotalPage (UNKNOWN)
+		--行号40-->
+		PageInfo<T>.getPages (UNKNOWN)
+		--行号41-->
+		CommonPage<T>.setPageNum (UNKNOWN)
+		--行号41-->
+		PageInfo<T>.getPageNum (UNKNOWN)
+		--行号42-->
+		CommonPage<T>.setPageSize (UNKNOWN)
+		--行号42-->
+		PageInfo<T>.getPageSize (UNKNOWN)
+		--行号43-->
+		CommonPage<T>.setTotal (UNKNOWN)
+		--行号43-->
+		PageInfo<T>.getTotal (UNKNOWN)
+		--行号44-->
+		CommonPage<T>.setList (UNKNOWN)
+		--行号44-->
+		PageInfo<T>.getList (UNKNOWN)
+	--行号87-->
+	CommonResult.success (UNCHANGED)
+		--行号36-->
+		SUCCESS.getCode (UNKNOWN)
+		--行号36-->
+		SUCCESS.getMessage (UNKNOWN)
+	--行号87-->
+	CommonResult.success (UNCHANGED)
+		--行号36-->
+		SUCCESS.getCode (UNKNOWN)
+		--行号36-->
+		SUCCESS.getMessage (UNKNOWN)
+
+调用链 4：MODIFIED方法 SmsFlashPromotionController.update
+SmsFlashPromotionController.update (MODIFIED)
+	--行号65-->
+	SmsFlashPromotionService.updateStatus (UNCHANGED)
+		SmsFlashPromotionServiceImpl.updateStatus (UNCHANGED)
+			--行号44-->
+			SmsFlashPromotion.setId (UNCHANGED)
+			--行号45-->
+			SmsFlashPromotion.setStatus (UNCHANGED)
+			🟧 SQL: update sms_flash_promotion /* IF: title != null */ title = #{title,jdbcType=VARCHAR}, /* IF: startDate != null */ start_date = #{startDate,jdbcType=DATE}, /* IF: endDate != null */ end_date = #{endDate,jdbcType=DATE}, /* IF: status != null */ status = #{status,jdbcType=INTEGER}, /* IF: createTime != null */ create_time = #{createTime,jdbcType=TIMESTAMP}, where id = #{id,jdbcType=BIGINT}
+			    ┌──────────────────────────────────────────────────┐
+			    │ 📊 操作类型: UPDATE                                   │
+			    │ 📋 影响表: sms_flash_promotion                       │
+			    │ ⚠️  风险等级: ℹ️ MEDIUM                               │
+			    │ 🔍 WHERE条件: ✅                                     │
+			    │ 📄 LIMIT限制: ❌ 无                                   │
+			    │ 📝 预估行数: UNKNOWN                                  │
+			    └──────────────────────────────────────────────────┘
+			    🔄 动态SQL条件:
+			      • IF: title != null
+			      • IF: startDate != null
+			      • IF: endDate != null
+			      • IF: status != null
+			      • IF: createTime != null
+	--行号65-->
+	SmsFlashPromotionService.updateStatus (UNCHANGED)
+		SmsFlashPromotionServiceImpl.updateStatus (UNCHANGED)
+			--行号44-->
+			SmsFlashPromotion.setId (UNCHANGED)
+			--行号45-->
+			SmsFlashPromotion.setStatus (UNCHANGED)
+			🟧 SQL: update sms_flash_promotion /* IF: title != null */ title = #{title,jdbcType=VARCHAR}, /* IF: startDate != null */ start_date = #{startDate,jdbcType=DATE}, /* IF: endDate != null */ end_date = #{endDate,jdbcType=DATE}, /* IF: status != null */ status = #{status,jdbcType=INTEGER}, /* IF: createTime != null */ create_time = #{createTime,jdbcType=TIMESTAMP}, where id = #{id,jdbcType=BIGINT}
+			    ┌──────────────────────────────────────────────────┐
+			    │ 📊 操作类型: UPDATE                                   │
+			    │ 📋 影响表: sms_flash_promotion                       │
+			    │ ⚠️  风险等级: ℹ️ MEDIUM                               │
+			    │ 🔍 WHERE条件: ✅                                     │
+			    │ 📄 LIMIT限制: ❌ 无                                   │
+			    │ 📝 预估行数: UNKNOWN                                  │
+			    └──────────────────────────────────────────────────┘
+			    🔄 动态SQL条件:
+			      • IF: title != null
+			      • IF: startDate != null
+			      • IF: endDate != null
+			      • IF: status != null
+			      • IF: createTime != null
+	--行号65-->
+	SmsFlashPromotionServiceImpl.updateStatus (UNCHANGED)
+		--行号44-->
+		SmsFlashPromotion.setId (UNCHANGED)
+		--行号45-->
+		SmsFlashPromotion.setStatus (UNCHANGED)
+		🟧 SQL: update sms_flash_promotion /* IF: title != null */ title = #{title,jdbcType=VARCHAR}, /* IF: startDate != null */ start_date = #{startDate,jdbcType=DATE}, /* IF: endDate != null */ end_date = #{endDate,jdbcType=DATE}, /* IF: status != null */ status = #{status,jdbcType=INTEGER}, /* IF: createTime != null */ create_time = #{createTime,jdbcType=TIMESTAMP}, where id = #{id,jdbcType=BIGINT}
+		    ┌──────────────────────────────────────────────────┐
+		    │ 📊 操作类型: UPDATE                                   │
+		    │ 📋 影响表: sms_flash_promotion                       │
+		    │ ⚠️  风险等级: ℹ️ MEDIUM                               │
+		    │ 🔍 WHERE条件: ✅                                     │
+		    │ 📄 LIMIT限制: ❌ 无                                   │
+		    │ 📝 预估行数: UNKNOWN                                  │
+		    └──────────────────────────────────────────────────┘
+		    🔄 动态SQL条件:
+		      • IF: title != null
+		      • IF: startDate != null
+		      • IF: endDate != null
+		      • IF: status != null
+		      • IF: createTime != null
+	--行号67-->
+	CommonResult.success (UNCHANGED)
+		--行号36-->
+		SUCCESS.getCode (UNKNOWN)
+		--行号36-->
+		SUCCESS.getMessage (UNKNOWN)
+	--行号67-->
+	CommonResult.success (UNCHANGED)
+		--行号36-->
+		SUCCESS.getCode (UNKNOWN)
+		--行号36-->
+		SUCCESS.getMessage (UNKNOWN)
+	--行号69-->
+	CommonResult.failed (UNCHANGED)
+		--行号78-->
+		CommonResult.failed (UNCHANGED)
+			--行号54-->
+			IErrorCode.getCode (UNCHANGED)
+				ResultCode.getCode (UNCHANGED)
+			--行号54-->
+			ResultCode.getCode (UNCHANGED)
+			--行号54-->
+			IErrorCode.getMessage (UNCHANGED)
+				ResultCode.getMessage (UNCHANGED)
+			--行号54-->
+			ResultCode.getMessage (UNCHANGED)
+
+调用链 5：MODIFIED方法 SmsFlashPromotionProductRelationController.delete
+SmsFlashPromotionProductRelationController.delete (MODIFIED)
+	--行号55-->
+	SmsFlashPromotionProductRelationService.delete (UNCHANGED)
+		SmsFlashPromotionProductRelationServiceImpl.delete (UNCHANGED)
+			🟥 SQL: delete from sms_flash_promotion_product_relation where id = #{id,jdbcType=BIGINT}
+			    ┌──────────────────────────────────────────────────┐
+			    │ 📊 操作类型: DELETE                                   │
+			    │ 📋 影响表: sms_flash_promotion_product_relation      │
+			    │ ⚠️  风险等级: ⚠️ HIGH                                 │
+			    │ 🔍 WHERE条件: ✅                                     │
+			    │ 📄 LIMIT限制: ❌ 无                                   │
+			    │ 📝 预估行数: UNKNOWN                                  │
+			    └──────────────────────────────────────────────────┘
+	--行号55-->
+	SmsFlashPromotionProductRelationService.delete (UNCHANGED)
+		SmsFlashPromotionProductRelationServiceImpl.delete (UNCHANGED)
+			🟥 SQL: delete from sms_flash_promotion_product_relation where id = #{id,jdbcType=BIGINT}
+			    ┌──────────────────────────────────────────────────┐
+			    │ 📊 操作类型: DELETE                                   │
+			    │ 📋 影响表: sms_flash_promotion_product_relation      │
+			    │ ⚠️  风险等级: ⚠️ HIGH                                 │
+			    │ 🔍 WHERE条件: ✅                                     │
+			    │ 📄 LIMIT限制: ❌ 无                                   │
+			    │ 📝 预估行数: UNKNOWN                                  │
+			    └──────────────────────────────────────────────────┘
+	--行号55-->
+	SmsFlashPromotionProductRelationServiceImpl.delete (UNCHANGED)
+		🟥 SQL: delete from sms_flash_promotion_product_relation where id = #{id,jdbcType=BIGINT}
+		    ┌──────────────────────────────────────────────────┐
+		    │ 📊 操作类型: DELETE                                   │
+		    │ 📋 影响表: sms_flash_promotion_product_relation      │
+		    │ ⚠️  风险等级: ⚠️ HIGH                                 │
+		    │ 🔍 WHERE条件: ✅                                     │
+		    │ 📄 LIMIT限制: ❌ 无                                   │
+		    │ 📝 预估行数: UNKNOWN                                  │
+		    └──────────────────────────────────────────────────┘
+	--行号57-->
+	CommonResult.success (UNCHANGED)
+		--行号36-->
+		SUCCESS.getCode (UNKNOWN)
+		--行号36-->
+		SUCCESS.getMessage (UNKNOWN)
+	--行号57-->
+	CommonResult.success (UNCHANGED)
+		--行号36-->
+		SUCCESS.getCode (UNKNOWN)
+		--行号36-->
+		SUCCESS.getMessage (UNKNOWN)
+	--行号59-->
+	CommonResult.failed (UNCHANGED)
+		--行号78-->
+		CommonResult.failed (UNCHANGED)
+			--行号54-->
+			IErrorCode.getCode (UNCHANGED)
+				ResultCode.getCode (UNCHANGED)
+			--行号54-->
+			ResultCode.getCode (UNCHANGED)
+			--行号54-->
+			IErrorCode.getMessage (UNCHANGED)
+				ResultCode.getMessage (UNCHANGED)
+			--行号54-->
+			ResultCode.getMessage (UNCHANGED)
+
+调用链 6：MODIFIED方法 SmsFlashPromotionProductRelationController.update
+SmsFlashPromotionProductRelationController.update (MODIFIED)
+	--行号44-->
+	SmsFlashPromotionProductRelationService.update (UNCHANGED)
+		SmsFlashPromotionProductRelationServiceImpl.update (UNCHANGED)
+			--行号35-->
+			SmsFlashPromotionProductRelation.setId (UNCHANGED)
+			🟧 SQL: update sms_flash_promotion_product_relation set flash_promotion_id = #{flashPromotionId,jdbcType=BIGINT}, flash_promotion_session_id = #{flashPromotionSessionId,jdbcType=BIGINT}, product_id = #{productId,jdbcType=BIGINT}, flash_promotion_price = #{flashPromotionPrice,jdbcType=DECIMAL}, flash_promotion_count = #{flashPromotionCount,jdbcType=INTEGER}, flash_promotion_limit = #{flashPromotionLimit,jdbcType=INTEGER}, sort = #{sort,jdbcType=INTEGER} where id = #{id,jdbcType=BIGINT}
+			    ┌──────────────────────────────────────────────────┐
+			    │ 📊 操作类型: UPDATE                                   │
+			    │ 📋 影响表: sms_flash_promotion_product_relation      │
+			    │ ⚠️  风险等级: ℹ️ MEDIUM                               │
+			    │ 🔍 WHERE条件: ✅                                     │
+			    │ 📄 LIMIT限制: ✅                                     │
+			    │ 📝 预估行数: FEW                                      │
+			    └──────────────────────────────────────────────────┘
+	--行号44-->
+	SmsFlashPromotionProductRelationService.update (UNCHANGED)
+		SmsFlashPromotionProductRelationServiceImpl.update (UNCHANGED)
+			--行号35-->
+			SmsFlashPromotionProductRelation.setId (UNCHANGED)
+			🟧 SQL: update sms_flash_promotion_product_relation set flash_promotion_id = #{flashPromotionId,jdbcType=BIGINT}, flash_promotion_session_id = #{flashPromotionSessionId,jdbcType=BIGINT}, product_id = #{productId,jdbcType=BIGINT}, flash_promotion_price = #{flashPromotionPrice,jdbcType=DECIMAL}, flash_promotion_count = #{flashPromotionCount,jdbcType=INTEGER}, flash_promotion_limit = #{flashPromotionLimit,jdbcType=INTEGER}, sort = #{sort,jdbcType=INTEGER} where id = #{id,jdbcType=BIGINT}
+			    ┌──────────────────────────────────────────────────┐
+			    │ 📊 操作类型: UPDATE                                   │
+			    │ 📋 影响表: sms_flash_promotion_product_relation      │
+			    │ ⚠️  风险等级: ℹ️ MEDIUM                               │
+			    │ 🔍 WHERE条件: ✅                                     │
+			    │ 📄 LIMIT限制: ✅                                     │
+			    │ 📝 预估行数: FEW                                      │
+			    └──────────────────────────────────────────────────┘
+	--行号44-->
+	SmsFlashPromotionProductRelationServiceImpl.update (UNCHANGED)
+		--行号35-->
+		SmsFlashPromotionProductRelation.setId (UNCHANGED)
+		🟧 SQL: update sms_flash_promotion_product_relation set flash_promotion_id = #{flashPromotionId,jdbcType=BIGINT}, flash_promotion_session_id = #{flashPromotionSessionId,jdbcType=BIGINT}, product_id = #{productId,jdbcType=BIGINT}, flash_promotion_price = #{flashPromotionPrice,jdbcType=DECIMAL}, flash_promotion_count = #{flashPromotionCount,jdbcType=INTEGER}, flash_promotion_limit = #{flashPromotionLimit,jdbcType=INTEGER}, sort = #{sort,jdbcType=INTEGER} where id = #{id,jdbcType=BIGINT}
+		    ┌──────────────────────────────────────────────────┐
+		    │ 📊 操作类型: UPDATE                                   │
+		    │ 📋 影响表: sms_flash_promotion_product_relation      │
+		    │ ⚠️  风险等级: ℹ️ MEDIUM                               │
+		    │ 🔍 WHERE条件: ✅                                     │
+		    │ 📄 LIMIT限制: ✅                                     │
+		    │ 📝 预估行数: FEW                                      │
+		    └──────────────────────────────────────────────────┘
+	--行号46-->
+	CommonResult.success (UNCHANGED)
+		--行号36-->
+		SUCCESS.getCode (UNKNOWN)
+		--行号36-->
+		SUCCESS.getMessage (UNKNOWN)
+	--行号46-->
+	CommonResult.success (UNCHANGED)
+		--行号36-->
+		SUCCESS.getCode (UNKNOWN)
+		--行号36-->
+		SUCCESS.getMessage (UNKNOWN)
+	--行号48-->
+	CommonResult.failed (UNCHANGED)
+		--行号78-->
+		CommonResult.failed (UNCHANGED)
+			--行号54-->
+			IErrorCode.getCode (UNCHANGED)
+				ResultCode.getCode (UNCHANGED)
+			--行号54-->
+			ResultCode.getCode (UNCHANGED)
+			--行号54-->
+			IErrorCode.getMessage (UNCHANGED)
+				ResultCode.getMessage (UNCHANGED)
+			--行号54-->
+			ResultCode.getMessage (UNCHANGED)
+
+调用链 7：MODIFIED方法 SmsFlashPromotionSessionController.updateStatus
+SmsFlashPromotionSessionController.updateStatus (MODIFIED)
+	--行号54-->
+	SmsFlashPromotionSessionService.updateStatus (UNCHANGED)
+		SmsFlashPromotionSessionServiceImpl.updateStatus (UNCHANGED)
+			--行号43-->
+			SmsFlashPromotionSession.setId (UNCHANGED)
+			--行号44-->
+			SmsFlashPromotionSession.setStatus (UNCHANGED)
+			🟧 SQL: update sms_flash_promotion_session /* IF: name != null */ name = #{name,jdbcType=VARCHAR}, /* IF: startTime != null */ start_time = #{startTime,jdbcType=TIME}, /* IF: endTime != null */ end_time = #{endTime,jdbcType=TIME}, /* IF: status != null */ status = #{status,jdbcType=INTEGER}, /* IF: createTime != null */ create_time = #{createTime,jdbcType=TIMESTAMP}, where id = #{id,jdbcType=BIGINT}
+			    ┌──────────────────────────────────────────────────┐
+			    │ 📊 操作类型: UPDATE                                   │
+			    │ 📋 影响表: sms_flash_promotion_session               │
+			    │ ⚠️  风险等级: ℹ️ MEDIUM                               │
+			    │ 🔍 WHERE条件: ✅                                     │
+			    │ 📄 LIMIT限制: ❌ 无                                   │
+			    │ 📝 预估行数: UNKNOWN                                  │
+			    └──────────────────────────────────────────────────┘
+			    🔄 动态SQL条件:
+			      • IF: name != null
+			      • IF: startTime != null
+			      • IF: endTime != null
+			      • IF: status != null
+			      • IF: createTime != null
+	--行号54-->
+	SmsFlashPromotionSessionService.updateStatus (UNCHANGED)
+		SmsFlashPromotionSessionServiceImpl.updateStatus (UNCHANGED)
+			--行号43-->
+			SmsFlashPromotionSession.setId (UNCHANGED)
+			--行号44-->
+			SmsFlashPromotionSession.setStatus (UNCHANGED)
+			🟧 SQL: update sms_flash_promotion_session /* IF: name != null */ name = #{name,jdbcType=VARCHAR}, /* IF: startTime != null */ start_time = #{startTime,jdbcType=TIME}, /* IF: endTime != null */ end_time = #{endTime,jdbcType=TIME}, /* IF: status != null */ status = #{status,jdbcType=INTEGER}, /* IF: createTime != null */ create_time = #{createTime,jdbcType=TIMESTAMP}, where id = #{id,jdbcType=BIGINT}
+			    ┌──────────────────────────────────────────────────┐
+			    │ 📊 操作类型: UPDATE                                   │
+			    │ 📋 影响表: sms_flash_promotion_session               │
+			    │ ⚠️  风险等级: ℹ️ MEDIUM                               │
+			    │ 🔍 WHERE条件: ✅                                     │
+			    │ 📄 LIMIT限制: ❌ 无                                   │
+			    │ 📝 预估行数: UNKNOWN                                  │
+			    └──────────────────────────────────────────────────┘
+			    🔄 动态SQL条件:
+			      • IF: name != null
+			      • IF: startTime != null
+			      • IF: endTime != null
+			      • IF: status != null
+			      • IF: createTime != null
+	--行号54-->
+	SmsFlashPromotionSessionServiceImpl.updateStatus (UNCHANGED)
+		--行号43-->
+		SmsFlashPromotionSession.setId (UNCHANGED)
+		--行号44-->
+		SmsFlashPromotionSession.setStatus (UNCHANGED)
+		🟧 SQL: update sms_flash_promotion_session /* IF: name != null */ name = #{name,jdbcType=VARCHAR}, /* IF: startTime != null */ start_time = #{startTime,jdbcType=TIME}, /* IF: endTime != null */ end_time = #{endTime,jdbcType=TIME}, /* IF: status != null */ status = #{status,jdbcType=INTEGER}, /* IF: createTime != null */ create_time = #{createTime,jdbcType=TIMESTAMP}, where id = #{id,jdbcType=BIGINT}
+		    ┌──────────────────────────────────────────────────┐
+		    │ 📊 操作类型: UPDATE                                   │
+		    │ 📋 影响表: sms_flash_promotion_session               │
+		    │ ⚠️  风险等级: ℹ️ MEDIUM                               │
+		    │ 🔍 WHERE条件: ✅                                     │
+		    │ 📄 LIMIT限制: ❌ 无                                   │
+		    │ 📝 预估行数: UNKNOWN                                  │
+		    └──────────────────────────────────────────────────┘
+		    🔄 动态SQL条件:
+		      • IF: name != null
+		      • IF: startTime != null
+		      • IF: endTime != null
+		      • IF: status != null
+		      • IF: createTime != null
+	--行号56-->
+	CommonResult.success (UNCHANGED)
+		--行号36-->
+		SUCCESS.getCode (UNKNOWN)
+		--行号36-->
+		SUCCESS.getMessage (UNKNOWN)
+	--行号56-->
+	CommonResult.success (UNCHANGED)
+		--行号36-->
+		SUCCESS.getCode (UNKNOWN)
+		--行号36-->
+		SUCCESS.getMessage (UNKNOWN)
+	--行号58-->
+	CommonResult.failed (UNCHANGED)
+		--行号78-->
+		CommonResult.failed (UNCHANGED)
+			--行号54-->
+			IErrorCode.getCode (UNCHANGED)
+				ResultCode.getCode (UNCHANGED)
+			--行号54-->
+			ResultCode.getCode (UNCHANGED)
+			--行号54-->
+			IErrorCode.getMessage (UNCHANGED)
+				ResultCode.getMessage (UNCHANGED)
+			--行号54-->
+			ResultCode.getMessage (UNCHANGED)
+
+调用链 8：MODIFIED方法 SmsHomeAdvertiseController.delete
+SmsHomeAdvertiseController.delete (MODIFIED)
+	--行号42-->
+	SmsHomeAdvertiseService.delete (UNCHANGED)
+		SmsHomeAdvertiseServiceImpl.delete (UNCHANGED)
+			--行号36-->
+			SmsHomeAdvertiseExample.createCriteria (UNCHANGED)
+				--行号49-->
+				SmsHomeAdvertiseExample.createCriteriaInternal (UNCHANGED)
+				--行号50-->
+				List<Criteria>.size (UNKNOWN)
+				--行号51-->
+				List<Criteria>.add (UNKNOWN)
+			🟥 SQL: delete from sms_home_advertise /* IF: _parameter != null */ /* FOREACH: oredCriteria */ /* IF: criteria.valid */ /* FOREACH: criteria.criteria */ and ${criterion.condition} and ${criterion.condition} #{criterion.value} and ${criterion.condition} #{criterion.value} and #{criterion.secondValue} and ${criterion.condition} /* FOREACH: criterion.value */ #{listItem}
+			    ┌──────────────────────────────────────────────────┐
+			    │ 📊 操作类型: DELETE                                   │
+			    │ 📋 影响表: sms_home_advertise                        │
+			    │ ⚠️  风险等级: 🔴 CRITICAL                             │
+			    │ 🔍 WHERE条件: ❌ 缺失                                  │
+			    │ 📄 LIMIT限制: ❌ 无                                   │
+			    │ 📝 预估行数: ALL                                      │
+			    └──────────────────────────────────────────────────┘
+			    🔄 动态SQL条件:
+			      • IF: _parameter != null
+	--行号42-->
+	SmsHomeAdvertiseService.delete (UNCHANGED)
+		SmsHomeAdvertiseServiceImpl.delete (UNCHANGED)
+			--行号36-->
+			SmsHomeAdvertiseExample.createCriteria (UNCHANGED)
+				--行号49-->
+				SmsHomeAdvertiseExample.createCriteriaInternal (UNCHANGED)
+				--行号50-->
+				List<Criteria>.size (UNKNOWN)
+				--行号51-->
+				List<Criteria>.add (UNKNOWN)
+			🟥 SQL: delete from sms_home_advertise /* IF: _parameter != null */ /* FOREACH: oredCriteria */ /* IF: criteria.valid */ /* FOREACH: criteria.criteria */ and ${criterion.condition} and ${criterion.condition} #{criterion.value} and ${criterion.condition} #{criterion.value} and #{criterion.secondValue} and ${criterion.condition} /* FOREACH: criterion.value */ #{listItem}
+			    ┌──────────────────────────────────────────────────┐
+			    │ 📊 操作类型: DELETE                                   │
+			    │ 📋 影响表: sms_home_advertise                        │
+			    │ ⚠️  风险等级: 🔴 CRITICAL                             │
+			    │ 🔍 WHERE条件: ❌ 缺失                                  │
+			    │ 📄 LIMIT限制: ❌ 无                                   │
+			    │ 📝 预估行数: ALL                                      │
+			    └──────────────────────────────────────────────────┘
+			    🔄 动态SQL条件:
+			      • IF: _parameter != null
+	--行号42-->
+	SmsHomeAdvertiseServiceImpl.delete (UNCHANGED)
+		--行号36-->
+		SmsHomeAdvertiseExample.createCriteria (UNCHANGED)
+			--行号49-->
+			SmsHomeAdvertiseExample.createCriteriaInternal (UNCHANGED)
+			--行号50-->
+			List<Criteria>.size (UNKNOWN)
+			--行号51-->
+			List<Criteria>.add (UNKNOWN)
+		🟥 SQL: delete from sms_home_advertise /* IF: _parameter != null */ /* FOREACH: oredCriteria */ /* IF: criteria.valid */ /* FOREACH: criteria.criteria */ and ${criterion.condition} and ${criterion.condition} #{criterion.value} and ${criterion.condition} #{criterion.value} and #{criterion.secondValue} and ${criterion.condition} /* FOREACH: criterion.value */ #{listItem}
+		    ┌──────────────────────────────────────────────────┐
+		    │ 📊 操作类型: DELETE                                   │
+		    │ 📋 影响表: sms_home_advertise                        │
+		    │ ⚠️  风险等级: 🔴 CRITICAL                             │
+		    │ 🔍 WHERE条件: ❌ 缺失                                  │
+		    │ 📄 LIMIT限制: ❌ 无                                   │
+		    │ 📝 预估行数: ALL                                      │
+		    └──────────────────────────────────────────────────┘
+		    🔄 动态SQL条件:
+		      • IF: _parameter != null
+	--行号44-->
+	CommonResult.success (UNCHANGED)
+		--行号36-->
+		SUCCESS.getCode (UNKNOWN)
+		--行号36-->
+		SUCCESS.getMessage (UNKNOWN)
+	--行号44-->
+	CommonResult.success (UNCHANGED)
+		--行号36-->
+		SUCCESS.getCode (UNKNOWN)
+		--行号36-->
+		SUCCESS.getMessage (UNKNOWN)
+	--行号45-->
+	CommonResult.failed (UNCHANGED)
+		--行号78-->
+		CommonResult.failed (UNCHANGED)
+			--行号54-->
+			IErrorCode.getCode (UNCHANGED)
+				ResultCode.getCode (UNCHANGED)
+			--行号54-->
+			ResultCode.getCode (UNCHANGED)
+			--行号54-->
+			IErrorCode.getMessage (UNCHANGED)
+				ResultCode.getMessage (UNCHANGED)
+			--行号54-->
+			ResultCode.getMessage (UNCHANGED)
+
+调用链 9：MODIFIED方法 SmsHomeAdvertiseController.getItem
+SmsHomeAdvertiseController.getItem (MODIFIED)
+	--行号62-->
+	SmsHomeAdvertiseService.getItem (UNCHANGED)
+		SmsHomeAdvertiseServiceImpl.getItem (UNCHANGED)
+			🟦 SQL: select id, name, type, pic, start_time, end_time, status, click_count, order_count, url, note, sort from sms_home_advertise where id = #{id,jdbcType=BIGINT}
+			    ┌──────────────────────────────────────────────────┐
+			    │ 📊 操作类型: SELECT                                   │
+			    │ 📋 影响表: sms_home_advertise                        │
+			    │ ⚠️  风险等级: ✅ LOW                                   │
+			    │ 🔍 WHERE条件: ✅                                     │
+			    │ 📄 LIMIT限制: ❌ 无                                   │
+			    │ 📝 预估行数: MANY                                     │
+			    └──────────────────────────────────────────────────┘
+	--行号62-->
+	SmsHomeAdvertiseService.getItem (UNCHANGED)
+		SmsHomeAdvertiseServiceImpl.getItem (UNCHANGED)
+			🟦 SQL: select id, name, type, pic, start_time, end_time, status, click_count, order_count, url, note, sort from sms_home_advertise where id = #{id,jdbcType=BIGINT}
+			    ┌──────────────────────────────────────────────────┐
+			    │ 📊 操作类型: SELECT                                   │
+			    │ 📋 影响表: sms_home_advertise                        │
+			    │ ⚠️  风险等级: ✅ LOW                                   │
+			    │ 🔍 WHERE条件: ✅                                     │
+			    │ 📄 LIMIT限制: ❌ 无                                   │
+			    │ 📝 预估行数: MANY                                     │
+			    └──────────────────────────────────────────────────┘
+	--行号62-->
+	SmsHomeAdvertiseServiceImpl.getItem (UNCHANGED)
+		🟦 SQL: select id, name, type, pic, start_time, end_time, status, click_count, order_count, url, note, sort from sms_home_advertise where id = #{id,jdbcType=BIGINT}
+		    ┌──────────────────────────────────────────────────┐
+		    │ 📊 操作类型: SELECT                                   │
+		    │ 📋 影响表: sms_home_advertise                        │
+		    │ ⚠️  风险等级: ✅ LOW                                   │
+		    │ 🔍 WHERE条件: ✅                                     │
+		    │ 📄 LIMIT限制: ❌ 无                                   │
+		    │ 📝 预估行数: MANY                                     │
+		    └──────────────────────────────────────────────────┘
+	--行号63-->
+	CommonResult.success (UNCHANGED)
+		--行号36-->
+		SUCCESS.getCode (UNKNOWN)
+		--行号36-->
+		SUCCESS.getMessage (UNKNOWN)
+	--行号63-->
+	CommonResult.success (UNCHANGED)
+		--行号36-->
+		SUCCESS.getCode (UNKNOWN)
+		--行号36-->
+		SUCCESS.getMessage (UNKNOWN)
+
+调用链 10：MODIFIED方法 SmsHomeAdvertiseController.list
+SmsHomeAdvertiseController.list (MODIFIED)
+	--行号84-->
+	SmsHomeAdvertiseService.list (UNCHANGED)
+		SmsHomeAdvertiseServiceImpl.list (UNCHANGED)
+			--行号61-->
+			PageHelper.startPage (UNKNOWN)
+			--行号63-->
+			SmsHomeAdvertiseExample.createCriteria (UNCHANGED)
+				--行号49-->
+				SmsHomeAdvertiseExample.createCriteriaInternal (UNCHANGED)
+				--行号50-->
+				List<Criteria>.size (UNKNOWN)
+				--行号51-->
+				List<Criteria>.add (UNKNOWN)
+			--行号64,70-->
+			StrUtil.isEmpty (UNKNOWN)
+			--行号65-->
+			Criteria.andNameLike (UNKNOWN)
+			--行号68-->
+			Criteria.andTypeEqualTo (UNKNOWN)
+			--行号76,82-->
+			SimpleDateFormat.parse (UNKNOWN)
+			--行号78,84-->
+			E.printStackTrace (UNKNOWN)
+			--行号87-->
+			Criteria.andEndTimeBetween (UNKNOWN)
+			--行号90-->
+			SmsHomeAdvertiseExample.setOrderByClause (UNCHANGED)
+			🟦 SQL: select /* IF: distinct */ distinct id, name, type, pic, start_time, end_time, status, click_count, order_count, url, note, sort from sms_home_advertise /* IF: _parameter != null */ /* FOREACH: oredCriteria */ /* IF: criteria.valid */ /* FOREACH: criteria.criteria */ and ${criterion.condition} and ${criterion.condition} #{criterion.value} and ${criterion.condition} #{criterion.value} and #{criterion.secondValue} and ${criterion.condition} /* FOREACH: criterion.value */ #{listItem} /* IF: orderByClause != null */ order by ${orderByClause}
+			    ┌──────────────────────────────────────────────────┐
+			    │ 📊 操作类型: SELECT                                   │
+			    │ 📋 影响表: sms_home_advertise                        │
+			    │ ⚠️  风险等级: ℹ️ MEDIUM                               │
+			    │ 🔍 WHERE条件: ❌ 缺失                                  │
+			    │ 📄 LIMIT限制: ❌ 无                                   │
+			    │ 📝 预估行数: UNKNOWN                                  │
+			    └──────────────────────────────────────────────────┘
+			    ⚡ 性能预警:
+			      • [LOW] ⚠️ 全表扫描: SELECT语句缺少WHERE或LIMIT条件
+			        💡 建议: 添加WHERE条件或LIMIT子句限制返回行数
+			    🔄 动态SQL条件:
+			      • IF: distinct
+			      • IF: _parameter != null
+			      • IF: orderByClause != null
+	--行号84-->
+	SmsHomeAdvertiseService.list (UNCHANGED)
+		SmsHomeAdvertiseServiceImpl.list (UNCHANGED)
+			--行号61-->
+			PageHelper.startPage (UNKNOWN)
+			--行号63-->
+			SmsHomeAdvertiseExample.createCriteria (UNCHANGED)
+				--行号49-->
+				SmsHomeAdvertiseExample.createCriteriaInternal (UNCHANGED)
+				--行号50-->
+				List<Criteria>.size (UNKNOWN)
+				--行号51-->
+				List<Criteria>.add (UNKNOWN)
+			--行号64,70-->
+			StrUtil.isEmpty (UNKNOWN)
+			--行号65-->
+			Criteria.andNameLike (UNKNOWN)
+			--行号68-->
+			Criteria.andTypeEqualTo (UNKNOWN)
+			--行号76,82-->
+			SimpleDateFormat.parse (UNKNOWN)
+			--行号78,84-->
+			E.printStackTrace (UNKNOWN)
+			--行号87-->
+			Criteria.andEndTimeBetween (UNKNOWN)
+			--行号90-->
+			SmsHomeAdvertiseExample.setOrderByClause (UNCHANGED)
+			🟦 SQL: select /* IF: distinct */ distinct id, name, type, pic, start_time, end_time, status, click_count, order_count, url, note, sort from sms_home_advertise /* IF: _parameter != null */ /* FOREACH: oredCriteria */ /* IF: criteria.valid */ /* FOREACH: criteria.criteria */ and ${criterion.condition} and ${criterion.condition} #{criterion.value} and ${criterion.condition} #{criterion.value} and #{criterion.secondValue} and ${criterion.condition} /* FOREACH: criterion.value */ #{listItem} /* IF: orderByClause != null */ order by ${orderByClause}
+			    ┌──────────────────────────────────────────────────┐
+			    │ 📊 操作类型: SELECT                                   │
+			    │ 📋 影响表: sms_home_advertise                        │
+			    │ ⚠️  风险等级: ℹ️ MEDIUM                               │
+			    │ 🔍 WHERE条件: ❌ 缺失                                  │
+			    │ 📄 LIMIT限制: ❌ 无                                   │
+			    │ 📝 预估行数: UNKNOWN                                  │
+			    └──────────────────────────────────────────────────┘
+			    ⚡ 性能预警:
+			      • [LOW] ⚠️ 全表扫描: SELECT语句缺少WHERE或LIMIT条件
+			        💡 建议: 添加WHERE条件或LIMIT子句限制返回行数
+			    🔄 动态SQL条件:
+			      • IF: distinct
+			      • IF: _parameter != null
+			      • IF: orderByClause != null
+	--行号84-->
+	SmsHomeAdvertiseServiceImpl.list (UNCHANGED)
+		--行号61-->
+		PageHelper.startPage (UNKNOWN)
+		--行号63-->
+		SmsHomeAdvertiseExample.createCriteria (UNCHANGED)
+			--行号49-->
+			SmsHomeAdvertiseExample.createCriteriaInternal (UNCHANGED)
+			--行号50-->
+			List<Criteria>.size (UNKNOWN)
+			--行号51-->
+			List<Criteria>.add (UNKNOWN)
+		--行号64,70-->
+		StrUtil.isEmpty (UNKNOWN)
+		--行号65-->
+		Criteria.andNameLike (UNKNOWN)
+		--行号68-->
+		Criteria.andTypeEqualTo (UNKNOWN)
+		--行号76,82-->
+		SimpleDateFormat.parse (UNKNOWN)
+		--行号78,84-->
+		E.printStackTrace (UNKNOWN)
+		--行号87-->
+		Criteria.andEndTimeBetween (UNKNOWN)
+		--行号90-->
+		SmsHomeAdvertiseExample.setOrderByClause (UNCHANGED)
+		🟦 SQL: select /* IF: distinct */ distinct id, name, type, pic, start_time, end_time, status, click_count, order_count, url, note, sort from sms_home_advertise /* IF: _parameter != null */ /* FOREACH: oredCriteria */ /* IF: criteria.valid */ /* FOREACH: criteria.criteria */ and ${criterion.condition} and ${criterion.condition} #{criterion.value} and ${criterion.condition} #{criterion.value} and #{criterion.secondValue} and ${criterion.condition} /* FOREACH: criterion.value */ #{listItem} /* IF: orderByClause != null */ order by ${orderByClause}
+		    ┌──────────────────────────────────────────────────┐
+		    │ 📊 操作类型: SELECT                                   │
+		    │ 📋 影响表: sms_home_advertise                        │
+		    │ ⚠️  风险等级: ℹ️ MEDIUM                               │
+		    │ 🔍 WHERE条件: ❌ 缺失                                  │
+		    │ 📄 LIMIT限制: ❌ 无                                   │
+		    │ 📝 预估行数: UNKNOWN                                  │
+		    └──────────────────────────────────────────────────┘
+		    ⚡ 性能预警:
+		      • [LOW] ⚠️ 全表扫描: SELECT语句缺少WHERE或LIMIT条件
+		        💡 建议: 添加WHERE条件或LIMIT子句限制返回行数
+		    🔄 动态SQL条件:
+		      • IF: distinct
+		      • IF: _parameter != null
+		      • IF: orderByClause != null
+	--行号85-->
+	CommonPage.restPage (UNCHANGED)
+		--行号40-->
+		CommonPage<T>.setTotalPage (UNKNOWN)
+		--行号40-->
+		PageInfo<T>.getPages (UNKNOWN)
+		--行号41-->
+		CommonPage<T>.setPageNum (UNKNOWN)
+		--行号41-->
+		PageInfo<T>.getPageNum (UNKNOWN)
+		--行号42-->
+		CommonPage<T>.setPageSize (UNKNOWN)
+		--行号42-->
+		PageInfo<T>.getPageSize (UNKNOWN)
+		--行号43-->
+		CommonPage<T>.setTotal (UNKNOWN)
+		--行号43-->
+		PageInfo<T>.getTotal (UNKNOWN)
+		--行号44-->
+		CommonPage<T>.setList (UNKNOWN)
+		--行号44-->
+		PageInfo<T>.getList (UNKNOWN)
+	--行号85-->
+	CommonPage.restPage (UNCHANGED)
+		--行号40-->
+		CommonPage<T>.setTotalPage (UNKNOWN)
+		--行号40-->
+		PageInfo<T>.getPages (UNKNOWN)
+		--行号41-->
+		CommonPage<T>.setPageNum (UNKNOWN)
+		--行号41-->
+		PageInfo<T>.getPageNum (UNKNOWN)
+		--行号42-->
+		CommonPage<T>.setPageSize (UNKNOWN)
+		--行号42-->
+		PageInfo<T>.getPageSize (UNKNOWN)
+		--行号43-->
+		CommonPage<T>.setTotal (UNKNOWN)
+		--行号43-->
+		PageInfo<T>.getTotal (UNKNOWN)
+		--行号44-->
+		CommonPage<T>.setList (UNKNOWN)
+		--行号44-->
+		PageInfo<T>.getList (UNKNOWN)
+	--行号85-->
+	CommonResult.success (UNCHANGED)
+		--行号36-->
+		SUCCESS.getCode (UNKNOWN)
+		--行号36-->
+		SUCCESS.getMessage (UNKNOWN)
+	--行号85-->
+	CommonResult.success (UNCHANGED)
+		--行号36-->
+		SUCCESS.getCode (UNKNOWN)
+		--行号36-->
+		SUCCESS.getMessage (UNKNOWN)
+
+调用链 11：MODIFIED方法 SmsHomeAdvertiseController.update
+SmsHomeAdvertiseController.update (MODIFIED)
+	--行号70-->
+	SmsHomeAdvertiseService.update (UNCHANGED)
+		SmsHomeAdvertiseServiceImpl.update (UNCHANGED)
+			--行号55-->
+			SmsHomeAdvertise.setId (UNCHANGED)
+			🟧 SQL: update sms_home_advertise /* IF: name != null */ name = #{name,jdbcType=VARCHAR}, /* IF: type != null */ type = #{type,jdbcType=INTEGER}, /* IF: pic != null */ pic = #{pic,jdbcType=VARCHAR}, /* IF: startTime != null */ start_time = #{startTime,jdbcType=TIMESTAMP}, /* IF: endTime != null */ end_time = #{endTime,jdbcType=TIMESTAMP}, /* IF: status != null */ status = #{status,jdbcType=INTEGER}, /* IF: clickCount != null */ click_count = #{clickCount,jdbcType=INTEGER}, /* IF: orderCount != null */ order_count = #{orderCount,jdbcType=INTEGER}, /* IF: url != null */ url = #{url,jdbcType=VARCHAR}, /* IF: note != null */ note = #{note,jdbcType=VARCHAR}, /* IF: sort != null */ sort = #{sort,jdbcType=INTEGER}, where id = #{id,jdbcType=BIGINT}
+			    ┌──────────────────────────────────────────────────┐
+			    │ 📊 操作类型: UPDATE                                   │
+			    │ 📋 影响表: sms_home_advertise                        │
+			    │ ⚠️  风险等级: ℹ️ MEDIUM                               │
+			    │ 🔍 WHERE条件: ✅                                     │
+			    │ 📄 LIMIT限制: ❌ 无                                   │
+			    │ 📝 预估行数: UNKNOWN                                  │
+			    └──────────────────────────────────────────────────┘
+			    🔄 动态SQL条件:
+			      • IF: name != null
+			      • IF: type != null
+			      • IF: pic != null
+			      • IF: startTime != null
+			      • IF: endTime != null
+			      • IF: status != null
+			      • IF: clickCount != null
+			      • IF: orderCount != null
+			      • IF: url != null
+			      • IF: note != null
+			      • IF: sort != null
+	--行号70-->
+	SmsHomeAdvertiseService.update (UNCHANGED)
+		SmsHomeAdvertiseServiceImpl.update (UNCHANGED)
+			--行号55-->
+			SmsHomeAdvertise.setId (UNCHANGED)
+			🟧 SQL: update sms_home_advertise /* IF: name != null */ name = #{name,jdbcType=VARCHAR}, /* IF: type != null */ type = #{type,jdbcType=INTEGER}, /* IF: pic != null */ pic = #{pic,jdbcType=VARCHAR}, /* IF: startTime != null */ start_time = #{startTime,jdbcType=TIMESTAMP}, /* IF: endTime != null */ end_time = #{endTime,jdbcType=TIMESTAMP}, /* IF: status != null */ status = #{status,jdbcType=INTEGER}, /* IF: clickCount != null */ click_count = #{clickCount,jdbcType=INTEGER}, /* IF: orderCount != null */ order_count = #{orderCount,jdbcType=INTEGER}, /* IF: url != null */ url = #{url,jdbcType=VARCHAR}, /* IF: note != null */ note = #{note,jdbcType=VARCHAR}, /* IF: sort != null */ sort = #{sort,jdbcType=INTEGER}, where id = #{id,jdbcType=BIGINT}
+			    ┌──────────────────────────────────────────────────┐
+			    │ 📊 操作类型: UPDATE                                   │
+			    │ 📋 影响表: sms_home_advertise                        │
+			    │ ⚠️  风险等级: ℹ️ MEDIUM                               │
+			    │ 🔍 WHERE条件: ✅                                     │
+			    │ 📄 LIMIT限制: ❌ 无                                   │
+			    │ 📝 预估行数: UNKNOWN                                  │
+			    └──────────────────────────────────────────────────┘
+			    🔄 动态SQL条件:
+			      • IF: name != null
+			      • IF: type != null
+			      • IF: pic != null
+			      • IF: startTime != null
+			      • IF: endTime != null
+			      • IF: status != null
+			      • IF: clickCount != null
+			      • IF: orderCount != null
+			      • IF: url != null
+			      • IF: note != null
+			      • IF: sort != null
+	--行号70-->
+	SmsHomeAdvertiseServiceImpl.update (UNCHANGED)
+		--行号55-->
+		SmsHomeAdvertise.setId (UNCHANGED)
+		🟧 SQL: update sms_home_advertise /* IF: name != null */ name = #{name,jdbcType=VARCHAR}, /* IF: type != null */ type = #{type,jdbcType=INTEGER}, /* IF: pic != null */ pic = #{pic,jdbcType=VARCHAR}, /* IF: startTime != null */ start_time = #{startTime,jdbcType=TIMESTAMP}, /* IF: endTime != null */ end_time = #{endTime,jdbcType=TIMESTAMP}, /* IF: status != null */ status = #{status,jdbcType=INTEGER}, /* IF: clickCount != null */ click_count = #{clickCount,jdbcType=INTEGER}, /* IF: orderCount != null */ order_count = #{orderCount,jdbcType=INTEGER}, /* IF: url != null */ url = #{url,jdbcType=VARCHAR}, /* IF: note != null */ note = #{note,jdbcType=VARCHAR}, /* IF: sort != null */ sort = #{sort,jdbcType=INTEGER}, where id = #{id,jdbcType=BIGINT}
+		    ┌──────────────────────────────────────────────────┐
+		    │ 📊 操作类型: UPDATE                                   │
+		    │ 📋 影响表: sms_home_advertise                        │
+		    │ ⚠️  风险等级: ℹ️ MEDIUM                               │
+		    │ 🔍 WHERE条件: ✅                                     │
+		    │ 📄 LIMIT限制: ❌ 无                                   │
+		    │ 📝 预估行数: UNKNOWN                                  │
+		    └──────────────────────────────────────────────────┘
+		    🔄 动态SQL条件:
+		      • IF: name != null
+		      • IF: type != null
+		      • IF: pic != null
+		      • IF: startTime != null
+		      • IF: endTime != null
+		      • IF: status != null
+		      • IF: clickCount != null
+		      • IF: orderCount != null
+		      • IF: url != null
+		      • IF: note != null
+		      • IF: sort != null
+	--行号72-->
+	CommonResult.success (UNCHANGED)
+		--行号36-->
+		SUCCESS.getCode (UNKNOWN)
+		--行号36-->
+		SUCCESS.getMessage (UNKNOWN)
+	--行号72-->
+	CommonResult.success (UNCHANGED)
+		--行号36-->
+		SUCCESS.getCode (UNKNOWN)
+		--行号36-->
+		SUCCESS.getMessage (UNKNOWN)
+	--行号73-->
+	CommonResult.failed (UNCHANGED)
+		--行号78-->
+		CommonResult.failed (UNCHANGED)
+			--行号54-->
+			IErrorCode.getCode (UNCHANGED)
+				ResultCode.getCode (UNCHANGED)
+			--行号54-->
+			ResultCode.getCode (UNCHANGED)
+			--行号54-->
+			IErrorCode.getMessage (UNCHANGED)
+				ResultCode.getMessage (UNCHANGED)
+			--行号54-->
+			ResultCode.getMessage (UNCHANGED)
+
+调用链 12：MODIFIED方法 SmsHomeNewProductController.create
+SmsHomeNewProductController.create (MODIFIED)
+	--行号32-->
+	SmsHomeNewProductService.create (UNCHANGED)
+		SmsHomeNewProductServiceImpl.create (UNCHANGED)
+			--行号25-->
+			SmsHomeNewProduct.setRecommendStatus (UNCHANGED)
+			--行号25-->
+			SmsHomeNewProduct.setRecommendStatus (UNCHANGED)
+			--行号26-->
+			SmsHomeNewProduct.setSort (UNCHANGED)
+			--行号26-->
+			SmsHomeNewProduct.setSort (UNCHANGED)
+			🟩 SQL: insert into sms_home_new_product (product_id, product_name, recommend_status, sort) values (#{productId,jdbcType=BIGINT}, #{productName,jdbcType=VARCHAR}, #{recommendStatus,jdbcType=INTEGER}, #{sort,jdbcType=INTEGER})
+			    ┌──────────────────────────────────────────────────┐
+			    │ 📊 操作类型: INSERT                                   │
+			    │ 📋 影响表: sms_home_new_product                      │
+			    │ ⚠️  风险等级: ✅ LOW                                   │
+			    │ 🔍 WHERE条件: ✅                                     │
+			    │ 📄 LIMIT限制: ❌ 无                                   │
+			    │ 📝 预估行数: ONE                                      │
+			    └──────────────────────────────────────────────────┘
+			--行号29-->
+			SmsHomeNewProduct>.size (UNKNOWN)
+	--行号32-->
+	SmsHomeNewProductService.create (UNCHANGED)
+		SmsHomeNewProductServiceImpl.create (UNCHANGED)
+			--行号25-->
+			SmsHomeNewProduct.setRecommendStatus (UNCHANGED)
+			--行号25-->
+			SmsHomeNewProduct.setRecommendStatus (UNCHANGED)
+			--行号26-->
+			SmsHomeNewProduct.setSort (UNCHANGED)
+			--行号26-->
+			SmsHomeNewProduct.setSort (UNCHANGED)
+			🟩 SQL: insert into sms_home_new_product (product_id, product_name, recommend_status, sort) values (#{productId,jdbcType=BIGINT}, #{productName,jdbcType=VARCHAR}, #{recommendStatus,jdbcType=INTEGER}, #{sort,jdbcType=INTEGER})
+			    ┌──────────────────────────────────────────────────┐
+			    │ 📊 操作类型: INSERT                                   │
+			    │ 📋 影响表: sms_home_new_product                      │
+			    │ ⚠️  风险等级: ✅ LOW                                   │
+			    │ 🔍 WHERE条件: ✅                                     │
+			    │ 📄 LIMIT限制: ❌ 无                                   │
+			    │ 📝 预估行数: ONE                                      │
+			    └──────────────────────────────────────────────────┘
+			--行号29-->
+			SmsHomeNewProduct>.size (UNKNOWN)
+	--行号32-->
+	SmsHomeNewProductServiceImpl.create (UNCHANGED)
+		--行号25-->
+		SmsHomeNewProduct.setRecommendStatus (UNCHANGED)
+		--行号25-->
+		SmsHomeNewProduct.setRecommendStatus (UNCHANGED)
+		--行号26-->
+		SmsHomeNewProduct.setSort (UNCHANGED)
+		--行号26-->
+		SmsHomeNewProduct.setSort (UNCHANGED)
+		🟩 SQL: insert into sms_home_new_product (product_id, product_name, recommend_status, sort) values (#{productId,jdbcType=BIGINT}, #{productName,jdbcType=VARCHAR}, #{recommendStatus,jdbcType=INTEGER}, #{sort,jdbcType=INTEGER})
+		    ┌──────────────────────────────────────────────────┐
+		    │ 📊 操作类型: INSERT                                   │
+		    │ 📋 影响表: sms_home_new_product                      │
+		    │ ⚠️  风险等级: ✅ LOW                                   │
+		    │ 🔍 WHERE条件: ✅                                     │
+		    │ 📄 LIMIT限制: ❌ 无                                   │
+		    │ 📝 预估行数: ONE                                      │
+		    └──────────────────────────────────────────────────┘
+		--行号29-->
+		SmsHomeNewProduct>.size (UNKNOWN)
+	--行号34-->
+	CommonResult.success (UNCHANGED)
+		--行号36-->
+		SUCCESS.getCode (UNKNOWN)
+		--行号36-->
+		SUCCESS.getMessage (UNKNOWN)
+	--行号34-->
+	CommonResult.success (UNCHANGED)
+		--行号36-->
+		SUCCESS.getCode (UNKNOWN)
+		--行号36-->
+		SUCCESS.getMessage (UNKNOWN)
+	--行号36-->
+	CommonResult.failed (UNCHANGED)
+		--行号78-->
+		CommonResult.failed (UNCHANGED)
+			--行号54-->
+			IErrorCode.getCode (UNCHANGED)
+				ResultCode.getCode (UNCHANGED)
+			--行号54-->
+			ResultCode.getCode (UNCHANGED)
+			--行号54-->
+			IErrorCode.getMessage (UNCHANGED)
+				ResultCode.getMessage (UNCHANGED)
+			--行号54-->
+			ResultCode.getMessage (UNCHANGED)
+
+调用链 13：MODIFIED方法 SmsHomeRecommendSubjectController.create
+SmsHomeRecommendSubjectController.create (MODIFIED)
+	--行号32-->
+	SmsHomeRecommendSubjectService.create (UNCHANGED)
+		SmsHomeRecommendSubjectServiceImpl.create (UNCHANGED)
+			--行号25-->
+			SmsHomeRecommendSubject.setRecommendStatus (UNCHANGED)
+			--行号25-->
+			SmsHomeRecommendSubject.setRecommendStatus (UNCHANGED)
+			--行号26-->
+			SmsHomeRecommendSubject.setSort (UNCHANGED)
+			--行号26-->
+			SmsHomeRecommendSubject.setSort (UNCHANGED)
+			🟩 SQL: insert into sms_home_recommend_subject (subject_id, subject_name, recommend_status, sort) values (#{subjectId,jdbcType=BIGINT}, #{subjectName,jdbcType=VARCHAR}, #{recommendStatus,jdbcType=INTEGER}, #{sort,jdbcType=INTEGER})
+			    ┌──────────────────────────────────────────────────┐
+			    │ 📊 操作类型: INSERT                                   │
+			    │ 📋 影响表: sms_home_recommend_subject                │
+			    │ ⚠️  风险等级: ✅ LOW                                   │
+			    │ 🔍 WHERE条件: ✅                                     │
+			    │ 📄 LIMIT限制: ❌ 无                                   │
+			    │ 📝 预估行数: ONE                                      │
+			    └──────────────────────────────────────────────────┘
+			--行号29-->
+			SmsHomeRecommendSubject>.size (UNKNOWN)
+	--行号32-->
+	SmsHomeRecommendSubjectService.create (UNCHANGED)
+		SmsHomeRecommendSubjectServiceImpl.create (UNCHANGED)
+			--行号25-->
+			SmsHomeRecommendSubject.setRecommendStatus (UNCHANGED)
+			--行号25-->
+			SmsHomeRecommendSubject.setRecommendStatus (UNCHANGED)
+			--行号26-->
+			SmsHomeRecommendSubject.setSort (UNCHANGED)
+			--行号26-->
+			SmsHomeRecommendSubject.setSort (UNCHANGED)
+			🟩 SQL: insert into sms_home_recommend_subject (subject_id, subject_name, recommend_status, sort) values (#{subjectId,jdbcType=BIGINT}, #{subjectName,jdbcType=VARCHAR}, #{recommendStatus,jdbcType=INTEGER}, #{sort,jdbcType=INTEGER})
+			    ┌──────────────────────────────────────────────────┐
+			    │ 📊 操作类型: INSERT                                   │
+			    │ 📋 影响表: sms_home_recommend_subject                │
+			    │ ⚠️  风险等级: ✅ LOW                                   │
+			    │ 🔍 WHERE条件: ✅                                     │
+			    │ 📄 LIMIT限制: ❌ 无                                   │
+			    │ 📝 预估行数: ONE                                      │
+			    └──────────────────────────────────────────────────┘
+			--行号29-->
+			SmsHomeRecommendSubject>.size (UNKNOWN)
+	--行号32-->
+	SmsHomeRecommendSubjectServiceImpl.create (UNCHANGED)
+		--行号25-->
+		SmsHomeRecommendSubject.setRecommendStatus (UNCHANGED)
+		--行号25-->
+		SmsHomeRecommendSubject.setRecommendStatus (UNCHANGED)
+		--行号26-->
+		SmsHomeRecommendSubject.setSort (UNCHANGED)
+		--行号26-->
+		SmsHomeRecommendSubject.setSort (UNCHANGED)
+		🟩 SQL: insert into sms_home_recommend_subject (subject_id, subject_name, recommend_status, sort) values (#{subjectId,jdbcType=BIGINT}, #{subjectName,jdbcType=VARCHAR}, #{recommendStatus,jdbcType=INTEGER}, #{sort,jdbcType=INTEGER})
+		    ┌──────────────────────────────────────────────────┐
+		    │ 📊 操作类型: INSERT                                   │
+		    │ 📋 影响表: sms_home_recommend_subject                │
+		    │ ⚠️  风险等级: ✅ LOW                                   │
+		    │ 🔍 WHERE条件: ✅                                     │
+		    │ 📄 LIMIT限制: ❌ 无                                   │
+		    │ 📝 预估行数: ONE                                      │
+		    └──────────────────────────────────────────────────┘
+		--行号29-->
+		SmsHomeRecommendSubject>.size (UNKNOWN)
+	--行号34-->
+	CommonResult.success (UNCHANGED)
+		--行号36-->
+		SUCCESS.getCode (UNKNOWN)
+		--行号36-->
+		SUCCESS.getMessage (UNKNOWN)
+	--行号34-->
+	CommonResult.success (UNCHANGED)
+		--行号36-->
+		SUCCESS.getCode (UNKNOWN)
+		--行号36-->
+		SUCCESS.getMessage (UNKNOWN)
+	--行号36-->
+	CommonResult.failed (UNCHANGED)
+		--行号78-->
+		CommonResult.failed (UNCHANGED)
+			--行号54-->
+			IErrorCode.getCode (UNCHANGED)
+				ResultCode.getCode (UNCHANGED)
+			--行号54-->
+			ResultCode.getCode (UNCHANGED)
+			--行号54-->
+			IErrorCode.getMessage (UNCHANGED)
+				ResultCode.getMessage (UNCHANGED)
+			--行号54-->
+			ResultCode.getMessage (UNCHANGED)
+
+调用链 14：MODIFIED方法 UmsMenuController.list
+UmsMenuController.list (MODIFIED)
+	--行号81-->
+	UmsMenuService.list (UNCHANGED)
+		UmsMenuServiceImpl.list (UNCHANGED)
+			--行号69-->
+			PageHelper.startPage (UNKNOWN)
+			--行号71-->
+			UmsMenuExample.setOrderByClause (UNCHANGED)
+			--行号72-->
+			UmsMenuExample.createCriteria (UNCHANGED)
+				--行号49-->
+				UmsMenuExample.createCriteriaInternal (UNCHANGED)
+				--行号50-->
+				List<Criteria>.size (UNKNOWN)
+				--行号51-->
+				List<Criteria>.add (UNKNOWN)
+			🟦 SQL: select /* IF: distinct */ distinct id, parent_id, create_time, title, level, sort, name, icon, hidden from ums_menu /* IF: _parameter != null */ /* FOREACH: oredCriteria */ /* IF: criteria.valid */ /* FOREACH: criteria.criteria */ and ${criterion.condition} and ${criterion.condition} #{criterion.value} and ${criterion.condition} #{criterion.value} and #{criterion.secondValue} and ${criterion.condition} /* FOREACH: criterion.value */ #{listItem} /* IF: orderByClause != null */ order by ${orderByClause}
+			    ┌──────────────────────────────────────────────────┐
+			    │ 📊 操作类型: SELECT                                   │
+			    │ 📋 影响表: ums_menu                                  │
+			    │ ⚠️  风险等级: ℹ️ MEDIUM                               │
+			    │ 🔍 WHERE条件: ❌ 缺失                                  │
+			    │ 📄 LIMIT限制: ❌ 无                                   │
+			    │ 📝 预估行数: UNKNOWN                                  │
+			    └──────────────────────────────────────────────────┘
+			    ⚡ 性能预警:
+			      • [LOW] ⚠️ 全表扫描: SELECT语句缺少WHERE或LIMIT条件
+			        💡 建议: 添加WHERE条件或LIMIT子句限制返回行数
+			    🔄 动态SQL条件:
+			      • IF: distinct
+			      • IF: _parameter != null
+			      • IF: orderByClause != null
+	--行号81-->
+	UmsMenuService.list (UNCHANGED)
+		UmsMenuServiceImpl.list (UNCHANGED)
+			--行号69-->
+			PageHelper.startPage (UNKNOWN)
+			--行号71-->
+			UmsMenuExample.setOrderByClause (UNCHANGED)
+			--行号72-->
+			UmsMenuExample.createCriteria (UNCHANGED)
+				--行号49-->
+				UmsMenuExample.createCriteriaInternal (UNCHANGED)
+				--行号50-->
+				List<Criteria>.size (UNKNOWN)
+				--行号51-->
+				List<Criteria>.add (UNKNOWN)
+			🟦 SQL: select /* IF: distinct */ distinct id, parent_id, create_time, title, level, sort, name, icon, hidden from ums_menu /* IF: _parameter != null */ /* FOREACH: oredCriteria */ /* IF: criteria.valid */ /* FOREACH: criteria.criteria */ and ${criterion.condition} and ${criterion.condition} #{criterion.value} and ${criterion.condition} #{criterion.value} and #{criterion.secondValue} and ${criterion.condition} /* FOREACH: criterion.value */ #{listItem} /* IF: orderByClause != null */ order by ${orderByClause}
+			    ┌──────────────────────────────────────────────────┐
+			    │ 📊 操作类型: SELECT                                   │
+			    │ 📋 影响表: ums_menu                                  │
+			    │ ⚠️  风险等级: ℹ️ MEDIUM                               │
+			    │ 🔍 WHERE条件: ❌ 缺失                                  │
+			    │ 📄 LIMIT限制: ❌ 无                                   │
+			    │ 📝 预估行数: UNKNOWN                                  │
+			    └──────────────────────────────────────────────────┘
+			    ⚡ 性能预警:
+			      • [LOW] ⚠️ 全表扫描: SELECT语句缺少WHERE或LIMIT条件
+			        💡 建议: 添加WHERE条件或LIMIT子句限制返回行数
+			    🔄 动态SQL条件:
+			      • IF: distinct
+			      • IF: _parameter != null
+			      • IF: orderByClause != null
+	--行号81-->
+	UmsMenuServiceImpl.list (UNCHANGED)
+		--行号69-->
+		PageHelper.startPage (UNKNOWN)
+		--行号71-->
+		UmsMenuExample.setOrderByClause (UNCHANGED)
+		--行号72-->
+		UmsMenuExample.createCriteria (UNCHANGED)
+			--行号49-->
+			UmsMenuExample.createCriteriaInternal (UNCHANGED)
+			--行号50-->
+			List<Criteria>.size (UNKNOWN)
+			--行号51-->
+			List<Criteria>.add (UNKNOWN)
+		🟦 SQL: select /* IF: distinct */ distinct id, parent_id, create_time, title, level, sort, name, icon, hidden from ums_menu /* IF: _parameter != null */ /* FOREACH: oredCriteria */ /* IF: criteria.valid */ /* FOREACH: criteria.criteria */ and ${criterion.condition} and ${criterion.condition} #{criterion.value} and ${criterion.condition} #{criterion.value} and #{criterion.secondValue} and ${criterion.condition} /* FOREACH: criterion.value */ #{listItem} /* IF: orderByClause != null */ order by ${orderByClause}
+		    ┌──────────────────────────────────────────────────┐
+		    │ 📊 操作类型: SELECT                                   │
+		    │ 📋 影响表: ums_menu                                  │
+		    │ ⚠️  风险等级: ℹ️ MEDIUM                               │
+		    │ 🔍 WHERE条件: ❌ 缺失                                  │
+		    │ 📄 LIMIT限制: ❌ 无                                   │
+		    │ 📝 预估行数: UNKNOWN                                  │
+		    └──────────────────────────────────────────────────┘
+		    ⚡ 性能预警:
+		      • [LOW] ⚠️ 全表扫描: SELECT语句缺少WHERE或LIMIT条件
+		        💡 建议: 添加WHERE条件或LIMIT子句限制返回行数
+		    🔄 动态SQL条件:
+		      • IF: distinct
+		      • IF: _parameter != null
+		      • IF: orderByClause != null
+	--行号82-->
+	CommonPage.restPage (UNCHANGED)
+		--行号40-->
+		CommonPage<T>.setTotalPage (UNKNOWN)
+		--行号40-->
+		PageInfo<T>.getPages (UNKNOWN)
+		--行号41-->
+		CommonPage<T>.setPageNum (UNKNOWN)
+		--行号41-->
+		PageInfo<T>.getPageNum (UNKNOWN)
+		--行号42-->
+		CommonPage<T>.setPageSize (UNKNOWN)
+		--行号42-->
+		PageInfo<T>.getPageSize (UNKNOWN)
+		--行号43-->
+		CommonPage<T>.setTotal (UNKNOWN)
+		--行号43-->
+		PageInfo<T>.getTotal (UNKNOWN)
+		--行号44-->
+		CommonPage<T>.setList (UNKNOWN)
+		--行号44-->
+		PageInfo<T>.getList (UNKNOWN)
+	--行号82-->
+	CommonPage.restPage (UNCHANGED)
+		--行号40-->
+		CommonPage<T>.setTotalPage (UNKNOWN)
+		--行号40-->
+		PageInfo<T>.getPages (UNKNOWN)
+		--行号41-->
+		CommonPage<T>.setPageNum (UNKNOWN)
+		--行号41-->
+		PageInfo<T>.getPageNum (UNKNOWN)
+		--行号42-->
+		CommonPage<T>.setPageSize (UNKNOWN)
+		--行号42-->
+		PageInfo<T>.getPageSize (UNKNOWN)
+		--行号43-->
+		CommonPage<T>.setTotal (UNKNOWN)
+		--行号43-->
+		PageInfo<T>.getTotal (UNKNOWN)
+		--行号44-->
+		CommonPage<T>.setList (UNKNOWN)
+		--行号44-->
+		PageInfo<T>.getList (UNKNOWN)
+	--行号82-->
+	CommonResult.success (UNCHANGED)
+		--行号36-->
+		SUCCESS.getCode (UNKNOWN)
+		--行号36-->
+		SUCCESS.getMessage (UNKNOWN)
+	--行号82-->
+	CommonResult.success (UNCHANGED)
+		--行号36-->
+		SUCCESS.getCode (UNKNOWN)
+		--行号36-->
+		SUCCESS.getMessage (UNKNOWN)
+
+调用链 15：MODIFIED方法 UmsMenuController.updateHidden
+UmsMenuController.updateHidden (MODIFIED)
+	--行号97-->
+	UmsMenuService.updateHidden (UNCHANGED)
+		UmsMenuServiceImpl.updateHidden (UNCHANGED)
+			--行号89-->
+			UmsMenu.setId (UNCHANGED)
+			--行号90-->
+			UmsMenu.setHidden (UNCHANGED)
+			🟧 SQL: update ums_menu /* IF: parentId != null */ parent_id = #{parentId,jdbcType=BIGINT}, /* IF: createTime != null */ create_time = #{createTime,jdbcType=TIMESTAMP}, /* IF: title != null */ title = #{title,jdbcType=VARCHAR}, /* IF: level != null */ level = #{level,jdbcType=INTEGER}, /* IF: sort != null */ sort = #{sort,jdbcType=INTEGER}, /* IF: name != null */ name = #{name,jdbcType=VARCHAR}, /* IF: icon != null */ icon = #{icon,jdbcType=VARCHAR}, /* IF: hidden != null */ hidden = #{hidden,jdbcType=INTEGER}, where id = #{id,jdbcType=BIGINT}
+			    ┌──────────────────────────────────────────────────┐
+			    │ 📊 操作类型: UPDATE                                   │
+			    │ 📋 影响表: ums_menu                                  │
+			    │ ⚠️  风险等级: ℹ️ MEDIUM                               │
+			    │ 🔍 WHERE条件: ✅                                     │
+			    │ 📄 LIMIT限制: ❌ 无                                   │
+			    │ 📝 预估行数: UNKNOWN                                  │
+			    └──────────────────────────────────────────────────┘
+			    🔄 动态SQL条件:
+			      • IF: parentId != null
+			      • IF: createTime != null
+			      • IF: title != null
+			      • IF: level != null
+			      • IF: sort != null
+			      • IF: name != null
+			      • IF: icon != null
+			      • IF: hidden != null
+	--行号97-->
+	UmsMenuService.updateHidden (UNCHANGED)
+		UmsMenuServiceImpl.updateHidden (UNCHANGED)
+			--行号89-->
+			UmsMenu.setId (UNCHANGED)
+			--行号90-->
+			UmsMenu.setHidden (UNCHANGED)
+			🟧 SQL: update ums_menu /* IF: parentId != null */ parent_id = #{parentId,jdbcType=BIGINT}, /* IF: createTime != null */ create_time = #{createTime,jdbcType=TIMESTAMP}, /* IF: title != null */ title = #{title,jdbcType=VARCHAR}, /* IF: level != null */ level = #{level,jdbcType=INTEGER}, /* IF: sort != null */ sort = #{sort,jdbcType=INTEGER}, /* IF: name != null */ name = #{name,jdbcType=VARCHAR}, /* IF: icon != null */ icon = #{icon,jdbcType=VARCHAR}, /* IF: hidden != null */ hidden = #{hidden,jdbcType=INTEGER}, where id = #{id,jdbcType=BIGINT}
+			    ┌──────────────────────────────────────────────────┐
+			    │ 📊 操作类型: UPDATE                                   │
+			    │ 📋 影响表: ums_menu                                  │
+			    │ ⚠️  风险等级: ℹ️ MEDIUM                               │
+			    │ 🔍 WHERE条件: ✅                                     │
+			    │ 📄 LIMIT限制: ❌ 无                                   │
+			    │ 📝 预估行数: UNKNOWN                                  │
+			    └──────────────────────────────────────────────────┘
+			    🔄 动态SQL条件:
+			      • IF: parentId != null
+			      • IF: createTime != null
+			      • IF: title != null
+			      • IF: level != null
+			      • IF: sort != null
+			      • IF: name != null
+			      • IF: icon != null
+			      • IF: hidden != null
+	--行号97-->
+	UmsMenuServiceImpl.updateHidden (UNCHANGED)
+		--行号89-->
+		UmsMenu.setId (UNCHANGED)
+		--行号90-->
+		UmsMenu.setHidden (UNCHANGED)
+		🟧 SQL: update ums_menu /* IF: parentId != null */ parent_id = #{parentId,jdbcType=BIGINT}, /* IF: createTime != null */ create_time = #{createTime,jdbcType=TIMESTAMP}, /* IF: title != null */ title = #{title,jdbcType=VARCHAR}, /* IF: level != null */ level = #{level,jdbcType=INTEGER}, /* IF: sort != null */ sort = #{sort,jdbcType=INTEGER}, /* IF: name != null */ name = #{name,jdbcType=VARCHAR}, /* IF: icon != null */ icon = #{icon,jdbcType=VARCHAR}, /* IF: hidden != null */ hidden = #{hidden,jdbcType=INTEGER}, where id = #{id,jdbcType=BIGINT}
+		    ┌──────────────────────────────────────────────────┐
+		    │ 📊 操作类型: UPDATE                                   │
+		    │ 📋 影响表: ums_menu                                  │
+		    │ ⚠️  风险等级: ℹ️ MEDIUM                               │
+		    │ 🔍 WHERE条件: ✅                                     │
+		    │ 📄 LIMIT限制: ❌ 无                                   │
+		    │ 📝 预估行数: UNKNOWN                                  │
+		    └──────────────────────────────────────────────────┘
+		    🔄 动态SQL条件:
+		      • IF: parentId != null
+		      • IF: createTime != null
+		      • IF: title != null
+		      • IF: level != null
+		      • IF: sort != null
+		      • IF: name != null
+		      • IF: icon != null
+		      • IF: hidden != null
+	--行号99-->
+	CommonResult.success (UNCHANGED)
+		--行号36-->
+		SUCCESS.getCode (UNKNOWN)
+		--行号36-->
+		SUCCESS.getMessage (UNKNOWN)
+	--行号99-->
+	CommonResult.success (UNCHANGED)
+		--行号36-->
+		SUCCESS.getCode (UNKNOWN)
+		--行号36-->
+		SUCCESS.getMessage (UNKNOWN)
+	--行号101-->
+	CommonResult.failed (UNCHANGED)
+		--行号78-->
+		CommonResult.failed (UNCHANGED)
+			--行号54-->
+			IErrorCode.getCode (UNCHANGED)
+				ResultCode.getCode (UNCHANGED)
+			--行号54-->
+			ResultCode.getCode (UNCHANGED)
+			--行号54-->
+			IErrorCode.getMessage (UNCHANGED)
+				ResultCode.getMessage (UNCHANGED)
+			--行号54-->
+			ResultCode.getMessage (UNCHANGED)
+
+调用链 16：MODIFIED方法 UmsRoleController.listMenu
+UmsRoleController.listMenu (MODIFIED)
+	--行号96-->
+	UmsRoleService.listMenu (UNCHANGED)
+		UmsRoleServiceImpl.listMenu (UNCHANGED)
+			🟦 SQL: SELECT m.id id, m.parent_id parentId, m.create_time createTime, m.title title, m.level level, m.sort sort, m.name name, m.icon icon, m.hidden hidden FROM ums_role_menu_relation rmr LEFT JOIN ums_menu m ON rmr.menu_id = m.id WHERE rmr.role_id = #{roleId} AND m.id IS NOT NULL GROUP BY m.id
+			    ┌──────────────────────────────────────────────────┐
+			    │ 📊 操作类型: SELECT                                   │
+			    │ 📋 影响表: ums_menu, ums_role_menu_relation          │
+			    │ ⚠️  风险等级: ✅ LOW                                   │
+			    │ 🔍 WHERE条件: ✅                                     │
+			    │ 📄 LIMIT限制: ❌ 无                                   │
+			    │ 📝 预估行数: MANY                                     │
+			    └──────────────────────────────────────────────────┘
+	--行号96-->
+	UmsRoleService.listMenu (UNCHANGED)
+		UmsRoleServiceImpl.listMenu (UNCHANGED)
+			🟦 SQL: SELECT m.id id, m.parent_id parentId, m.create_time createTime, m.title title, m.level level, m.sort sort, m.name name, m.icon icon, m.hidden hidden FROM ums_role_menu_relation rmr LEFT JOIN ums_menu m ON rmr.menu_id = m.id WHERE rmr.role_id = #{roleId} AND m.id IS NOT NULL GROUP BY m.id
+			    ┌──────────────────────────────────────────────────┐
+			    │ 📊 操作类型: SELECT                                   │
+			    │ 📋 影响表: ums_menu, ums_role_menu_relation          │
+			    │ ⚠️  风险等级: ✅ LOW                                   │
+			    │ 🔍 WHERE条件: ✅                                     │
+			    │ 📄 LIMIT限制: ❌ 无                                   │
+			    │ 📝 预估行数: MANY                                     │
+			    └──────────────────────────────────────────────────┘
+	--行号96-->
+	UmsRoleServiceImpl.listMenu (UNCHANGED)
+		🟦 SQL: SELECT m.id id, m.parent_id parentId, m.create_time createTime, m.title title, m.level level, m.sort sort, m.name name, m.icon icon, m.hidden hidden FROM ums_role_menu_relation rmr LEFT JOIN ums_menu m ON rmr.menu_id = m.id WHERE rmr.role_id = #{roleId} AND m.id IS NOT NULL GROUP BY m.id
+		    ┌──────────────────────────────────────────────────┐
+		    │ 📊 操作类型: SELECT                                   │
+		    │ 📋 影响表: ums_menu, ums_role_menu_relation          │
+		    │ ⚠️  风险等级: ✅ LOW                                   │
+		    │ 🔍 WHERE条件: ✅                                     │
+		    │ 📄 LIMIT限制: ❌ 无                                   │
+		    │ 📝 预估行数: MANY                                     │
+		    └──────────────────────────────────────────────────┘
+	--行号97-->
+	CommonResult.success (UNCHANGED)
+		--行号36-->
+		SUCCESS.getCode (UNKNOWN)
+		--行号36-->
+		SUCCESS.getMessage (UNKNOWN)
+	--行号97-->
+	CommonResult.success (UNCHANGED)
+		--行号36-->
+		SUCCESS.getCode (UNKNOWN)
+		--行号36-->
+		SUCCESS.getMessage (UNKNOWN)

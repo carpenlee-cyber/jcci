@@ -169,16 +169,46 @@ class TaskService:
         cursor.execute('SELECT COUNT(*) as count FROM analysis_tasks')
         result = cursor.fetchone()
         conn.close()
-        
+
         return result[0] if result else 0
-    
-    def update_task_status(self, task_id: str, status: str, 
+
+    def count_tasks_by_status(self) -> Dict[str, int]:
+        """按状态统计任务数量"""
+        conn = sqlite3.connect(self.db_path)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT status, COUNT(*) as count 
+            FROM analysis_tasks 
+            GROUP BY status
+        ''')
+        rows = cursor.fetchall()
+        conn.close()
+
+        # 初始化所有可能的状态
+        status_counts = {
+            TaskStatus.PENDING: 0,
+            TaskStatus.RUNNING: 0,
+            TaskStatus.COMPLETED: 0,
+            TaskStatus.FAILED: 0
+        }
+
+        # 更新实际统计值
+        for row in rows:
+            status = row['status']
+            count = row['count']
+            if status in status_counts:
+                status_counts[status] = count
+
+        return status_counts
+
+    def update_task_status(self, task_id: str, status: str,
                           progress: Optional[float] = None,
                           result_url: Optional[str] = None,
                           error_message: Optional[str] = None):
         """更新任务状态（公开方法，供 API 调用）"""
         self._update_task_status(task_id, status, progress, result_url, error_message)
-    
+
     # ==================== Git 引用验证 ====================
 
     def validate_git_refs(self, git_url: str, tag_old: str, tag_new: str) -> Tuple[bool, str]:

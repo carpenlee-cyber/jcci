@@ -1,0 +1,1041 @@
+{
+  "metadata": {
+    "direction": "upwards",
+    "analysis_version": "3.1",
+    "username": "carpenlee-cyber",
+    "git_url": "https://github.com/carpenlee-cyber/mall.git",
+    "project_name": "mall",
+    "baseline_commit": "SHAa4e1_20260508_01",
+    "target_commit": "SHA5197_20260508_02",
+    "total_methods": 16,
+    "successful_chains": 16,
+    "failed_chains": 0,
+    "output_file": "C:\\Users\\carpe\\VisualStudioProject\\TestPlatform\\jcci\\jcci\\analyze_result\\mall_SHAa4e1_20260508_01\\SHA5197_20260508_02\\upwards_call_chains.json",
+    "max_depth": 5,
+    "features_enabled": {
+      "class_hierarchy_analysis": true,
+      "entry_detection": true
+    },
+    "coverage_stats": {
+      "total_methods": 0,
+      "methods_with_callers": 0,
+      "methods_without_callers": 136,
+      "cha_resolved_calls": 0,
+      "direct_calls": 0,
+      "cyclic_paths": 0,
+      "depth_limited_paths": 0,
+      "entry_points_found": 16,
+      "coverage_rate_percent": 0.0,
+      "interpretation": "覆盖率表示成功找到至少一个调用者的方法比例。低覆盖率可能意味着大量调用通过动态绑定/框架发起。"
+    }
+  },
+  "impact_chains": [
+    {
+      "direction": "upwards",
+      "method_info": {
+        "class_name": "SmsCouponController",
+        "method_name": "delete",
+        "parameters": "[{\"parameter_type\": \"Long\", \"parameter_name\": \"id\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult",
+        "change_type": "MODIFIED"
+      },
+      "package_class": "com.macro.mall.controller.SmsCouponController",
+      "method_signature": "delete(Long)",
+      "chain": {
+        "node_id": "0|com.macro.mall.controller.SmsCouponController|delete(Long)",
+        "package_class": "com.macro.mall.controller.SmsCouponController",
+        "method_signature": "delete(Long)",
+        "method_name": "delete",
+        "class_name": "SmsCouponController",
+        "depth": 0,
+        "invocation_lines": [],
+        "is_cyclic": false,
+        "is_leaf": true,
+        "db_method_id": 14640,
+        "root_type": "HTTP_API",
+        "call_type": "DIRECT",
+        "has_multiple_call_sites": false,
+        "api_paths": [
+          "[POST]/coupon/delete/{id}"
+        ],
+        "change_type": "MODIFIED",
+        "dao_info": null,
+        "documentation": "/**\n * 优惠券管理Controller\n * Created by macro on 2018/8/28.\n */",
+        "children": [],
+        "_analysis_meta": {
+          "coverage_stats": {
+            "total_query_methods": 1,
+            "methods_with_callers": 0,
+            "methods_without_callers": 1,
+            "cha_resolved_calls": 0,
+            "direct_calls": 0,
+            "cyclic_paths": 0,
+            "depth_limited_paths": 0
+          },
+          "limitations": [],
+          "is_complete": true
+        }
+      },
+      "entry_points": [
+        {
+          "package_class": "com.macro.mall.controller.SmsCouponController",
+          "method_signature": "delete(Long)",
+          "root_type": "HTTP_API",
+          "depth_from_change": 0,
+          "api_paths": [
+            "[POST]/coupon/delete/{id}"
+          ],
+          "documentation": "/**\n * 优惠券管理Controller\n * Created by macro on 2018/8/28.\n */"
+        }
+      ],
+      "has_incomplete_paths": false
+    },
+    {
+      "direction": "upwards",
+      "method_info": {
+        "class_name": "SmsCouponController",
+        "method_name": "update",
+        "parameters": "[{\"parameter_type\": \"Long\", \"parameter_name\": \"id\", \"parameter_varargs\": false}, {\"parameter_type\": \"com.macro.mall.dto.SmsCouponParam\", \"parameter_name\": \"couponParam\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult",
+        "change_type": "MODIFIED"
+      },
+      "package_class": "com.macro.mall.controller.SmsCouponController",
+      "method_signature": "update(Long,com.macro.mall.dto.SmsCouponParam)",
+      "chain": {
+        "node_id": "0|com.macro.mall.controller.SmsCouponController|update(Long,com.macro.mall.dto.SmsCouponParam)",
+        "package_class": "com.macro.mall.controller.SmsCouponController",
+        "method_signature": "update(Long,com.macro.mall.dto.SmsCouponParam)",
+        "method_name": "update",
+        "class_name": "SmsCouponController",
+        "depth": 0,
+        "invocation_lines": [],
+        "is_cyclic": false,
+        "is_leaf": true,
+        "db_method_id": 14641,
+        "root_type": "HTTP_API",
+        "call_type": "DIRECT",
+        "has_multiple_call_sites": false,
+        "api_paths": [
+          "[POST]/coupon/update/{id}"
+        ],
+        "change_type": "MODIFIED",
+        "dao_info": null,
+        "documentation": "/**\n * 优惠券管理Controller\n * Created by macro on 2018/8/28.\n */",
+        "children": [],
+        "_analysis_meta": {
+          "coverage_stats": {
+            "total_query_methods": 2,
+            "methods_with_callers": 0,
+            "methods_without_callers": 2,
+            "cha_resolved_calls": 0,
+            "direct_calls": 0,
+            "cyclic_paths": 0,
+            "depth_limited_paths": 0
+          },
+          "limitations": [],
+          "is_complete": true
+        }
+      },
+      "entry_points": [
+        {
+          "package_class": "com.macro.mall.controller.SmsCouponController",
+          "method_signature": "update(Long,com.macro.mall.dto.SmsCouponParam)",
+          "root_type": "HTTP_API",
+          "depth_from_change": 0,
+          "api_paths": [
+            "[POST]/coupon/update/{id}"
+          ],
+          "documentation": "/**\n * 优惠券管理Controller\n * Created by macro on 2018/8/28.\n */"
+        }
+      ],
+      "has_incomplete_paths": false
+    },
+    {
+      "direction": "upwards",
+      "method_info": {
+        "class_name": "SmsFlashPromotionController",
+        "method_name": "getItem",
+        "parameters": "[{\"parameter_type\": \"String\", \"parameter_name\": \"keyword\", \"parameter_varargs\": false}, {\"parameter_type\": \"Integer\", \"parameter_name\": \"pageSize\", \"parameter_varargs\": false}, {\"parameter_type\": \"Integer\", \"parameter_name\": \"pageNum\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult<com.macro.mall.common.api.CommonPage>",
+        "change_type": "MODIFIED"
+      },
+      "package_class": "com.macro.mall.controller.SmsFlashPromotionController",
+      "method_signature": "getItem(String,Integer,Integer)",
+      "chain": {
+        "node_id": "0|com.macro.mall.controller.SmsFlashPromotionController|getItem(String,Integer,Integer)",
+        "package_class": "com.macro.mall.controller.SmsFlashPromotionController",
+        "method_signature": "getItem(String,Integer,Integer)",
+        "method_name": "getItem",
+        "class_name": "SmsFlashPromotionController",
+        "depth": 0,
+        "invocation_lines": [],
+        "is_cyclic": false,
+        "is_leaf": true,
+        "db_method_id": 14422,
+        "root_type": "HTTP_API",
+        "call_type": "DIRECT",
+        "has_multiple_call_sites": false,
+        "api_paths": [
+          "[GET]/flash/list"
+        ],
+        "change_type": "MODIFIED",
+        "dao_info": null,
+        "documentation": "/**\n * 限时购活动管理Controller\n * Created by macro on 2018/11/16.\n */",
+        "children": [],
+        "_analysis_meta": {
+          "coverage_stats": {
+            "total_query_methods": 3,
+            "methods_with_callers": 0,
+            "methods_without_callers": 3,
+            "cha_resolved_calls": 0,
+            "direct_calls": 0,
+            "cyclic_paths": 0,
+            "depth_limited_paths": 0
+          },
+          "limitations": [],
+          "is_complete": true
+        }
+      },
+      "entry_points": [
+        {
+          "package_class": "com.macro.mall.controller.SmsFlashPromotionController",
+          "method_signature": "getItem(String,Integer,Integer)",
+          "root_type": "HTTP_API",
+          "depth_from_change": 0,
+          "api_paths": [
+            "[GET]/flash/list"
+          ],
+          "documentation": "/**\n * 限时购活动管理Controller\n * Created by macro on 2018/11/16.\n */"
+        }
+      ],
+      "has_incomplete_paths": false
+    },
+    {
+      "direction": "upwards",
+      "method_info": {
+        "class_name": "SmsFlashPromotionController",
+        "method_name": "update",
+        "parameters": "[{\"parameter_type\": \"Long\", \"parameter_name\": \"id\", \"parameter_varargs\": false}, {\"parameter_type\": \"Integer\", \"parameter_name\": \"status\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult",
+        "change_type": "MODIFIED"
+      },
+      "package_class": "com.macro.mall.controller.SmsFlashPromotionController",
+      "method_signature": "update(Long,Integer)",
+      "chain": {
+        "node_id": "0|com.macro.mall.controller.SmsFlashPromotionController|update(Long,Integer)",
+        "package_class": "com.macro.mall.controller.SmsFlashPromotionController",
+        "method_signature": "update(Long,Integer)",
+        "method_name": "update",
+        "class_name": "SmsFlashPromotionController",
+        "depth": 0,
+        "invocation_lines": [],
+        "is_cyclic": false,
+        "is_leaf": true,
+        "db_method_id": 14420,
+        "root_type": "HTTP_API",
+        "call_type": "DIRECT",
+        "has_multiple_call_sites": false,
+        "api_paths": [
+          "[POST]/flash/update/status/{id}"
+        ],
+        "change_type": "MODIFIED",
+        "dao_info": null,
+        "documentation": "/**\n * 限时购活动管理Controller\n * Created by macro on 2018/11/16.\n */",
+        "children": [],
+        "_analysis_meta": {
+          "coverage_stats": {
+            "total_query_methods": 4,
+            "methods_with_callers": 0,
+            "methods_without_callers": 4,
+            "cha_resolved_calls": 0,
+            "direct_calls": 0,
+            "cyclic_paths": 0,
+            "depth_limited_paths": 0
+          },
+          "limitations": [],
+          "is_complete": true
+        }
+      },
+      "entry_points": [
+        {
+          "package_class": "com.macro.mall.controller.SmsFlashPromotionController",
+          "method_signature": "update(Long,Integer)",
+          "root_type": "HTTP_API",
+          "depth_from_change": 0,
+          "api_paths": [
+            "[POST]/flash/update/status/{id}"
+          ],
+          "documentation": "/**\n * 限时购活动管理Controller\n * Created by macro on 2018/11/16.\n */"
+        }
+      ],
+      "has_incomplete_paths": false
+    },
+    {
+      "direction": "upwards",
+      "method_info": {
+        "class_name": "SmsFlashPromotionProductRelationController",
+        "method_name": "delete",
+        "parameters": "[{\"parameter_type\": \"Long\", \"parameter_name\": \"id\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult",
+        "change_type": "MODIFIED"
+      },
+      "package_class": "com.macro.mall.controller.SmsFlashPromotionProductRelationController",
+      "method_signature": "delete(Long)",
+      "chain": {
+        "node_id": "0|com.macro.mall.controller.SmsFlashPromotionProductRelationController|delete(Long)",
+        "package_class": "com.macro.mall.controller.SmsFlashPromotionProductRelationController",
+        "method_signature": "delete(Long)",
+        "method_name": "delete",
+        "class_name": "SmsFlashPromotionProductRelationController",
+        "depth": 0,
+        "invocation_lines": [],
+        "is_cyclic": false,
+        "is_leaf": true,
+        "db_method_id": 14365,
+        "root_type": "HTTP_API",
+        "call_type": "DIRECT",
+        "has_multiple_call_sites": false,
+        "api_paths": [
+          "[POST]/flashProductRelation/delete/{id}"
+        ],
+        "change_type": "MODIFIED",
+        "dao_info": null,
+        "documentation": "/**\n * 限时购和商品关系管理Controller\n * Created by macro on 2018/11/16.\n */",
+        "children": [],
+        "_analysis_meta": {
+          "coverage_stats": {
+            "total_query_methods": 5,
+            "methods_with_callers": 0,
+            "methods_without_callers": 5,
+            "cha_resolved_calls": 0,
+            "direct_calls": 0,
+            "cyclic_paths": 0,
+            "depth_limited_paths": 0
+          },
+          "limitations": [],
+          "is_complete": true
+        }
+      },
+      "entry_points": [
+        {
+          "package_class": "com.macro.mall.controller.SmsFlashPromotionProductRelationController",
+          "method_signature": "delete(Long)",
+          "root_type": "HTTP_API",
+          "depth_from_change": 0,
+          "api_paths": [
+            "[POST]/flashProductRelation/delete/{id}"
+          ],
+          "documentation": "/**\n * 限时购和商品关系管理Controller\n * Created by macro on 2018/11/16.\n */"
+        }
+      ],
+      "has_incomplete_paths": false
+    },
+    {
+      "direction": "upwards",
+      "method_info": {
+        "class_name": "SmsFlashPromotionProductRelationController",
+        "method_name": "update",
+        "parameters": "[{\"parameter_type\": \"Long\", \"parameter_name\": \"id\", \"parameter_varargs\": false}, {\"parameter_type\": \"com.macro.mall.model.SmsFlashPromotionProductRelation\", \"parameter_name\": \"relation\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult",
+        "change_type": "MODIFIED"
+      },
+      "package_class": "com.macro.mall.controller.SmsFlashPromotionProductRelationController",
+      "method_signature": "update(Long,com.macro.mall.model.SmsFlashPromotionProductRelation)",
+      "chain": {
+        "node_id": "0|com.macro.mall.controller.SmsFlashPromotionProductRelationController|update(Long,com.macro.mall.model.SmsFlashPromotionProductRelation)",
+        "package_class": "com.macro.mall.controller.SmsFlashPromotionProductRelationController",
+        "method_signature": "update(Long,com.macro.mall.model.SmsFlashPromotionProductRelation)",
+        "method_name": "update",
+        "class_name": "SmsFlashPromotionProductRelationController",
+        "depth": 0,
+        "invocation_lines": [],
+        "is_cyclic": false,
+        "is_leaf": true,
+        "db_method_id": 14364,
+        "root_type": "HTTP_API",
+        "call_type": "DIRECT",
+        "has_multiple_call_sites": false,
+        "api_paths": [
+          "[POST]/flashProductRelation/update/{id}"
+        ],
+        "change_type": "MODIFIED",
+        "dao_info": null,
+        "documentation": "/**\n * 限时购和商品关系管理Controller\n * Created by macro on 2018/11/16.\n */",
+        "children": [],
+        "_analysis_meta": {
+          "coverage_stats": {
+            "total_query_methods": 6,
+            "methods_with_callers": 0,
+            "methods_without_callers": 6,
+            "cha_resolved_calls": 0,
+            "direct_calls": 0,
+            "cyclic_paths": 0,
+            "depth_limited_paths": 0
+          },
+          "limitations": [],
+          "is_complete": true
+        }
+      },
+      "entry_points": [
+        {
+          "package_class": "com.macro.mall.controller.SmsFlashPromotionProductRelationController",
+          "method_signature": "update(Long,com.macro.mall.model.SmsFlashPromotionProductRelation)",
+          "root_type": "HTTP_API",
+          "depth_from_change": 0,
+          "api_paths": [
+            "[POST]/flashProductRelation/update/{id}"
+          ],
+          "documentation": "/**\n * 限时购和商品关系管理Controller\n * Created by macro on 2018/11/16.\n */"
+        }
+      ],
+      "has_incomplete_paths": false
+    },
+    {
+      "direction": "upwards",
+      "method_info": {
+        "class_name": "SmsFlashPromotionSessionController",
+        "method_name": "updateStatus",
+        "parameters": "[{\"parameter_type\": \"Long\", \"parameter_name\": \"id\", \"parameter_varargs\": false}, {\"parameter_type\": \"Integer\", \"parameter_name\": \"status\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult",
+        "change_type": "MODIFIED"
+      },
+      "package_class": "com.macro.mall.controller.SmsFlashPromotionSessionController",
+      "method_signature": "updateStatus(Long,Integer)",
+      "chain": {
+        "node_id": "0|com.macro.mall.controller.SmsFlashPromotionSessionController|updateStatus(Long,Integer)",
+        "package_class": "com.macro.mall.controller.SmsFlashPromotionSessionController",
+        "method_signature": "updateStatus(Long,Integer)",
+        "method_name": "updateStatus",
+        "class_name": "SmsFlashPromotionSessionController",
+        "depth": 0,
+        "invocation_lines": [],
+        "is_cyclic": false,
+        "is_leaf": true,
+        "db_method_id": 14387,
+        "root_type": "HTTP_API",
+        "call_type": "DIRECT",
+        "has_multiple_call_sites": false,
+        "api_paths": [
+          "[POST]/flashSession/update/status/{id}"
+        ],
+        "change_type": "MODIFIED",
+        "dao_info": null,
+        "documentation": "/**\n * 限时购场次管理Controller\n * Created by macro on 2018/11/16.\n */",
+        "children": [],
+        "_analysis_meta": {
+          "coverage_stats": {
+            "total_query_methods": 7,
+            "methods_with_callers": 0,
+            "methods_without_callers": 7,
+            "cha_resolved_calls": 0,
+            "direct_calls": 0,
+            "cyclic_paths": 0,
+            "depth_limited_paths": 0
+          },
+          "limitations": [],
+          "is_complete": true
+        }
+      },
+      "entry_points": [
+        {
+          "package_class": "com.macro.mall.controller.SmsFlashPromotionSessionController",
+          "method_signature": "updateStatus(Long,Integer)",
+          "root_type": "HTTP_API",
+          "depth_from_change": 0,
+          "api_paths": [
+            "[POST]/flashSession/update/status/{id}"
+          ],
+          "documentation": "/**\n * 限时购场次管理Controller\n * Created by macro on 2018/11/16.\n */"
+        }
+      ],
+      "has_incomplete_paths": false
+    },
+    {
+      "direction": "upwards",
+      "method_info": {
+        "class_name": "SmsHomeAdvertiseController",
+        "method_name": "delete",
+        "parameters": "[{\"parameter_type\": \"List<Long>\", \"parameter_name\": \"ids\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult",
+        "change_type": "MODIFIED"
+      },
+      "package_class": "com.macro.mall.controller.SmsHomeAdvertiseController",
+      "method_signature": "delete(List<Long>)",
+      "chain": {
+        "node_id": "0|com.macro.mall.controller.SmsHomeAdvertiseController|delete(List<Long>)",
+        "package_class": "com.macro.mall.controller.SmsHomeAdvertiseController",
+        "method_signature": "delete(List<Long>)",
+        "method_name": "delete",
+        "class_name": "SmsHomeAdvertiseController",
+        "depth": 0,
+        "invocation_lines": [],
+        "is_cyclic": false,
+        "is_leaf": true,
+        "db_method_id": 14457,
+        "root_type": "HTTP_API",
+        "call_type": "DIRECT",
+        "has_multiple_call_sites": false,
+        "api_paths": [
+          "[POST]/home/advertise/delete"
+        ],
+        "change_type": "MODIFIED",
+        "dao_info": null,
+        "documentation": "/**\n * 首页轮播广告管理Controller\n * Created by macro on 2018/11/7.\n */",
+        "children": [],
+        "_analysis_meta": {
+          "coverage_stats": {
+            "total_query_methods": 8,
+            "methods_with_callers": 0,
+            "methods_without_callers": 8,
+            "cha_resolved_calls": 0,
+            "direct_calls": 0,
+            "cyclic_paths": 0,
+            "depth_limited_paths": 0
+          },
+          "limitations": [],
+          "is_complete": true
+        }
+      },
+      "entry_points": [
+        {
+          "package_class": "com.macro.mall.controller.SmsHomeAdvertiseController",
+          "method_signature": "delete(List<Long>)",
+          "root_type": "HTTP_API",
+          "depth_from_change": 0,
+          "api_paths": [
+            "[POST]/home/advertise/delete"
+          ],
+          "documentation": "/**\n * 首页轮播广告管理Controller\n * Created by macro on 2018/11/7.\n */"
+        }
+      ],
+      "has_incomplete_paths": false
+    },
+    {
+      "direction": "upwards",
+      "method_info": {
+        "class_name": "SmsHomeAdvertiseController",
+        "method_name": "getItem",
+        "parameters": "[{\"parameter_type\": \"Long\", \"parameter_name\": \"id\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult<com.macro.mall.model.SmsHomeAdvertise>",
+        "change_type": "MODIFIED"
+      },
+      "package_class": "com.macro.mall.controller.SmsHomeAdvertiseController",
+      "method_signature": "getItem(Long)",
+      "chain": {
+        "node_id": "0|com.macro.mall.controller.SmsHomeAdvertiseController|getItem(Long)",
+        "package_class": "com.macro.mall.controller.SmsHomeAdvertiseController",
+        "method_signature": "getItem(Long)",
+        "method_name": "getItem",
+        "class_name": "SmsHomeAdvertiseController",
+        "depth": 0,
+        "invocation_lines": [],
+        "is_cyclic": false,
+        "is_leaf": true,
+        "db_method_id": 14459,
+        "root_type": "HTTP_API",
+        "call_type": "DIRECT",
+        "has_multiple_call_sites": false,
+        "api_paths": [
+          "[GET]/home/advertise/{id}"
+        ],
+        "change_type": "MODIFIED",
+        "dao_info": null,
+        "documentation": "/**\n * 首页轮播广告管理Controller\n * Created by macro on 2018/11/7.\n */",
+        "children": [],
+        "_analysis_meta": {
+          "coverage_stats": {
+            "total_query_methods": 9,
+            "methods_with_callers": 0,
+            "methods_without_callers": 9,
+            "cha_resolved_calls": 0,
+            "direct_calls": 0,
+            "cyclic_paths": 0,
+            "depth_limited_paths": 0
+          },
+          "limitations": [],
+          "is_complete": true
+        }
+      },
+      "entry_points": [
+        {
+          "package_class": "com.macro.mall.controller.SmsHomeAdvertiseController",
+          "method_signature": "getItem(Long)",
+          "root_type": "HTTP_API",
+          "depth_from_change": 0,
+          "api_paths": [
+            "[GET]/home/advertise/{id}"
+          ],
+          "documentation": "/**\n * 首页轮播广告管理Controller\n * Created by macro on 2018/11/7.\n */"
+        }
+      ],
+      "has_incomplete_paths": false
+    },
+    {
+      "direction": "upwards",
+      "method_info": {
+        "class_name": "SmsHomeAdvertiseController",
+        "method_name": "list",
+        "parameters": "[{\"parameter_type\": \"String\", \"parameter_name\": \"name\", \"parameter_varargs\": false}, {\"parameter_type\": \"Integer\", \"parameter_name\": \"type\", \"parameter_varargs\": false}, {\"parameter_type\": \"String\", \"parameter_name\": \"endTime\", \"parameter_varargs\": false}, {\"parameter_type\": \"Integer\", \"parameter_name\": \"pageSize\", \"parameter_varargs\": false}, {\"parameter_type\": \"Integer\", \"parameter_name\": \"pageNum\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult<com.macro.mall.common.api.CommonPage>",
+        "change_type": "MODIFIED"
+      },
+      "package_class": "com.macro.mall.controller.SmsHomeAdvertiseController",
+      "method_signature": "list(String,Integer,String,Integer,Integer)",
+      "chain": {
+        "node_id": "0|com.macro.mall.controller.SmsHomeAdvertiseController|list(String,Integer,String,Integer,Integer)",
+        "package_class": "com.macro.mall.controller.SmsHomeAdvertiseController",
+        "method_signature": "list(String,Integer,String,Integer,Integer)",
+        "method_name": "list",
+        "class_name": "SmsHomeAdvertiseController",
+        "depth": 0,
+        "invocation_lines": [],
+        "is_cyclic": false,
+        "is_leaf": true,
+        "db_method_id": 14461,
+        "root_type": "HTTP_API",
+        "call_type": "DIRECT",
+        "has_multiple_call_sites": false,
+        "api_paths": [
+          "[GET]/home/advertise/list"
+        ],
+        "change_type": "MODIFIED",
+        "dao_info": null,
+        "documentation": "/**\n * 首页轮播广告管理Controller\n * Created by macro on 2018/11/7.\n */",
+        "children": [],
+        "_analysis_meta": {
+          "coverage_stats": {
+            "total_query_methods": 10,
+            "methods_with_callers": 0,
+            "methods_without_callers": 10,
+            "cha_resolved_calls": 0,
+            "direct_calls": 0,
+            "cyclic_paths": 0,
+            "depth_limited_paths": 0
+          },
+          "limitations": [],
+          "is_complete": true
+        }
+      },
+      "entry_points": [
+        {
+          "package_class": "com.macro.mall.controller.SmsHomeAdvertiseController",
+          "method_signature": "list(String,Integer,String,Integer,Integer)",
+          "root_type": "HTTP_API",
+          "depth_from_change": 0,
+          "api_paths": [
+            "[GET]/home/advertise/list"
+          ],
+          "documentation": "/**\n * 首页轮播广告管理Controller\n * Created by macro on 2018/11/7.\n */"
+        }
+      ],
+      "has_incomplete_paths": false
+    },
+    {
+      "direction": "upwards",
+      "method_info": {
+        "class_name": "SmsHomeAdvertiseController",
+        "method_name": "update",
+        "parameters": "[{\"parameter_type\": \"Long\", \"parameter_name\": \"id\", \"parameter_varargs\": false}, {\"parameter_type\": \"com.macro.mall.model.SmsHomeAdvertise\", \"parameter_name\": \"advertise\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult",
+        "change_type": "MODIFIED"
+      },
+      "package_class": "com.macro.mall.controller.SmsHomeAdvertiseController",
+      "method_signature": "update(Long,com.macro.mall.model.SmsHomeAdvertise)",
+      "chain": {
+        "node_id": "0|com.macro.mall.controller.SmsHomeAdvertiseController|update(Long,com.macro.mall.model.SmsHomeAdvertise)",
+        "package_class": "com.macro.mall.controller.SmsHomeAdvertiseController",
+        "method_signature": "update(Long,com.macro.mall.model.SmsHomeAdvertise)",
+        "method_name": "update",
+        "class_name": "SmsHomeAdvertiseController",
+        "depth": 0,
+        "invocation_lines": [],
+        "is_cyclic": false,
+        "is_leaf": true,
+        "db_method_id": 14460,
+        "root_type": "HTTP_API",
+        "call_type": "DIRECT",
+        "has_multiple_call_sites": false,
+        "api_paths": [
+          "[POST]/home/advertise/update/{id}"
+        ],
+        "change_type": "MODIFIED",
+        "dao_info": null,
+        "documentation": "/**\n * 首页轮播广告管理Controller\n * Created by macro on 2018/11/7.\n */",
+        "children": [],
+        "_analysis_meta": {
+          "coverage_stats": {
+            "total_query_methods": 11,
+            "methods_with_callers": 0,
+            "methods_without_callers": 11,
+            "cha_resolved_calls": 0,
+            "direct_calls": 0,
+            "cyclic_paths": 0,
+            "depth_limited_paths": 0
+          },
+          "limitations": [],
+          "is_complete": true
+        }
+      },
+      "entry_points": [
+        {
+          "package_class": "com.macro.mall.controller.SmsHomeAdvertiseController",
+          "method_signature": "update(Long,com.macro.mall.model.SmsHomeAdvertise)",
+          "root_type": "HTTP_API",
+          "depth_from_change": 0,
+          "api_paths": [
+            "[POST]/home/advertise/update/{id}"
+          ],
+          "documentation": "/**\n * 首页轮播广告管理Controller\n * Created by macro on 2018/11/7.\n */"
+        }
+      ],
+      "has_incomplete_paths": false
+    },
+    {
+      "direction": "upwards",
+      "method_info": {
+        "class_name": "SmsHomeNewProductController",
+        "method_name": "create",
+        "parameters": "[{\"parameter_type\": \"List<com.macro.mall.model.SmsHomeNewProduct>\", \"parameter_name\": \"homeNewProductList\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult",
+        "change_type": "MODIFIED"
+      },
+      "package_class": "com.macro.mall.controller.SmsHomeNewProductController",
+      "method_signature": "create(List<com.macro.mall.model.SmsHomeNewProduct>)",
+      "chain": {
+        "node_id": "0|com.macro.mall.controller.SmsHomeNewProductController|create(List<com.macro.mall.model.SmsHomeNewProduct>)",
+        "package_class": "com.macro.mall.controller.SmsHomeNewProductController",
+        "method_signature": "create(List<com.macro.mall.model.SmsHomeNewProduct>)",
+        "method_name": "create",
+        "class_name": "SmsHomeNewProductController",
+        "depth": 0,
+        "invocation_lines": [],
+        "is_cyclic": false,
+        "is_leaf": true,
+        "db_method_id": 14486,
+        "root_type": "HTTP_API",
+        "call_type": "DIRECT",
+        "has_multiple_call_sites": false,
+        "api_paths": [
+          "[POST]/home/newProduct/create"
+        ],
+        "change_type": "MODIFIED",
+        "dao_info": null,
+        "documentation": "/**\n * 首页新品管理Controller\n * Created by macro on 2018/11/6.\n */",
+        "children": [],
+        "_analysis_meta": {
+          "coverage_stats": {
+            "total_query_methods": 12,
+            "methods_with_callers": 0,
+            "methods_without_callers": 12,
+            "cha_resolved_calls": 0,
+            "direct_calls": 0,
+            "cyclic_paths": 0,
+            "depth_limited_paths": 0
+          },
+          "limitations": [],
+          "is_complete": true
+        }
+      },
+      "entry_points": [
+        {
+          "package_class": "com.macro.mall.controller.SmsHomeNewProductController",
+          "method_signature": "create(List<com.macro.mall.model.SmsHomeNewProduct>)",
+          "root_type": "HTTP_API",
+          "depth_from_change": 0,
+          "api_paths": [
+            "[POST]/home/newProduct/create"
+          ],
+          "documentation": "/**\n * 首页新品管理Controller\n * Created by macro on 2018/11/6.\n */"
+        }
+      ],
+      "has_incomplete_paths": false
+    },
+    {
+      "direction": "upwards",
+      "method_info": {
+        "class_name": "SmsHomeRecommendSubjectController",
+        "method_name": "create",
+        "parameters": "[{\"parameter_type\": \"List<com.macro.mall.model.SmsHomeRecommendSubject>\", \"parameter_name\": \"homeRecommendSubjectList\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult",
+        "change_type": "MODIFIED"
+      },
+      "package_class": "com.macro.mall.controller.SmsHomeRecommendSubjectController",
+      "method_signature": "create(List<com.macro.mall.model.SmsHomeRecommendSubject>)",
+      "chain": {
+        "node_id": "0|com.macro.mall.controller.SmsHomeRecommendSubjectController|create(List<com.macro.mall.model.SmsHomeRecommendSubject>)",
+        "package_class": "com.macro.mall.controller.SmsHomeRecommendSubjectController",
+        "method_signature": "create(List<com.macro.mall.model.SmsHomeRecommendSubject>)",
+        "method_name": "create",
+        "class_name": "SmsHomeRecommendSubjectController",
+        "depth": 0,
+        "invocation_lines": [],
+        "is_cyclic": false,
+        "is_leaf": true,
+        "db_method_id": 14491,
+        "root_type": "HTTP_API",
+        "call_type": "DIRECT",
+        "has_multiple_call_sites": false,
+        "api_paths": [
+          "[POST]/home/recommendSubject/create"
+        ],
+        "change_type": "MODIFIED",
+        "dao_info": null,
+        "documentation": "/**\n * 首页专题推荐管理Controller\n * Created by macro on 2018/11/6.\n */",
+        "children": [],
+        "_analysis_meta": {
+          "coverage_stats": {
+            "total_query_methods": 13,
+            "methods_with_callers": 0,
+            "methods_without_callers": 13,
+            "cha_resolved_calls": 0,
+            "direct_calls": 0,
+            "cyclic_paths": 0,
+            "depth_limited_paths": 0
+          },
+          "limitations": [],
+          "is_complete": true
+        }
+      },
+      "entry_points": [
+        {
+          "package_class": "com.macro.mall.controller.SmsHomeRecommendSubjectController",
+          "method_signature": "create(List<com.macro.mall.model.SmsHomeRecommendSubject>)",
+          "root_type": "HTTP_API",
+          "depth_from_change": 0,
+          "api_paths": [
+            "[POST]/home/recommendSubject/create"
+          ],
+          "documentation": "/**\n * 首页专题推荐管理Controller\n * Created by macro on 2018/11/6.\n */"
+        }
+      ],
+      "has_incomplete_paths": false
+    },
+    {
+      "direction": "upwards",
+      "method_info": {
+        "class_name": "UmsMenuController",
+        "method_name": "list",
+        "parameters": "[{\"parameter_type\": \"Long\", \"parameter_name\": \"parentId\", \"parameter_varargs\": false}, {\"parameter_type\": \"Integer\", \"parameter_name\": \"pageSize\", \"parameter_varargs\": false}, {\"parameter_type\": \"Integer\", \"parameter_name\": \"pageNum\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult<com.macro.mall.common.api.CommonPage>",
+        "change_type": "MODIFIED"
+      },
+      "package_class": "com.macro.mall.controller.UmsMenuController",
+      "method_signature": "list(Long,Integer,Integer)",
+      "chain": {
+        "node_id": "0|com.macro.mall.controller.UmsMenuController|list(Long,Integer,Integer)",
+        "package_class": "com.macro.mall.controller.UmsMenuController",
+        "method_signature": "list(Long,Integer,Integer)",
+        "method_name": "list",
+        "class_name": "UmsMenuController",
+        "depth": 0,
+        "invocation_lines": [],
+        "is_cyclic": false,
+        "is_leaf": true,
+        "db_method_id": 14553,
+        "root_type": "HTTP_API",
+        "call_type": "DIRECT",
+        "has_multiple_call_sites": false,
+        "api_paths": [
+          "[GET]/menu/list/{parentId}"
+        ],
+        "change_type": "MODIFIED",
+        "dao_info": null,
+        "documentation": "/**\n * 后台菜单管理Controller\n * Created by macro on 2020/2/4.\n */",
+        "children": [],
+        "_analysis_meta": {
+          "coverage_stats": {
+            "total_query_methods": 14,
+            "methods_with_callers": 0,
+            "methods_without_callers": 14,
+            "cha_resolved_calls": 0,
+            "direct_calls": 0,
+            "cyclic_paths": 0,
+            "depth_limited_paths": 0
+          },
+          "limitations": [],
+          "is_complete": true
+        }
+      },
+      "entry_points": [
+        {
+          "package_class": "com.macro.mall.controller.UmsMenuController",
+          "method_signature": "list(Long,Integer,Integer)",
+          "root_type": "HTTP_API",
+          "depth_from_change": 0,
+          "api_paths": [
+            "[GET]/menu/list/{parentId}"
+          ],
+          "documentation": "/**\n * 后台菜单管理Controller\n * Created by macro on 2020/2/4.\n */"
+        }
+      ],
+      "has_incomplete_paths": false
+    },
+    {
+      "direction": "upwards",
+      "method_info": {
+        "class_name": "UmsMenuController",
+        "method_name": "updateHidden",
+        "parameters": "[{\"parameter_type\": \"Long\", \"parameter_name\": \"id\", \"parameter_varargs\": false}, {\"parameter_type\": \"Integer\", \"parameter_name\": \"hidden\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult",
+        "change_type": "MODIFIED"
+      },
+      "package_class": "com.macro.mall.controller.UmsMenuController",
+      "method_signature": "updateHidden(Long,Integer)",
+      "chain": {
+        "node_id": "0|com.macro.mall.controller.UmsMenuController|updateHidden(Long,Integer)",
+        "package_class": "com.macro.mall.controller.UmsMenuController",
+        "method_signature": "updateHidden(Long,Integer)",
+        "method_name": "updateHidden",
+        "class_name": "UmsMenuController",
+        "depth": 0,
+        "invocation_lines": [],
+        "is_cyclic": false,
+        "is_leaf": true,
+        "db_method_id": 14555,
+        "root_type": "HTTP_API",
+        "call_type": "DIRECT",
+        "has_multiple_call_sites": false,
+        "api_paths": [
+          "[POST]/menu/updateHidden/{id}"
+        ],
+        "change_type": "MODIFIED",
+        "dao_info": null,
+        "documentation": "/**\n * 后台菜单管理Controller\n * Created by macro on 2020/2/4.\n */",
+        "children": [],
+        "_analysis_meta": {
+          "coverage_stats": {
+            "total_query_methods": 15,
+            "methods_with_callers": 0,
+            "methods_without_callers": 15,
+            "cha_resolved_calls": 0,
+            "direct_calls": 0,
+            "cyclic_paths": 0,
+            "depth_limited_paths": 0
+          },
+          "limitations": [],
+          "is_complete": true
+        }
+      },
+      "entry_points": [
+        {
+          "package_class": "com.macro.mall.controller.UmsMenuController",
+          "method_signature": "updateHidden(Long,Integer)",
+          "root_type": "HTTP_API",
+          "depth_from_change": 0,
+          "api_paths": [
+            "[POST]/menu/updateHidden/{id}"
+          ],
+          "documentation": "/**\n * 后台菜单管理Controller\n * Created by macro on 2020/2/4.\n */"
+        }
+      ],
+      "has_incomplete_paths": false
+    },
+    {
+      "direction": "upwards",
+      "method_info": {
+        "class_name": "UmsRoleController",
+        "method_name": "listMenu",
+        "parameters": "[{\"parameter_type\": \"Long\", \"parameter_name\": \"roleId\", \"parameter_varargs\": false}]",
+        "return_type": "com.macro.mall.common.api.CommonResult<List>",
+        "change_type": "MODIFIED"
+      },
+      "package_class": "com.macro.mall.controller.UmsRoleController",
+      "method_signature": "listMenu(Long)",
+      "chain": {
+        "node_id": "0|com.macro.mall.controller.UmsRoleController|listMenu(Long)",
+        "package_class": "com.macro.mall.controller.UmsRoleController",
+        "method_signature": "listMenu(Long)",
+        "method_name": "listMenu",
+        "class_name": "UmsRoleController",
+        "depth": 0,
+        "invocation_lines": [],
+        "is_cyclic": false,
+        "is_leaf": true,
+        "db_method_id": 26447,
+        "root_type": "HTTP_API",
+        "call_type": "DIRECT",
+        "has_multiple_call_sites": false,
+        "api_paths": [
+          "[GET]/role/listMenu/{roleId}"
+        ],
+        "change_type": "MODIFIED",
+        "dao_info": null,
+        "documentation": "/**\n * 后台用户角色管理Controller\n * Created by macro on 2018/9/30.\n */",
+        "children": [],
+        "_analysis_meta": {
+          "coverage_stats": {
+            "total_query_methods": 16,
+            "methods_with_callers": 0,
+            "methods_without_callers": 16,
+            "cha_resolved_calls": 0,
+            "direct_calls": 0,
+            "cyclic_paths": 0,
+            "depth_limited_paths": 0
+          },
+          "limitations": [],
+          "is_complete": true
+        }
+      },
+      "entry_points": [
+        {
+          "package_class": "com.macro.mall.controller.UmsRoleController",
+          "method_signature": "listMenu(Long)",
+          "root_type": "HTTP_API",
+          "depth_from_change": 0,
+          "api_paths": [
+            "[GET]/role/listMenu/{roleId}"
+          ],
+          "documentation": "/**\n * 后台用户角色管理Controller\n * Created by macro on 2018/9/30.\n */"
+        }
+      ],
+      "has_incomplete_paths": false
+    }
+  ],
+  "failed": [],
+  "analysis_limitations": [
+    {
+      "id": "DYNAMIC_DISPATCH",
+      "severity": "HIGH",
+      "description": "无法覆盖通过反射、Lambda、方法引用、动态代理发起的调用",
+      "examples": [
+        "Spring AOP 代理方法",
+        "MyBatis Mapper 动态绑定",
+        "反射调用 invoke()"
+      ],
+      "impact": "向上分析可能遗漏实际调用者，结果属于'过于乐观的下界'"
+    },
+    {
+      "id": "INTERFACE_RESOLUTION",
+      "severity": "MEDIUM",
+      "description": "CHA 解析基于静态类层次，无法处理运行时类型确定",
+      "examples": [
+        "条件分支中不同实现类赋值",
+        "工厂模式返回类型"
+      ],
+      "impact": "可能包含不可达调用路径（假阳性），或遗漏某些实现类（假阴性）"
+    },
+    {
+      "id": "FRAMEWORK_CALLS",
+      "severity": "MEDIUM",
+      "description": "框架代码（Spring DispatcherServlet、定时任务调度器等）通常不在分析范围内",
+      "examples": [
+        "HTTP 请求由 DispatcherServlet 转发",
+        "@Scheduled 由 Spring 调度器触发"
+      ],
+      "impact": "Controller 方法可能显示为'无静态调用者'，需结合注解识别"
+    },
+    {
+      "id": "NATIVE_CODE",
+      "severity": "LOW",
+      "description": "JNI 调用、Native 方法无法追踪",
+      "examples": [
+        "System.arraycopy()",
+        "文件 IO 的 Native 实现"
+      ],
+      "impact": "不影响常规业务代码分析"
+    }
+  ],
+  "recommendations": [
+    "覆盖率较低（<30%），建议检查是否存在大量动态绑定调用（如 MyBatis Mapper、Spring AOP）。考虑结合运行时分析补充静态分析盲区。"
+  ]
+}

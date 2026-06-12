@@ -45,9 +45,24 @@ export interface TaskStatus {
   user_id?: string
 }
 
+export interface AbandonTaskRequest {
+  pipeline_analysis_id: string
+  username: string
+}
+
 export interface TaskListResponse {
   total: number
   tasks: TaskStatus[]
+}
+
+export interface TaskStatsResponse {
+  total: number
+  by_status: {
+    pending: number
+    running: number
+    completed: number
+    failed: number
+  }
 }
 
 export const taskApi = {
@@ -75,5 +90,13 @@ export const taskApi = {
 
   getTrackingStats() {
     return apiClient.get('/stats/tracking')
+  },
+
+  getTaskStats() {
+    return apiClient.get<TaskStatsResponse>('/tasks/stats')
+  },
+
+  abandonTask(data: AbandonTaskRequest) {
+    return apiClient.post('/tasks/abandon', data)
   }
 }

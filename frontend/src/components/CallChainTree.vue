@@ -1,12 +1,12 @@
 <template>
   <div class="call-chain-tree">
     <h3 v-if="title">{{ title }}</h3>
-    
+   
     <!-- AI 批量分析按钮（逐方法触发 analyze_method） -->
     <div v-if="showBulkAnalysis" class="bulk-analysis-bar">
-      <el-button 
-        type="primary" 
-        @click="startBulkAnalysis" 
+      <el-button
+        type="primary"
+        @click="startBulkAnalysis"
         :loading="bulkAnalyzing"
         :disabled="bulkAnalyzing"
       >
@@ -15,11 +15,11 @@
       <el-checkbox v-model="forceFreshBulk" style="margin-left: 10px" :disabled="bulkAnalyzing">
         强制全新分析
       </el-checkbox>
-      
+     
       <!-- 批量分析进度 -->
       <div v-if="bulkRunning" class="bulk-progress">
-        <el-progress 
-          :percentage="Math.round(bulkProgress * 100)" 
+        <el-progress
+          :percentage="Math.round(bulkProgress * 100)"
           :status="bulkProgress >= 1 ? 'success' : undefined"
           :stroke-width="16"
         />
@@ -27,7 +27,7 @@
           {{ bulkCompleted }} / {{ bulkTotal }} 个方法
         </span>
       </div>
-      
+     
       <el-alert
         v-if="bulkComplete"
         title="✅ 批量分析完成"
@@ -36,7 +36,7 @@
         @close="bulkComplete = false"
         style="margin-top: 10px"
       />
-      
+     
       <el-alert
         v-if="bulkError"
         :title="'分析失败: ' + bulkError"
@@ -46,7 +46,7 @@
         style="margin-top: 10px"
       />
     </div>
-    
+   
     <el-tree
       :data="data"
       :props="treeProps"
@@ -68,12 +68,12 @@
           >
             <span class="node-label">{{ truncateLabel(data.label) }}</span>
           </el-tooltip>
-          
+         
           <!-- 文档说明 (tooltip + inline) -->
-          <el-tooltip 
-            v-if="data.documentation && data.documentation !== 'None'" 
-            :content="data.documentation" 
-            placement="top" 
+          <el-tooltip
+            v-if="data.documentation && data.documentation !== 'None'"
+            :content="data.documentation"
+            placement="top"
             :show-after="300"
             :hide-after="0"
             effect="dark"
@@ -91,20 +91,20 @@
           >
             <el-icon class="doc-icon no-doc-icon"><WarningFilled /></el-icon>
           </el-tooltip>
-          
+         
           <!-- 变更类型标签 -->
           <el-tag v-if="data.changeType" size="small" :type="getChangeTypeTag(data.changeType)" style="margin-left: 6px">
             {{ data.changeType }}
           </el-tag>
-          
+         
           <!-- DAO/SQL 信息标签 -->
           <template v-if="data.daoInfo && data.daoInfo.sql_type">
             <el-tag size="small" :type="getSqlTypeTag(data.daoInfo.sql_type)" style="margin-left: 4px">
               {{ data.daoInfo.sql_type }}
             </el-tag>
-            <el-tooltip 
-              :content="getDaoDetailTooltip(data.daoInfo)" 
-              placement="top" 
+            <el-tooltip
+              :content="getDaoDetailTooltip(data.daoInfo)"
+              placement="top"
               :show-after="300"
               effect="dark"
               :popper-style="{ maxWidth: '500px', whiteSpace: 'pre-wrap' }"
@@ -113,16 +113,16 @@
                 {{ (data.daoInfo.tables || [])[0] || data.daoInfo.table_name || '?' }}
               </el-tag>
             </el-tooltip>
-            <el-tag 
-              v-if="data.daoInfo.risk_level" 
-              size="small" 
-              :type="getRiskTag(data.daoInfo.risk_level)" 
+            <el-tag
+              v-if="data.daoInfo.risk_level"
+              size="small"
+              :type="getRiskTag(data.daoInfo.risk_level)"
               style="margin-left: 2px"
             >
               {{ data.daoInfo.risk_level }}
             </el-tag>
           </template>
-          
+         
           <!-- 入口点 / API 路径标记 -->
           <el-tag v-if="data.rootType && isEntryType(data.rootType)" size="small" type="success" style="margin-left: 4px">
             🚪入口
@@ -132,61 +132,61 @@
               {{ p }}
             </el-tag>
           </template>
-          
+         
           <!-- 环检测标记 -->
           <el-tag v-if="data.isCyclic" size="small" type="danger" style="margin-left: 4px">
             🔄循环
           </el-tag>
-          
+         
           <!-- AI 分析状态标签（三类：方法 / 向上链 / 向下链） -->
-          <el-tag 
-            v-if="getNodeStatus(data)?.running_task_id" 
-            size="small" 
-            type="warning" 
+          <el-tag
+            v-if="getNodeStatus(data)?.running_task_id"
+            size="small"
+            type="warning"
             style="margin-left: 4px"
           >
             ⏳ 分析中
           </el-tag>
           <template v-else>
-            <el-tag 
-              v-if="getNodeStatus(data)?.method_status === 'analyzed'" 
-              size="small" 
+            <el-tag
+              v-if="getNodeStatus(data)?.method_status === 'analyzed'"
+              size="small"
               type=""
               style="margin-left: 4px"
             >
               ✅ 方法分析
             </el-tag>
-            <el-tag 
-              v-if="getNodeStatus(data)?.upwards_chain_status === 'analyzed'" 
-              size="small" 
+            <el-tag
+              v-if="getNodeStatus(data)?.upwards_chain_status === 'analyzed'"
+              size="small"
               type="success"
               style="margin-left: 4px"
             >
               🔗 向上链分析
             </el-tag>
-            <el-tag 
-              v-if="getNodeStatus(data)?.downwards_chain_status === 'analyzed'" 
-              size="small" 
+            <el-tag
+              v-if="getNodeStatus(data)?.downwards_chain_status === 'analyzed'"
+              size="small"
               type="success"
               style="margin-left: 4px"
             >
               🔗 向下链分析
             </el-tag>
           </template>
-          
+         
           <!-- 操作按钮 (hover 显示) -->
           <span class="node-actions">
-            <el-button 
-              size="small" 
-              type="primary" 
+            <el-button
+              size="small"
+              type="primary"
               text
               @click.stop="openAIConfig(data)"
             >
               [AI 分析]
             </el-button>
-            <el-button 
+            <el-button
               v-if="getNodeStatus(data)?.latest_method_result_id || getNodeStatus(data)?.latest_upwards_chain_result_id || getNodeStatus(data)?.latest_downwards_chain_result_id"
-              size="small" 
+              size="small"
               type="success"
               text
               @click.stop="viewResult(data)"
@@ -197,10 +197,11 @@
         </span>
       </template>
     </el-tree>
-    
+   
     <el-empty v-if="!loading && data.length === 0" description="暂无数据" />
   </div>
 </template>
+
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch } from 'vue'
@@ -211,10 +212,12 @@ import apiClient from '@/api/client'
 import { useAIAnalysisStore } from '@/stores/aiAnalysis'
 import { useSessionStore } from '@/stores/session'
 
+
 const route = useRoute()
 const router = useRouter()
 const aiStore = useAIAnalysisStore()
 const sessionStore = useSessionStore()
+
 
 const props = defineProps<{
   data: any[]
@@ -224,10 +227,12 @@ const props = defineProps<{
   direction?: string
 }>()
 
+
 const treeProps = {
   children: 'children',
   label: 'label'
 }
+
 
 // ========== AI 批量分析 ==========
 const bulkAnalyzing = ref(false)
@@ -242,8 +247,10 @@ let bulkTaskId: string | null = null
 let bulkPollTimer: number | null = null
 let statusRefreshTimer: number | null = null
 
+
 // AI 批量分析可能耗时较长，单独设置超时
 apiClient.defaults.timeout = 300000
+
 
 // 轮询批量任务进度 + Tree 节点状态
 const startBatchPolling = (taskId: string) => {
@@ -254,10 +261,10 @@ const startBatchPolling = (taskId: string) => {
       bulkProgress.value = task.progress || 0
       bulkCompleted.value = task.completed_methods || 0
       bulkTotal.value = task.total_methods || 0
-      
+     
       // 每轮同步刷新 Tree 节点标签
       await loadNodesStatus()
-      
+     
       if (task.status === 'completed') {
         stopBatchPolling()
         bulkAnalyzing.value = false
@@ -274,10 +281,11 @@ const startBatchPolling = (taskId: string) => {
       console.error('批量任务轮询失败:', err)
     }
   }
-  
+ 
   poll()
   bulkPollTimer = window.setInterval(poll, 2000)
 }
+
 
 const stopBatchPolling = () => {
   if (bulkPollTimer) {
@@ -287,12 +295,13 @@ const stopBatchPolling = () => {
   bulkTaskId = null
 }
 
+
 onMounted(() => {
   loadNodesStatus()
-  
+ 
   // 页面可见性变化时刷新标签（用户从其他标签页返回时）
   document.addEventListener('visibilitychange', handleVisibilityChange)
-  
+ 
   // 定期刷新节点状态（30秒间隔）
   statusRefreshTimer = window.setInterval(() => {
     if (document.visibilityState === 'visible') {
@@ -301,6 +310,7 @@ onMounted(() => {
   }, 30000)
 })
 
+
 // 页面可见性变化时刷新节点状态
 const handleVisibilityChange = () => {
   if (document.visibilityState === 'visible') {
@@ -308,10 +318,12 @@ const handleVisibilityChange = () => {
   }
 }
 
+
 // 数据变化时重新加载节点状态
 watch(() => props.data, () => {
   loadNodesStatus()
 }, { deep: true })
+
 
 onUnmounted(() => {
   stopBatchPolling()
@@ -322,6 +334,7 @@ onUnmounted(() => {
   document.removeEventListener('visibilitychange', handleVisibilityChange)
 })
 
+
 const startBulkAnalysis = async () => {
   const baseline = route.query.baseline as string
   const version = route.query.version as string
@@ -329,14 +342,14 @@ const startBulkAnalysis = async () => {
     ElMessage.warning('请先选择基线和版本')
     return
   }
-  
+ 
   // 收集 Tree 中所有方法
   const nodes = collectNodeKeys(props.data)
   if (nodes.length === 0) {
     ElMessage.warning('Tree 中没有可分析的方法')
     return
   }
-  
+ 
   bulkAnalyzing.value = true
   bulkRunning.value = true
   bulkComplete.value = false
@@ -344,7 +357,7 @@ const startBulkAnalysis = async () => {
   bulkProgress.value = 0
   bulkCompleted.value = 0
   bulkTotal.value = nodes.length
-  
+ 
   try {
     const response = await apiClient.post('/analysis/batch-methods', {
       baseline,
@@ -353,7 +366,7 @@ const startBulkAnalysis = async () => {
       force_fresh: forceFreshBulk.value,
       methods: nodes
     })
-    
+   
     bulkTaskId = response.data.task_id
     if (bulkTaskId) {
       startBatchPolling(bulkTaskId)
@@ -372,7 +385,9 @@ const startBulkAnalysis = async () => {
   }
 }
 
+
 // ========== AI 节点状态 ==========
+
 
 /**
  * 解析节点标签中的类名和方法名
@@ -386,6 +401,7 @@ const parseNodeInfo = (data: any) => {
   }
   return { class_name: '', method_name: '' }
 }
+
 
 /**
  * 递归收集所有叶子节点的类名/方法名，用于批量查询
@@ -414,6 +430,7 @@ const collectNodeKeys = (treeData: any[]): any[] => {
   return nodes
 }
 
+
 /**
  * 加载节点分析状态
  */
@@ -421,12 +438,13 @@ const loadNodesStatus = async () => {
   const baseline = route.query.baseline as string
   const version = route.query.version as string
   if (!baseline || !version || !props.data || props.data.length === 0) return
-  
+ 
   const nodes = collectNodeKeys(props.data)
   if (nodes.length === 0) return
-  
+ 
   await aiStore.loadNodesStatus(baseline, version, nodes)
 }
+
 
 /**
  * 获取节点状态（兼容解析）
@@ -438,6 +456,7 @@ const getNodeStatus = (data: any) => {
   return aiStore.getNodeStatus(info.class_name, info.method_name)
 }
 
+
 /**
  * 在新标签页中打开 AI 分析配置页
  */
@@ -445,7 +464,7 @@ const openAIConfig = (data: any) => {
   const info = parseNodeInfo(data)
   const baseline = route.query.baseline as string
   const version = route.query.version as string
-  
+ 
   const resolved = router.resolve({
     name: 'AIAnalysisConfig',
     params: { taskId: route.params.taskId as string },
@@ -461,6 +480,7 @@ const openAIConfig = (data: any) => {
   })
   window.open(resolved.href, '_blank')
 }
+
 
 /**
  * 在新标签页中查看分析结果
@@ -494,6 +514,7 @@ const viewResult = (data: any) => {
   }
 }
 
+
 // ========== 标签颜色 ==========
 const isEntryType = (type: string) => {
   const entryTypes = [
@@ -502,6 +523,7 @@ const isEntryType = (type: string) => {
   ]
   return entryTypes.includes(type)
 }
+
 
 const getChangeTypeTag = (type: string) => {
   const map: Record<string, any> = {
@@ -513,38 +535,52 @@ const getChangeTypeTag = (type: string) => {
   return map[type] || 'info'
 }
 
-/** 截断方法签名中的参数，如 LockRateCallBackService.processBiz(a,b,c) → LockRateCallBackService.processBiz(—, —, —)
- *  同时截断文档注释部分，保留前80字符用于屏显 */
+
+/** 截断方法签名中的参数，如 LockRateCallBackService.processBiz(a,b,c,d) → LockRateCallBackService.processBiz(—, —, —, —)
+ *  同时截断文档注释部分，保留前40字符用于屏显。
+ *  使用 lastIndexOf('(') 精确定位参数括号，兼容根节点全限定类名。 */
 const truncateLabel = (label: string): string => {
   // 分离文档注释部分（📝...）
   const docIdx = label.indexOf('  📝')
   const mainPart = docIdx > 0 ? label.substring(0, docIdx) : label
   let docPart = docIdx > 0 ? label.substring(docIdx) : ''
 
-  // 截断文档部分（屏幕显示前80字符）
-  if (docPart && docPart.length > 83) {  // '  📝' + 80 chars
-    docPart = docPart.substring(0, 83) + '...'
+
+  // 截断文档部分（屏幕显示前40字符）
+  if (docPart && docPart.length > 43) {  // '  📝' + 40 chars
+    docPart = docPart.substring(0, 43) + '...'
   }
 
-  // 匹配 ClassName.methodName(params)
-  const match = mainPart.match(/^(.+?\.)(\w+)\((.+)\)$/)
-  if (!match) return mainPart + docPart
 
-  const [, classPath, methodName, params] = match
-  const paramList = params.split(/\s*,\s*/)
+  // 定位最后一个 '(' — 即方法参数起始位置
+  const parenIdx = mainPart.lastIndexOf('(')
+  if (parenIdx < 0) return mainPart + docPart
 
-  // 如果参数列表不长（每个参数 < 25 字符），不截断
-  if (paramList.length <= 2 && params.length < 60) return mainPart + docPart
+
+  const prefix = mainPart.substring(0, parenIdx)          // ClassName.methodName
+  const inside = mainPart.substring(parenIdx + 1)          // params...)
+  if (!inside.endsWith(')')) return mainPart + docPart
+
+
+  const params = inside.slice(0, -1)                       // 去掉尾部 ')'
+  const paramList = params.split(/\s*,\s*/).filter(p => p.trim())
+
+
+  // 无参或参数总长 < 30 字符时不截断（如 delete()、delete(Long id) 保持原样）
+  if (params.length < 30) return mainPart + docPart
+
 
   // 截断：每个参数替换为 —
   const shortParams = paramList.map(() => '—').join(', ')
-  return `${classPath}${methodName}(${shortParams})${docPart}`
+  return `${prefix}(${shortParams})${docPart}`
 }
+
 
 /** 判断 label 是否需要截断 */
 const needsTruncation = (label: string): boolean => {
   return truncateLabel(label) !== label
 }
+
 
 const getSqlTypeTag = (type: string) => {
   const map: Record<string, any> = {
@@ -556,6 +592,7 @@ const getSqlTypeTag = (type: string) => {
   return map[type] || 'info'
 }
 
+
 const getRiskTag = (level: string) => {
   const map: Record<string, any> = {
     LOW: 'info',
@@ -565,6 +602,7 @@ const getRiskTag = (level: string) => {
   }
   return map[level] || 'info'
 }
+
 
 const getDaoDetailTooltip = (di: any) => {
   const parts = []
@@ -579,15 +617,18 @@ const getDaoDetailTooltip = (di: any) => {
 }
 </script>
 
+
 <style scoped>
 .call-chain-tree {
   padding: 20px;
 }
 
+
 .call-chain-tree h3 {
   margin-bottom: 15px;
   color: #409EFF;
 }
+
 
 .custom-tree-node {
   display: flex;
@@ -596,10 +637,12 @@ const getDaoDetailTooltip = (di: any) => {
   flex-wrap: wrap;
 }
 
+
 .node-label {
   font-family: 'Consolas', 'Courier New', monospace;
   font-size: 13px;
 }
+
 
 .doc-icon {
   color: #909399;
@@ -608,9 +651,11 @@ const getDaoDetailTooltip = (di: any) => {
   flex-shrink: 0;
 }
 
+
 .no-doc-icon {
   color: #E6A23C;
 }
+
 
 .node-actions {
   opacity: 0;
@@ -618,9 +663,11 @@ const getDaoDetailTooltip = (di: any) => {
   margin-left: 4px;
 }
 
+
 .custom-tree-node:hover .node-actions {
   opacity: 1;
 }
+
 
 .bulk-analysis-bar {
   margin-bottom: 15px;
@@ -629,12 +676,14 @@ const getDaoDetailTooltip = (di: any) => {
   border-radius: 6px;
 }
 
+
 .bulk-progress {
   margin-top: 10px;
   display: flex;
   align-items: center;
   gap: 12px;
 }
+
 
 .bulk-progress-text {
   font-size: 13px;
