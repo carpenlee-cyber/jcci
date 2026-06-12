@@ -133,7 +133,7 @@ class CallChainNode:
     
     def to_dict(self) -> dict:
         """
-        转换为字典（用于 JSON 序列化，v3.1 增强版）
+        转换为字典（标准格式，用于 JSON 序列化和 API 响应）
         
         Returns:
             dict: 节点的字典表示，包含所有字段和递归的子节点
@@ -164,3 +164,137 @@ class CallChainNode:
         if self.entry_annotation:
             base["entry_annotation"] = self.entry_annotation
         return base
+    
+    def to_compact_dict(self) -> dict:
+        """
+        转换为紧凑字典（用于压缩存储，v5.0 新增）
+        
+        省略可推导字段（node_id、class_name）和等于默认值的字段，
+        使用紧凑 JSON（无缩进）可显著减少存储体积。
+        
+        Returns:
+            dict: 紧凑的节点字典，仅包含非默认值字段
+        """
+        base = {
+            "package_class": self.package_class,
+            "method_signature": self.method_signature,
+            "method_name": self.method_name,
+        }
+        
+        # depth: 省略默认值0
+        if self.depth != 0:
+            base["depth"] = self.depth
+        
+        # invocation_lines: 省略空数组
+        if self.invocation_lines:
+            base["invocation_lines"] = self.invocation_lines
+        
+        # is_cyclic: 省略默认值false
+        if self.is_cyclic:
+            base["is_cyclic"] = True
+        
+        # is_leaf: 省略默认值false（但叶子节点需保留）
+        if self.is_leaf:
+            base["is_leaf"] = True
+        
+        # db_method_id: 省略None
+        if self.db_method_id is not None:
+            base["db_method_id"] = self.db_method_id
+        
+        # root_type: 省略默认值"UNKNOWN"
+        if self.root_type != "UNKNOWN":
+            base["root_type"] = self.root_type
+        
+        # call_type: 省略默认值"DIRECT"
+        if self.call_type != "DIRECT":
+            base["call_type"] = self.call_type
+        
+        # has_multiple_call_sites: 省略默认值false
+        if self.has_multiple_call_sites:
+            base["has_multiple_call_sites"] = True
+        
+        # entry_annotation: 省略None
+        if self.entry_annotation:
+            base["entry_annotation"] = self.entry_annotation
+        
+        # api_paths: 省略空数组
+        if self.api_paths:
+            base["api_paths"] = self.api_paths
+        
+        # change_type: 省略默认值"UNCHANGED"（最常见），保留"UNKNOWN"以防歧义
+        if self.change_type not in ("UNCHANGED",):
+            base["change_type"] = self.change_type
+        
+        # dao_info: 省略None
+        if self.dao_info:
+            base["dao_info"] = self.dao_info if isinstance(self.dao_info, dict) else self.dao_info.to_dict()
+        
+        # documentation: 省略None
+        if self.documentation:
+            base["documentation"] = self.documentation
+        
+        # children: 省略空数组
+        if self.children:
+            base["children"] = [child.to_compact_dict() for child in self.children]
+        
+        return base
+    
+    @staticmethod
+    def expand_compact_dict(d: dict) -> dict:
+        """
+        从紧凑字典还原为标准字典（v5.0 新增）
+        
+        补全 node_id、class_name 和所有省略的默认值字段，
+        确保前端 API 响应格式与旧格式一致。
+        
+        Args:
+            d: 紧凑格式的节点字典
+        
+        Returns:
+            dict: 标准格式的节点字典
+        """
+        package_class = d.get("package_class", "")
+        method_signature = d.get("method_signature", "")
+        depth = d.get("depth", 0)
+        
+        # 推导 node_id
+        node_id = f"{depth}|{package_class}|{method_signature}"
+        
+        # 推导 class_name
+        class_name = package_class.split('.')[-1] if package_class else ''
+        
+        result = {
+            "node_id": node_id,
+            "package_class": package_class,
+            "method_signature": method_signature,
+            "method_name": d.get("method_name", ""),
+            "class_name": class_name,
+            "depth": depth,
+            "invocation_lines": d.get("invocation_lines", []),
+            "is_cyclic": d.get("is_cyclic", False),
+            "is_leaf": d.get("is_leaf", False),
+            "db_method_id": d.get("db_method_id"),
+            "root_type": d.get("root_type", "UNKNOWN"),
+            "call_type": d.get("call_type", "DIRECT"),
+            "has_multiple_call_sites": d.get("has_multiple_call_sites", False),
+            "api_paths": d.get("api_paths", []),
+            "change_type": d.get("change_type", "UNCHANGED"),
+            "dao_info": d.get("dao_info"),
+            "documentation": d.get("documentation"),
+        }
+        
+        # entry_annotation 仅在非空时添加（与 to_dict 行为一致）
+        if d.get("entry_annotation"):
+            result["entry_annotation"] = d["entry_annotation"]
+        
+        # 递归还原 children
+        if "children" in d:
+            result["children"] = [CallChainNode.expand_compact_dict(child) for child in d["children"]]
+        else:
+            result["children"] = []
+        
+        # 保留元数据字段
+        if "_analysis_meta" in d:
+            result["_analysis_meta"] = d["_analysis_meta"]
+        
+        return result

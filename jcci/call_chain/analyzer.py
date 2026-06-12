@@ -353,10 +353,6 @@ def build_upwards_call_chains(
     version_subdir = os.path.join(output_dir, commit_new_short)
     os.makedirs(version_subdir, exist_ok=True)
     
-    # 由于已经在以commit范围命名的子目录中，文件名可以简化
-    output_filename = f"upwards_call_chains.json"
-    output_filepath = os.path.join(version_subdir, output_filename)
-    
     result = {
         "metadata": {
             "direction": "upwards",
@@ -369,7 +365,7 @@ def build_upwards_call_chains(
             "total_methods": len(changed_methods),
             "successful_chains": len(results),
             "failed_chains": len(failed),
-            "output_file": output_filepath,
+            "output_file": "",
             "max_depth": max_depth,
             "features_enabled": {
                 "class_hierarchy_analysis": enable_cha,
@@ -390,8 +386,10 @@ def build_upwards_call_chains(
         "recommendations": _generate_recommendations(global_coverage, enable_cha)
     }
     
-    with open(output_filepath, 'w', encoding='utf-8') as f:
-        json.dump(result, f, indent=2, ensure_ascii=False)
+    # v5.0: 使用紧凑 GZIP 格式保存
+    from jcci.utils.path_utils import save_call_chains_json
+    output_filepath = save_call_chains_json('upwards', result, project_name, commit_old_short, commit_new_short)
+    result["metadata"]["output_file"] = output_filepath
     
     logger.info(f"✓ 向上分析结果已保存到: {output_filepath}")
     
@@ -537,10 +535,6 @@ def build_downwards_call_chains(
     version_subdir = os.path.join(output_dir, commit_new_short)
     os.makedirs(version_subdir, exist_ok=True)
     
-    # 由于已经在以commit范围命名的子目录中，文件名可以简化
-    output_filename = f"downwards_call_chains.json"
-    output_filepath = os.path.join(version_subdir, output_filename)
-    
     result = {
         "metadata": {
             "direction": "downwards",
@@ -553,7 +547,7 @@ def build_downwards_call_chains(
             "total_methods": len(changed_methods),
             "successful_chains": len(results),
             "failed_chains": len(failed),
-            "output_file": output_filepath,
+            "output_file": "",
             "max_depth": max_depth
         },
         "call_chains": results,
@@ -562,8 +556,10 @@ def build_downwards_call_chains(
                                if l['id'] in ['DYNAMIC_DISPATCH', 'INTERFACE_RESOLUTION']]
     }
     
-    with open(output_filepath, 'w', encoding='utf-8') as f:
-        json.dump(result, f, indent=2, ensure_ascii=False)
+    # v5.0: 使用紧凑 GZIP 格式保存
+    from jcci.utils.path_utils import save_call_chains_json
+    output_filepath = save_call_chains_json('downwards', result, project_name, commit_old_short, commit_new_short)
+    result["metadata"]["output_file"] = output_filepath
     
     logger.info(f"✓ 向下分析结果已保存到: {output_filepath}")
     

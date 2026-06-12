@@ -192,6 +192,8 @@ async def get_version_info(baseline: str, version: str):
     if not os.path.exists(version_dir):
         raise HTTPException(status_code=404, detail="Version not found")
     
+    upwards_json_gz = os.path.join(version_dir, "upwards_call_chains.json.gz")
+    downwards_json_gz = os.path.join(version_dir, "downwards_call_chains.json.gz")
     upwards_json = os.path.join(version_dir, "upwards_call_chains.json")
     downwards_json = os.path.join(version_dir, "downwards_call_chains.json")
     upwards_txt = os.path.join(version_dir, "upwards.txt")
@@ -200,8 +202,8 @@ async def get_version_info(baseline: str, version: str):
     return VersionInfo(
         baseline=baseline,
         version=version,
-        has_upwards=os.path.exists(upwards_json),
-        has_downwards=os.path.exists(downwards_json),
+        has_upwards=os.path.exists(upwards_json_gz) or os.path.exists(upwards_json),
+        has_downwards=os.path.exists(downwards_json_gz) or os.path.exists(downwards_json),
         has_text=os.path.exists(upwards_txt) and os.path.exists(downwards_txt)
     )
 
@@ -218,16 +220,13 @@ async def get_upwards_chains(baseline: str, version: str):
     Returns:
         向上调用链 JSON 数据
     """
-    result_dir = settings.RESULT_DIR
-    filepath = os.path.join(_resolve_data_path(baseline, version), "upwards_call_chains.json")
-    
-    if not os.path.exists(filepath):
-        raise HTTPException(status_code=404, detail="Upwards chains file not found")
-    
+    from jcci.utils.path_utils import load_call_chains_json_from_dir
+    data_dir = _resolve_data_path(baseline, version)
     try:
-        with open(filepath, 'r', encoding='utf-8') as f:
-            data = json.load(f)
+        data = load_call_chains_json_from_dir(data_dir, "upwards")
         return data
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail="Upwards chains file not found")
     except json.JSONDecodeError as e:
         raise HTTPException(status_code=500, detail=f"Invalid JSON: {str(e)}")
     except HTTPException:
@@ -248,16 +247,13 @@ async def get_downwards_chains(baseline: str, version: str):
     Returns:
         向下调用链 JSON 数据
     """
-    result_dir = settings.RESULT_DIR
-    filepath = os.path.join(_resolve_data_path(baseline, version), "downwards_call_chains.json")
-    
-    if not os.path.exists(filepath):
-        raise HTTPException(status_code=404, detail="Downwards chains file not found")
-    
+    from jcci.utils.path_utils import load_call_chains_json_from_dir
+    data_dir = _resolve_data_path(baseline, version)
     try:
-        with open(filepath, 'r', encoding='utf-8') as f:
-            data = json.load(f)
+        data = load_call_chains_json_from_dir(data_dir, "downwards")
         return data
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail="Downwards chains file not found")
     except json.JSONDecodeError as e:
         raise HTTPException(status_code=500, detail=f"Invalid JSON: {str(e)}")
     except HTTPException:
@@ -779,15 +775,12 @@ async def analyze_upwards_summary(baseline: str, version: str, request: UpwardsS
     Returns:
         汇总分析结果
     """
-    result_dir = settings.RESULT_DIR
-    filepath = os.path.join(_resolve_data_path(baseline, version), "upwards_call_chains.json")
-    
-    if not os.path.exists(filepath):
-        raise HTTPException(status_code=404, detail="Upwards chains file not found")
-    
+    from jcci.utils.path_utils import load_call_chains_json_from_dir
+    data_dir = _resolve_data_path(baseline, version)
     try:
-        with open(filepath, 'r', encoding='utf-8') as f:
-            data = json.load(f)
+        data = load_call_chains_json_from_dir(data_dir, "upwards")
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail="Upwards chains file not found")
     except HTTPException:
         raise
     except Exception as e:
@@ -914,14 +907,9 @@ async def get_sql_summary(baseline: str, version: str):
             logger.warning(f"SQL 摘要文件读取失败，回退到大 JSON: {e}")
     
     # Fallback: 旧格式大 JSON
-    filepath = os.path.join(data_dir, "downwards_call_chains.json")
-    if not os.path.exists(filepath):
-        raise HTTPException(status_code=404, detail="Downwards chains file not found")
-
+    from jcci.utils.path_utils import load_call_chains_json_from_dir
     try:
-        with open(filepath, 'r', encoding='utf-8') as f:
-            data = json.load(f)
-
+        data = load_call_chains_json_from_dir(data_dir, "downwards")
         call_chains = data.get('dependency_chains') or data.get('call_chains', [])
         dao_methods = sql_analyzer.extract_dao_methods(call_chains)
         summary = sql_analyzer.get_sql_summary(dao_methods)
@@ -1423,45 +1411,45 @@ async def get_chain_methods(baseline: str, version: str, direction: str = 'upwar
             
             conn.close()
             
-            # 向下方向：从大 JSON 补充 endpoints（索引文件不含链数据）
+            # 向下方向：从 JSON 补充 endpoints（索引文件不含链数据）
             if direction == 'downwards':
-                json_filepath = os.path.join(data_dir, "downwards_call_chains.json")
-                if os.path.exists(json_filepath):
-                    try:
-                        with open(json_filepath, 'r', encoding='utf-8') as f:
-                            chain_data = json.load(f)
-                        chains_list = chain_data.get('call_chains', chain_data.get('dependency_chains', []))
-                        # 构建 class_name.method_name -> chain 映射
-                        chain_map = {}
-                        for c in chains_list:
-                            mi = c.get('method_info', {})
-                            k = f"{mi.get('class_name', '')}.{mi.get('method_name', '')}"
-                            chain_map[k] = c
-                        # 为每个方法提取 endpoints
-                        for m in methods_with_cache:
-                            k = f"{m['class_name']}.{m['method_name']}"
-                            c = chain_map.get(k)
-                            if c:
-                                cr = c.get('chain', {})
-                                di = cr.get('dao_info')
-                                if di and isinstance(di, dict) and di.get('sql_type'):
-                                    # 链根节点自身就是 DAO/Mapper，直接作为端点
-                                    m['endpoints'] = [{
-                                        'class_name': cr.get('class_name', ''),
-                                        'method_name': cr.get('method_name', ''),
-                                        'api_paths': [],
-                                        'documentation': cr.get('documentation', ''),
-                                        'dao_sql_type': di.get('sql_type', ''),
-                                        'dao_tables': di.get('tables', []) if isinstance(di.get('tables'), list) else [],
-                                        'dao_method_signature': di.get('method_signature', ''),
-                                        'dao_sql_content': di.get('sql_content', ''),
-                                        'dao_mapper_method': di.get('mapper_method', '')
-                                    }]
-                                else:
-                                    chain_children = cr.get('children', [])
-                                    m['endpoints'] = _find_endpoint_nodes(chain_children, direction)
-                    except Exception:
-                        pass  # 温和回退，保持空 endpoints
+                try:
+                    from jcci.utils.path_utils import load_call_chains_json_from_dir
+                    chain_data = load_call_chains_json_from_dir(data_dir, "downwards")
+                except FileNotFoundError:
+                    chain_data = None
+                
+                if chain_data:
+                    chains_list = chain_data.get('call_chains', chain_data.get('dependency_chains', []))
+                    # 构建 class_name.method_name -> chain 映射
+                    chain_map = {}
+                    for c in chains_list:
+                        mi = c.get('method_info', {})
+                        k = f"{mi.get('class_name', '')}.{mi.get('method_name', '')}"
+                        chain_map[k] = c
+                    # 为每个方法提取 endpoints
+                    for m in methods_with_cache:
+                        k = f"{m['class_name']}.{m['method_name']}"
+                        c = chain_map.get(k)
+                        if c:
+                            cr = c.get('chain', {})
+                            di = cr.get('dao_info')
+                            if di and isinstance(di, dict) and di.get('sql_type'):
+                                # 链根节点自身就是 DAO/Mapper，直接作为端点
+                                m['endpoints'] = [{
+                                    'class_name': cr.get('class_name', ''),
+                                    'method_name': cr.get('method_name', ''),
+                                    'api_paths': [],
+                                    'documentation': cr.get('documentation', ''),
+                                    'dao_sql_type': di.get('sql_type', ''),
+                                    'dao_tables': di.get('tables', []) if isinstance(di.get('tables'), list) else [],
+                                    'dao_method_signature': di.get('method_signature', ''),
+                                    'dao_sql_content': di.get('sql_content', ''),
+                                    'dao_mapper_method': di.get('mapper_method', '')
+                                }]
+                            else:
+                                chain_children = cr.get('children', [])
+                                m['endpoints'] = _find_endpoint_nodes(chain_children, direction)
             
             total = len(methods_with_cache)
             # 分页切片
@@ -1479,17 +1467,12 @@ async def get_chain_methods(baseline: str, version: str, direction: str = 'upwar
             logger = __import__('logging').getLogger(__name__)
             logger.warning(f"索引文件读取失败，回退到大 JSON: {e}")
     
-    # Fallback: 旧格式大 JSON
-    result_dir = settings.RESULT_DIR
-    filename = f"{direction}_call_chains.json"
-    filepath = os.path.join(data_dir, filename)
-    
-    if not os.path.exists(filepath):
-        raise HTTPException(status_code=404, detail=f"{direction} call chains file not found")
-    
+    # Fallback: 从 JSON 加载
+    from jcci.utils.path_utils import load_call_chains_json_from_dir
     try:
-        with open(filepath, 'r', encoding='utf-8') as f:
-            data = json.load(f)
+        data = load_call_chains_json_from_dir(data_dir, direction)
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail=f"{direction} call chains file not found")
     except HTTPException:
         raise
     except Exception as e:
@@ -1705,16 +1688,12 @@ async def get_single_chain(baseline: str, version: str, direction: str, class_na
                     except Exception:
                         continue
     
-    # Fallback: 从大 JSON 中查找
-    json_filename = f"{direction}_call_chains.json"
-    json_filepath = os.path.join(data_dir, json_filename)
-    
-    if not os.path.exists(json_filepath):
-        raise HTTPException(status_code=404, detail=f"{direction} call chains file not found")
-    
+    # Fallback: 从 JSON 中查找
+    from jcci.utils.path_utils import load_call_chains_json_from_dir
     try:
-        with open(json_filepath, 'r', encoding='utf-8') as f:
-            data = json.load(f)
+        data = load_call_chains_json_from_dir(data_dir, direction)
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail=f"{direction} call chains file not found")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     

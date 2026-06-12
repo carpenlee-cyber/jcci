@@ -998,29 +998,33 @@ class LLMService:
         self, baseline: str, version: str, direction: str,
         class_name: str, method_name: str
     ) -> Optional[Dict]:
-        """从磁盘加载完整调用链 JSON 数据"""
+        """从磁盘加载完整调用链 JSON 数据（v5.0: 支持 .json.gz 和旧 .json）"""
+        from jcci.utils.tag_utils import extract_short_tag
+        from jcci.utils.path_utils import load_call_chains_json_from_dir
         from app.config import settings as s
         result_dir = s.RESULT_DIR
-    
-        # 构建文件名和路径
-        filename = f"{direction}_call_chains.json"
-    
+
         # 尝试直接路径
-        filepath = os.path.join(result_dir, baseline, version, filename)
-        if not os.path.exists(filepath):
-            # 尝试短标签路径
-            from jcci.utils.tag_utils import extract_short_tag
+        data_dir = os.path.join(result_dir, baseline, version)
+        data = None
+        if os.path.isdir(data_dir):
+            try:
+                data = load_call_chains_json_from_dir(data_dir, direction)
+            except FileNotFoundError:
+                pass
+
+        # 尝试短标签路径
+        if data is None:
             baseline_short = extract_short_tag(baseline)
             version_short = extract_short_tag(version)
-            filepath = os.path.join(result_dir, baseline_short, version_short, filename)
-            if not os.path.exists(filepath):
-                return None
-    
-        try:
-            with open(filepath, 'r', encoding='utf-8') as f:
-                data = json.load(f)
-        except Exception as e:
-            print(f"[CHAIN] 加载链 JSON 失败: {e}")
+            data_dir = os.path.join(result_dir, baseline_short, version_short)
+            if os.path.isdir(data_dir):
+                try:
+                    data = load_call_chains_json_from_dir(data_dir, direction)
+                except FileNotFoundError:
+                    pass
+
+        if data is None:
             return None
     
         # 查找匹配的链

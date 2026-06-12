@@ -134,7 +134,7 @@ def get_downwards_txt_path(project_name: str, commit_old: str, commit_new: str) 
 
 def get_upwards_json_path(project_name: str, commit_old: str, commit_new: str) -> str:
     """
-    获取向上调用链 JSON 文件路径
+    获取向上调用链 JSON 文件路径（旧格式）
     
     Args:
         project_name: 项目名称
@@ -150,7 +150,7 @@ def get_upwards_json_path(project_name: str, commit_old: str, commit_new: str) -
 
 def get_downwards_json_path(project_name: str, commit_old: str, commit_new: str) -> str:
     """
-    获取向下调用链 JSON 文件路径
+    获取向下调用链 JSON 文件路径（旧格式）
     
     Args:
         project_name: 项目名称
@@ -162,6 +162,251 @@ def get_downwards_json_path(project_name: str, commit_old: str, commit_new: str)
     """
     version_dir = get_version_subdir(project_name, commit_old, commit_new)
     return os.path.join(version_dir, "downwards_call_chains.json")
+
+
+def get_upwards_json_gz_path(project_name: str, commit_old: str, commit_new: str) -> str:
+    """
+    获取向上调用链压缩 JSON 文件路径（v5.0 新增）
+    
+    Args:
+        project_name: 项目名称
+        commit_old: 旧版本标识符
+        commit_new: 新版本标识符
+    
+    Returns:
+        str: 向上调用链 .json.gz 文件完整路径
+    """
+    version_dir = get_version_subdir(project_name, commit_old, commit_new)
+    return os.path.join(version_dir, "upwards_call_chains.json.gz")
+
+
+def get_downwards_json_gz_path(project_name: str, commit_old: str, commit_new: str) -> str:
+    """
+    获取向下调用链压缩 JSON 文件路径（v5.0 新增）
+    
+    Args:
+        project_name: 项目名称
+        commit_old: 旧版本标识符
+        commit_new: 新版本标识符
+    
+    Returns:
+        str: 向下调用链 .json.gz 文件完整路径
+    """
+    version_dir = get_version_subdir(project_name, commit_old, commit_new)
+    return os.path.join(version_dir, "downwards_call_chains.json.gz")
+
+
+# ==================== 统一读写函数（v5.0 新增） ====================
+
+def save_call_chains_json(direction: str, data: dict, project_name: str, 
+                           commit_old: str, commit_new: str) -> str:
+    """
+    以紧凑 GZIP 格式保存调用链数据（v5.0 新增）
+    
+    会自动将链中的节点从标准格式转换为紧凑格式，
+    然后以 GZIP 压缩写入 .json.gz 文件。
+    
+    Args:
+        direction: 'upwards' 或 'downwards'
+        data: 调用链结果字典（标准格式，含 metadata/impact_chains 或 metadata/call_chains）
+        project_name: 项目名称
+        commit_old: 旧版本标识符
+        commit_new: 新版本标识符
+    
+    Returns:
+        str: 输出文件路径
+    """
+    import json
+    import gzip
+
+    # 选择路径函数
+    if direction == 'upwards':
+        filepath = get_upwards_json_gz_path(project_name, commit_old, commit_new)
+        chains_key = 'impact_chains'
+    elif direction == 'downwards':
+        filepath = get_downwards_json_gz_path(project_name, commit_old, commit_new)
+        chains_key = 'call_chains'
+    else:
+        raise ValueError(f"direction must be 'upwards' or 'downwards', got: {direction}")
+    
+    ensure_dir_exists(os.path.dirname(filepath))
+    
+    # 将链数据中的 CallChainNode dict 转为紧凑格式
+    compact_data = dict(data)
+    if chains_key in compact_data:
+        compact_chains = []
+        for chain_entry in compact_data[chains_key]:
+            compact_entry = dict(chain_entry)
+            if 'chain' in compact_entry:
+                # chain 字段是从 CallChainNode.to_dict() 生成的
+                compact_entry['chain'] = _compact_chain_node_dict(compact_entry['chain'])
+            compact_chains.append(compact_entry)
+        compact_data[chains_key] = compact_chains
+    
+    # 以 GZIP 紧凑 JSON 写入
+    with gzip.open(filepath, 'wt', encoding='utf-8') as f:
+        json.dump(compact_data, f, separators=(',', ':'), ensure_ascii=False)
+    
+    return filepath
+
+
+def load_call_chains_json(direction: str, project_name: str, 
+                           commit_old: str, commit_new: str) -> dict:
+    """
+    统一加载调用链 JSON 数据（v5.0 新增）
+    
+    优先读取 .json.gz 压缩格式，不存在时回退到旧 .json 格式。
+    自动将紧凑格式还原为标准格式以兼容前端。
+    
+    Args:
+        direction: 'upwards' 或 'downwards'
+        project_name: 项目名称
+        commit_old: 旧版本标识符
+        commit_new: 新版本标识符
+    
+    Returns:
+        dict: 调用链数据（标准格式，与旧 .json 格式结构一致）
+    
+    Raises:
+        FileNotFoundError: 两种格式均不存在
+    """
+    gz_path = get_upwards_json_gz_path(project_name, commit_old, commit_new) if direction == 'upwards' \
+              else get_downwards_json_gz_path(project_name, commit_old, commit_new)
+
+    return load_call_chains_json_from_dir(os.path.dirname(gz_path), direction)
+
+
+def load_call_chains_json_from_dir(data_dir: str, direction: str) -> dict:
+    """
+    从数据目录加载调用链 JSON（v5.0 新增）
+    
+    优先读取 .json.gz 压缩格式，不存在时回退到旧 .json 格式。
+    自动将紧凑格式还原为标准格式以兼容前端。
+
+    Args:
+        data_dir: 版本数据目录（如 .../mall_xxx/yyy/）
+        direction: 'upwards' 或 'downwards'
+
+    Returns:
+        dict: 调用链数据（标准格式）
+
+    Raises:
+        FileNotFoundError: 两种格式均不存在
+    """
+    import json
+    import gzip
+
+    filename = f"{direction}_call_chains"
+    gz_path = os.path.join(data_dir, f"{filename}.json.gz")
+    json_path = os.path.join(data_dir, f"{filename}.json")
+
+    # 优先读取 .gz 新格式
+    if os.path.exists(gz_path):
+        with gzip.open(gz_path, 'rt', encoding='utf-8') as f:
+            data = json.load(f)
+        # 将紧凑格式还原为标准格式
+        data = _expand_call_chains_data(data, direction)
+        return data
+
+    # 回退到旧 .json 格式
+    if os.path.exists(json_path):
+        with open(json_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        return data
+
+    raise FileNotFoundError(f"Call chains file not found for {direction}: {gz_path} or {json_path}")
+
+
+def _compact_chain_node_dict(node_dict: dict) -> dict:
+    """
+    将单个标准节点字典转为紧凑格式（递归处理 children）
+    
+    与 CallChainNode.to_compact_dict() 逻辑一致，但操作纯 dict。
+    """
+    compact = {}
+    
+    # 必须保留的字段
+    for key in ('package_class', 'method_signature', 'method_name'):
+        if key in node_dict:
+            compact[key] = node_dict[key]
+    
+    # 条件保留的字段（非默认值才保留）
+    if node_dict.get('depth', 0) != 0:
+        compact['depth'] = node_dict['depth']
+    
+    invocation_lines = node_dict.get('invocation_lines', [])
+    if invocation_lines:
+        compact['invocation_lines'] = invocation_lines
+    
+    if node_dict.get('is_cyclic', False):
+        compact['is_cyclic'] = True
+    
+    if node_dict.get('is_leaf', False):
+        compact['is_leaf'] = True
+    
+    if node_dict.get('db_method_id') is not None:
+        compact['db_method_id'] = node_dict['db_method_id']
+    
+    root_type = node_dict.get('root_type', 'UNKNOWN')
+    if root_type != 'UNKNOWN':
+        compact['root_type'] = root_type
+    
+    call_type = node_dict.get('call_type', 'DIRECT')
+    if call_type != 'DIRECT':
+        compact['call_type'] = call_type
+    
+    if node_dict.get('has_multiple_call_sites', False):
+        compact['has_multiple_call_sites'] = True
+    
+    if node_dict.get('entry_annotation'):
+        compact['entry_annotation'] = node_dict['entry_annotation']
+    
+    api_paths = node_dict.get('api_paths', [])
+    if api_paths:
+        compact['api_paths'] = api_paths
+    
+    change_type = node_dict.get('change_type', 'UNCHANGED')
+    if change_type not in ('UNCHANGED',):
+        compact['change_type'] = change_type
+    
+    if node_dict.get('dao_info'):
+        compact['dao_info'] = node_dict['dao_info']
+    
+    if node_dict.get('documentation'):
+        compact['documentation'] = node_dict['documentation']
+    
+    # _analysis_meta: 仅在 upwards 链中存在，始终保留
+    if '_analysis_meta' in node_dict:
+        compact['_analysis_meta'] = node_dict['_analysis_meta']
+    
+    # 递归处理 children
+    children = node_dict.get('children', [])
+    if children:
+        compact['children'] = [_compact_chain_node_dict(child) for child in children]
+    
+    return compact
+
+
+def _expand_call_chains_data(data: dict, direction: str) -> dict:
+    """
+    将从 .json.gz 加载的紧凑数据还原为标准格式
+    
+    恢复 node_id、class_name 和所有默认值字段。
+    """
+    from jcci.call_chain.models import CallChainNode
+    
+    chains_key = 'impact_chains' if direction == 'upwards' else 'call_chains'
+    
+    if chains_key in data:
+        expanded_chains = []
+        for chain_entry in data[chains_key]:
+            expanded_entry = dict(chain_entry)
+            if 'chain' in expanded_entry:
+                expanded_entry['chain'] = CallChainNode.expand_compact_dict(expanded_entry['chain'])
+            expanded_chains.append(expanded_entry)
+        data[chains_key] = expanded_chains
+    
+    return data
 
 
 # ==================== 工具函数 ====================
