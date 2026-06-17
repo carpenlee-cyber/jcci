@@ -4,45 +4,25 @@
       <template #header>
         <div class="card-header">
           <h2>🤖 AI 分析配置</h2>
-          <el-button @click="$router.back()">
-            <el-icon><Back /></el-icon>
-            返回
-          </el-button>
         </div>
       </template>
-
-      <!-- 分析范围选择 -->
-      <el-radio-group v-model="analysisScope" class="scope-group">
-        <el-radio value="method">仅分析当前方法</el-radio>
-        <el-radio value="chain">分析整条调用链（自动逐方法分析后聚合）</el-radio>
-      </el-radio-group>
-
-      <!-- 链路分析方向选择（仅链分析模式） -->
-      <template v-if="analysisScope === 'chain'">
-        <div style="margin-top: 12px; padding: 10px 16px; background: #f0f5ff; border-radius: 6px">
-          <span style="font-weight: 600; margin-right: 12px">🔀 链路分析方向：</span>
-          <el-radio-group v-model="chainDirection" @change="onDirectionChange">
-            <el-radio value="upwards">⬆️ 向上分析（影响面评估：谁调用了变更方法）</el-radio>
-            <el-radio value="downwards">⬇️ 向下分析（功能风险评估：变更方法调用了谁）</el-radio>
-          </el-radio-group>
-        </div>
-      </template>
-
-      <el-divider />
-
-      <!-- 当前方法信息 -->
       <h3>📋 方法信息</h3>
       <el-descriptions :column="2" border v-if="currentMethod">
         <el-descriptions-item label="类名">{{ currentMethod.class_name }}</el-descriptions-item>
         <el-descriptions-item label="方法名">{{ currentMethod.method_name }}</el-descriptions-item>
-        <el-descriptions-item label="签名">{{ currentMethod.signature || currentMethod.method_name + '()' }}</el-descriptions-item>
+        <el-descriptions-item label="签名">
+          <el-tooltip
+            :content="currentMethod.signature || currentMethod.method_name + '()'"
+            placement="top"
+            :disabled="!isSignatureTooLong(currentMethod.signature || currentMethod.method_name + '()')"
+          >
+            <span class="signature-text">{{ currentMethod.signature || currentMethod.method_name + '()' }}</span>
+          </el-tooltip>
+        </el-descriptions-item>
         <el-descriptions-item label="变更类型">
           <el-tag :type="changeTypeTag(currentMethod.change_type)" size="small">
             {{ currentMethod.change_type }}
           </el-tag>
-        </el-descriptions-item>
-        <el-descriptions-item v-if="methodCode?.documentation" label="方法注释" :span="2">
-          <span class="method-doc">📝 {{ methodCode.documentation }}</span>
         </el-descriptions-item>
       </el-descriptions>
 
@@ -141,7 +121,6 @@
       <div class="action-bar">
         <el-checkbox v-model="store.forceFresh">🔄 强制全新分析（忽略缓存）</el-checkbox>
         <div>
-          <el-button @click="$router.back()">取消</el-button>
           <el-button
             type="primary"
             @click="startAnalysis"
@@ -196,12 +175,19 @@ const changeTypeTag = (type: string) => {
 }
 
 /**
+ * 判断签名是否过长需要显示tooltip
+ */
+const isSignatureTooLong = (signature: string) => {
+  return signature.length > 50 // 超过50个字符认为过长
+}
+
+/**
  * 切换链方向时重新加载方法列表和提示词
  */
 const onDirectionChange = async () => {
   const baseline = route.query.baseline as string
   const version = route.query.version as string
-  
+
   if (baseline && version) {
     methodsLoading.value = true
     store.analysisDirection = chainDirection.value
@@ -489,6 +475,15 @@ watch(analysisScope, async (newScope) => {
   line-height: 1.6;
   white-space: pre-wrap;
   word-break: break-word;
+}
+
+.signature-text {
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: inline-block;
+  vertical-align: bottom;
 }
 
 .action-bar {

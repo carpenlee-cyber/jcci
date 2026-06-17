@@ -98,14 +98,14 @@ const extractShortTag = (tag: string): string => {
   return tag
 }
 
-// 格式化基线名称（替换下划线为空格）
+// 格式化基线名称（直接返回原始名称）
 const formatBaselineName = (name: string) => {
-  return name.replace(/_/g, ' ')
+  return name
 }
 
-// 格式化版本名称
+// 格式化版本名称（直接返回原始名称）
 const formatVersionName = (name: string) => {
-  return name.replace(/_/g, ' ')
+  return name
 }
 
 // 加载基线列表

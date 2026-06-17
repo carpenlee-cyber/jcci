@@ -2,6 +2,7 @@
 LLM 智能分析服务
 """
 import os
+import re
 import json
 import time
 import sqlite3
@@ -11,14 +12,16 @@ from typing import Dict, Optional, List
 from app.config import settings
 
 
+
+
 class LLMAnalysisStatus:
     """全局 LLM 分析状态管理（线程安全）"""
-    
+   
     IDLE = "idle"
     ANALYZING = "analyzing"
-    
+   
     _instance = None
-    
+   
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super().__new__(cls)
@@ -27,22 +30,22 @@ class LLMAnalysisStatus:
             cls._instance._current_task = None
             cls._instance._started_at = None
         return cls._instance
-    
+   
     @property
     def status(self) -> str:
         with self._lock:
             return self._status
-    
+   
     @property
     def current_task(self) -> Optional[str]:
         with self._lock:
             return self._current_task
-    
+   
     @property
     def started_at(self) -> Optional[float]:
         with self._lock:
             return self._started_at
-    
+   
     def start(self, task_description: str = ""):
         """开始分析，返回 True 表示获取锁成功"""
         with self._lock:
@@ -52,14 +55,14 @@ class LLMAnalysisStatus:
             self._current_task = task_description
             self._started_at = time.time()
             return True
-    
+   
     def finish(self):
         """完成分析"""
         with self._lock:
             self._status = self.IDLE
             self._current_task = None
             self._started_at = None
-    
+   
     def to_dict(self) -> dict:
         with self._lock:
             elapsed = (time.time() - self._started_at) if self._started_at else 0
@@ -70,13 +73,17 @@ class LLMAnalysisStatus:
             }
 
 
+
+
 # 全局单例
 llm_status = LLMAnalysisStatus()
 
 
+
+
 class LLMService:
     """LLM 分析服务"""
-    
+   
     def __init__(self):
         self.api_url = settings.LLM_API_URL
         self.api_key = settings.LLM_API_KEY
@@ -86,10 +93,12 @@ class LLMService:
         self._ensure_cache_table()
         self._ensure_task_tables()
 
+
     def _ensure_cache_table(self):
         """确保 LLM 缓存表存在（含自动迁移）"""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
+
 
         # 先创建表（如果不存在），使用完整的 UNIQUE 约束（含 baseline/version）
         cursor.execute('''
@@ -113,6 +122,7 @@ class LLMService:
             )
         ''')
 
+
         # 检测旧 UNIQUE 约束（不含 baseline/version），若存在则执行表重建迁移
         need_migrate = False
         try:
@@ -131,6 +141,7 @@ class LLMService:
                         break
         except Exception:
             pass  # 表不存在时走 CREATE TABLE IF NOT EXISTS 路径
+
 
         if need_migrate:
             # 创建新表（含正确 UNIQUE）
@@ -155,6 +166,7 @@ class LLMService:
                 )
             ''')
 
+
             # 迁移数据：按新的完整 UNIQUE 键分组，保留每组最新记录
             new_cols = ['analysis_type', 'direction', 'baseline', 'version',
                         'class_name', 'method_name', 'change_type',
@@ -174,18 +186,20 @@ class LLMService:
                 )
             ''')
 
+
             # 替换旧表
             cursor.execute('DROP TABLE llm_analysis_cache')
             cursor.execute('ALTER TABLE llm_analysis_cache_new RENAME TO llm_analysis_cache')
 
+
         conn.commit()
         conn.close()
-    
+   
     def _ensure_task_tables(self):
         """确保 LLM 分析任务表和结果表存在"""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
-        
+       
         # 任务表
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS llm_analysis_tasks (
@@ -211,7 +225,7 @@ class LLMService:
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         ''')
-        
+       
         # 结果表
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS llm_analysis_results (
@@ -228,12 +242,12 @@ class LLMService:
                 FOREIGN KEY (task_id) REFERENCES llm_analysis_tasks(task_id)
             )
         ''')
-        
+       
         conn.commit()
         conn.close()
-    
+   
     # ========== 异步任务管理 ==========
-    
+   
     def create_task(
         self,
         analysis_type: str,
@@ -253,7 +267,7 @@ class LLMService:
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
         cursor.execute('''
-            INSERT INTO llm_analysis_tasks 
+            INSERT INTO llm_analysis_tasks
             (task_id, analysis_type, direction, baseline, version,
              class_name, method_name, change_type, status,
              total_methods, force_fresh,
@@ -266,7 +280,7 @@ class LLMService:
         conn.commit()
         conn.close()
         return task_id
-    
+   
     def update_task_status(
         self,
         task_id: str,
@@ -280,10 +294,10 @@ class LLMService:
         """更新任务状态"""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
-        
+       
         updates = ["status = ?"]
         params = [status]
-        
+       
         if progress is not None:
             updates.append("progress = ?")
             params.append(progress)
@@ -299,17 +313,17 @@ class LLMService:
         if error_message is not None:
             updates.append("error_message = ?")
             params.append(error_message)
-        
+       
         if status == 'running':
             updates.append("started_at = CURRENT_TIMESTAMP")
         elif status in ('completed', 'failed'):
             updates.append("completed_at = CURRENT_TIMESTAMP")
-        
+       
         params.append(task_id)
         cursor.execute(f"UPDATE llm_analysis_tasks SET {', '.join(updates)} WHERE task_id = ?", params)
         conn.commit()
         conn.close()
-    
+   
     def get_task(self, task_id: str) -> Optional[Dict]:
         """获取任务详情"""
         conn = sqlite3.connect(self.db_path)
@@ -324,7 +338,7 @@ class LLMService:
             task['sub_results'] = self._get_task_results(task_id)
             return task
         return None
-    
+   
     def _get_task_results(self, task_id: str) -> List[Dict]:
         """获取任务关联的所有结果"""
         conn = sqlite3.connect(self.db_path)
@@ -340,7 +354,7 @@ class LLMService:
         rows = cursor.fetchall()
         conn.close()
         return [dict(row) for row in rows]
-    
+   
     def save_result(
         self,
         task_id: str,
@@ -356,7 +370,7 @@ class LLMService:
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
         cursor.execute('''
-            INSERT INTO llm_analysis_results 
+            INSERT INTO llm_analysis_results
             (result_id, task_id, parent_task_id, class_name, method_name,
              analysis_result, model_name, analysis_duration, from_cache)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -365,7 +379,7 @@ class LLMService:
         conn.commit()
         conn.close()
         return result_id
-    
+   
     def get_result(self, result_id: str) -> Optional[Dict]:
         """获取单个分析结果"""
         conn = sqlite3.connect(self.db_path)
@@ -375,9 +389,9 @@ class LLMService:
         row = cursor.fetchone()
         conn.close()
         return dict(row) if row else None
-    
+   
     # ========== 后台异步执行方法 ==========
-    
+   
     def run_method_task(
         self,
         task_id: str,
@@ -393,10 +407,10 @@ class LLMService:
         """后台执行单方法分析任务"""
         try:
             self.update_task_status(task_id, 'running', progress=0.1, current_stage='method_analysis')
-            
+           
             class_name = method_info.get('class_name', '')
             method_name = method_info.get('method_name', '')
-            
+           
             result = self.analyze_method(
                 method_info=method_info,
                 db_info=db_info or {},
@@ -407,7 +421,7 @@ class LLMService:
                 custom_system_prompt=custom_system_prompt,
                 custom_analysis_prompt=custom_analysis_prompt
             )
-            
+           
             # 保存结果
             self.save_result(
                 task_id=task_id,
@@ -417,126 +431,126 @@ class LLMService:
                 analysis_duration=result.get('duration', 0.0),
                 from_cache=result.get('from_cache', False)
             )
-            
+           
             self.update_task_status(task_id, 'completed', progress=1.0)
         except Exception as e:
             self.update_task_status(task_id, 'failed', error_message=str(e))
-    
-    def run_chain_task(
-        self,
-        task_id: str,
-        chain_data: Dict,
-        selected_methods: List[Dict],
-        direction: str = 'upwards',
-        baseline: str = '',
-        version: str = '',
-        force_fresh: bool = False,
-        custom_system_prompt: str = '',
-        custom_analysis_prompt: str = ''
-    ):
-        """后台执行链路分析任务（逐方法分析 + 聚合）"""
-        try:
-            total = len(selected_methods)
-            self.update_task_status(task_id, 'running', progress=0.05,
-                                    total_methods=total, completed_methods=0,
-                                    current_stage='method_analysis')
-            
-            sub_results = []
-            for idx, method_info in enumerate(selected_methods):
-                class_name = method_info.get('class_name', '')
-                method_name = method_info.get('method_name', '')
-                
-                try:
-                    result = self.analyze_method(
-                        method_info=method_info,
-                        db_info=method_info.get('db_info', {}),
-                        direction=direction,
-                        baseline=baseline,
-                        version=version,
-                        force_fresh=force_fresh,
-                        custom_system_prompt=custom_system_prompt,
-                        custom_analysis_prompt=custom_analysis_prompt
-                    )
-                    
-                    self.save_result(
-                        task_id=task_id,
-                        class_name=class_name,
-                        method_name=method_name,
-                        analysis_result=result['result'],
-                        analysis_duration=result.get('duration', 0.0),
-                        from_cache=result.get('from_cache', False),
-                        parent_task_id=task_id
-                    )
-                    
-                    sub_results.append({
-                        'class_name': class_name,
-                        'method_name': method_name,
-                        'result': result['result'],
-                        'from_cache': result.get('from_cache', False)
-                    })
-                except Exception as e:
-                    sub_results.append({
-                        'class_name': class_name,
-                        'method_name': method_name,
-                        'result': f"分析失败: {str(e)}",
-                        'from_cache': False,
-                        'error': str(e)
-                    })
-                
-                # 更新进度
-                completed = idx + 1
-                progress = 0.05 + (0.55 * completed / total)
-                self.update_task_status(task_id, 'running', progress=progress,
-                                        completed_methods=completed)
-            
-            # 阶段2：聚合分析
-            self.update_task_status(task_id, 'running', progress=0.65,
-                                    current_stage='aggregation')
-            
-            success_results = [r for r in sub_results if 'error' not in r]
-            if not success_results:
-                raise Exception("所有子方法分析均失败，无法进行聚合分析")
-            
-            # 构建聚合提示词
-            aggregation_prompt = self._build_chain_aggregation_prompt(
-                chain_data, direction, success_results,
-                custom_analysis_prompt,
-                baseline=baseline, version=version
-            )
-            system_prompt = custom_system_prompt or self._get_system_prompt('chain')
-            
-            start_time = time.time()
-            aggregation_result = self._call_llm_api(aggregation_prompt, system_prompt)
-            duration = time.time() - start_time
-            
-            # 保存聚合结果
-            mi = chain_data.get('method_info', {})
-            self.save_result(
-                task_id=task_id,
-                class_name=mi.get('class_name', ''),
-                method_name=mi.get('method_name', ''),
-                analysis_result=aggregation_result,
-                analysis_duration=duration,
-                from_cache=False
-            )
-            
-            # 保存到缓存
-            self._save_to_cache(
-                analysis_type='chain',
-                direction=direction,
-                baseline=baseline,
-                version=version,
-                class_name=mi.get('class_name', ''),
-                method_name=mi.get('method_name', ''),
-                change_type=mi.get('change_type', 'UNKNOWN'),
-                analysis_result=aggregation_result,
-                analysis_duration=duration
-            )
-            
-            self.update_task_status(task_id, 'completed', progress=1.0)
-        except Exception as e:
-            self.update_task_status(task_id, 'failed', error_message=str(e))
-    
+   
+    # def run_chain_task(
+    #     self,
+    #     task_id: str,
+    #     chain_data: Dict,
+    #     selected_methods: List[Dict],
+    #     direction: str = 'upwards',
+    #     baseline: str = '',
+    #     version: str = '',
+    #     force_fresh: bool = False,
+    #     custom_system_prompt: str = '',
+    #     custom_analysis_prompt: str = ''
+    # ):
+    #     """后台执行链路分析任务（逐方法分析 + 聚合）"""
+    #     try:
+    #         total = len(selected_methods)
+    #         self.update_task_status(task_id, 'running', progress=0.05,
+    #                                 total_methods=total, completed_methods=0,
+    #                                 current_stage='method_analysis')
+    #
+    #         sub_results = []
+    #         for idx, method_info in enumerate(selected_methods):
+    #             class_name = method_info.get('class_name', '')
+    #             method_name = method_info.get('method_name', '')
+    #
+    #             try:
+    #                 result = self.analyze_method(
+    #                     method_info=method_info,
+    #                     db_info=method_info.get('db_info', {}),
+    #                     direction=direction,
+    #                     baseline=baseline,
+    #                     version=version,
+    #                     force_fresh=force_fresh,
+    #                     custom_system_prompt=custom_system_prompt,
+    #                     custom_analysis_prompt=custom_analysis_prompt
+    #                 )
+    #
+    #                 self.save_result(
+    #                     task_id=task_id,
+    #                     class_name=class_name,
+    #                     method_name=method_name,
+    #                     analysis_result=result['result'],
+    #                     analysis_duration=result.get('duration', 0.0),
+    #                     from_cache=result.get('from_cache', False),
+    #                     parent_task_id=task_id
+    #                 )
+    #
+    #                 sub_results.append({
+    #                     'class_name': class_name,
+    #                     'method_name': method_name,
+    #                     'result': result['result'],
+    #                     'from_cache': result.get('from_cache', False)
+    #                 })
+    #             except Exception as e:
+    #                 sub_results.append({
+    #                     'class_name': class_name,
+    #                     'method_name': method_name,
+    #                     'result': f"分析失败: {str(e)}",
+    #                     'from_cache': False,
+    #                     'error': str(e)
+    #                 })
+    #
+    #             # 更新进度
+    #             completed = idx + 1
+    #             progress = 0.05 + (0.55 * completed / total)
+    #             self.update_task_status(task_id, 'running', progress=progress,
+    #                                     completed_methods=completed)
+    #
+    #         # 阶段2：聚合分析
+    #         self.update_task_status(task_id, 'running', progress=0.65,
+    #                                 current_stage='aggregation')
+    #
+    #         success_results = [r for r in sub_results if 'error' not in r]
+    #         if not success_results:
+    #             raise Exception("所有子方法分析均失败，无法进行聚合分析")
+    #
+    #         # 构建聚合提示词
+    #         aggregation_prompt = self._build_chain_aggregation_prompt(
+    #             chain_data, direction, success_results,
+    #             custom_analysis_prompt,
+    #             baseline=baseline, version=version
+    #         )
+    #         system_prompt = custom_system_prompt or self._get_system_prompt('chain')
+    #
+    #         start_time = time.time()
+    #         aggregation_result = self._call_llm_api(aggregation_prompt, system_prompt)
+    #         duration = time.time() - start_time
+    #
+    #         # 保存聚合结果
+    #         mi = chain_data.get('method_info', {})
+    #         self.save_result(
+    #             task_id=task_id,
+    #             class_name=mi.get('class_name', ''),
+    #             method_name=mi.get('method_name', ''),
+    #             analysis_result=aggregation_result,
+    #             analysis_duration=duration,
+    #             from_cache=False
+    #         )
+    #
+    #         # 保存到缓存
+    #         self._save_to_cache(
+    #             analysis_type='chain',
+    #             direction=direction,
+    #             baseline=baseline,
+    #             version=version,
+    #             class_name=mi.get('class_name', ''),
+    #             method_name=mi.get('method_name', ''),
+    #             change_type=mi.get('change_type', 'UNKNOWN'),
+    #             analysis_result=aggregation_result,
+    #             analysis_duration=duration
+    #         )
+    #
+    #         self.update_task_status(task_id, 'completed', progress=1.0)
+    #     except Exception as e:
+    #         self.update_task_status(task_id, 'failed', error_message=str(e))
+   
     def run_batch_method_task(
         self,
         task_id: str,
@@ -554,12 +568,16 @@ class LLMService:
             self.update_task_status(task_id, 'running', progress=0.05,
                                     total_methods=total, completed_methods=0,
                                     current_stage='method_analysis')
-            
+           
             for idx, method_info in enumerate(methods):
                 class_name = method_info.get('class_name', '')
                 method_name = method_info.get('method_name', '')
-                
+               
                 try:
+                    # 从数据库加载方法的完整代码信息，确保与单次分析提示词一致
+                    method_info = self._enrich_method_info_with_code(
+                        method_info, baseline, version
+                    )
                     result = self.analyze_method(
                         method_info=method_info,
                         db_info=method_info.get('db_info', {}),
@@ -570,7 +588,7 @@ class LLMService:
                         custom_system_prompt=custom_system_prompt,
                         custom_analysis_prompt=custom_analysis_prompt
                     )
-                    
+                   
                     self.save_result(
                         task_id=task_id,
                         class_name=class_name,
@@ -582,17 +600,230 @@ class LLMService:
                     )
                 except Exception as e:
                     print(f"[BATCH] 批量分析子方法失败 {class_name}.{method_name}: {e}")
-                
+               
                 # 更新进度
                 completed = idx + 1
                 progress = 0.05 + (0.9 * completed / total)
                 self.update_task_status(task_id, 'running', progress=progress,
                                         completed_methods=completed)
-            
+           
             self.update_task_status(task_id, 'completed', progress=1.0)
         except Exception as e:
             self.update_task_status(task_id, 'failed', error_message=str(e))
-    
+   
+    def _enrich_method_info_with_code(
+        self,
+        method_info: Dict,
+        baseline: str,
+        version: str
+    ) -> Dict:
+        """
+        从基线数据库加载方法的完整代码信息（baseline_code / current_code / 元数据），
+        填充到 method_info 中，确保批量分析与单次分析的提示词输入一致。
+
+        逻辑复用自 GET /analysis/method-code API，保证两路径的代码加载结果相同。
+        基线 DB 中 project 表记录每次分析：
+        - project_id=0: 基线版本代码
+        - project_id>0: 各差异版本代码
+        """
+        from jcci.utils.tag_utils import extract_short_tag
+        from app.config import settings as s
+
+        class_name = method_info.get('class_name', '')
+        method_name = method_info.get('method_name', '')
+        if not class_name or not method_name:
+            return method_info
+
+        result_dir = s.RESULT_DIR
+        baseline_short = extract_short_tag(baseline)
+
+        # 1) 定位基线数据库文件（复用 _fetch_method_bodies 的查找逻辑）
+        db_path = None
+        for candidate in [
+            os.path.join(result_dir, baseline_short, f"{baseline_short}_baseline.db"),
+            os.path.join(result_dir, baseline, f"{baseline}_baseline.db"),
+        ]:
+            if os.path.exists(candidate):
+                db_path = candidate
+                break
+
+        if not db_path:
+            suffix = '_' + baseline_short
+            for item in sorted(os.listdir(result_dir)):
+                if item.endswith(suffix) and os.path.isdir(os.path.join(result_dir, item)):
+                    db_candidate = os.path.join(result_dir, item, f"{item}_baseline.db")
+                    if os.path.exists(db_candidate):
+                        db_path = db_candidate
+                        break
+
+        if not db_path:
+            print(f"[BATCH] 无法找到基线DB: baseline={baseline}, version={version}")
+            return method_info
+
+        # 2) 处理类名（支持全限定名 → 短类名 + 包名）
+        short_class_name = class_name
+        package_name = ''
+        if '.' in class_name:
+            parts = class_name.rsplit('.', 1)
+            package_name = parts[0]
+            short_class_name = parts[1]
+
+        # 3) 查询数据库获取基线/版本代码
+        try:
+            conn = sqlite3.connect(db_path)
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
+
+            baseline_commit = extract_short_tag(baseline)
+            version_commit = extract_short_tag(version)
+
+            # 查找版本 project_id
+            cursor.execute('''
+                SELECT project_id FROM project
+                WHERE commit_or_branch_new = ? AND commit_or_branch_old = ?
+                LIMIT 1
+            ''', (version_commit, baseline_commit))
+            version_proj = cursor.fetchone()
+            version_project_id = version_proj['project_id'] if version_proj else None
+
+            # 查找基线 project_id
+            cursor.execute('''
+                SELECT project_id FROM project
+                WHERE commit_or_branch_new = ? AND commit_or_branch_old = ?
+                LIMIT 1
+            ''', (baseline_commit, baseline_commit))
+            baseline_proj = cursor.fetchone()
+            baseline_project_id = baseline_proj['project_id'] if baseline_proj else 0
+
+            # 辅助：按包名查询方法（返回所有行，用于处理过载方法）
+            def _query_method(cursor, short_cls, pkg, mtd, proj_id):
+                if pkg:
+                    cursor.execute('''
+                        SELECT m.body, m.annotations, m.access_modifier,
+                               m.return_type, m.parameters, m.change_type
+                        FROM methods m
+                        JOIN class c ON m.class_id = c.class_id
+                        WHERE c.class_name = ? AND c.package_name = ?
+                          AND m.method_name = ? AND m.project_id = ?
+                    ''', (short_cls, pkg, mtd, proj_id))
+                else:
+                    cursor.execute('''
+                        SELECT m.body, m.annotations, m.access_modifier,
+                               m.return_type, m.parameters, m.change_type
+                        FROM methods m
+                        JOIN class c ON m.class_id = c.class_id
+                        WHERE c.class_name = ? AND m.method_name = ?
+                          AND m.project_id = ?
+                    ''', (short_cls, mtd, proj_id))
+                return cursor.fetchall()
+
+            # 辅助：从 parameters JSON 提取参数类型列表
+            def _extract_param_types(parameters_json):
+                if not parameters_json:
+                    return []
+                try:
+                    params_list = json.loads(parameters_json) if isinstance(parameters_json, str) else parameters_json
+                    if not isinstance(params_list, list):
+                        return []
+                    return [p.get('parameter_type', '') for p in params_list if isinstance(p, dict)]
+                except (json.JSONDecodeError, TypeError):
+                    return []
+
+            # 辅助：匹配参数类型列表
+            def _match_param_types(sig_types, db_types):
+                if len(sig_types) != len(db_types):
+                    return False
+                for st, dt in zip(sig_types, db_types):
+                    if st == dt:
+                        continue
+                    st_short = st.rsplit('.', 1)[-1] if '.' in st else st
+                    dt_short = dt.rsplit('.', 1)[-1] if '.' in dt else dt
+                    if st_short == dt_short:
+                        continue
+                    return False
+                return True
+
+            # 辅助：按 change_type 匹配（用于版本项目中定位过载方法）
+            def _match_row_by_change_type(rows, target_type):
+                for row in rows:
+                    if row['change_type'] == target_type:
+                        return row
+                return None
+
+            # 辅助：按参数类型匹配
+            def _match_row_by_params(rows, param_types):
+                if not param_types:
+                    return None
+                for row in rows:
+                    db_types = _extract_param_types(row['parameters'] or '')
+                    if _match_param_types(param_types, db_types):
+                        return row
+                return None
+
+            # 辅助：将 body 解析为代码行字符串
+            def _parse_body(body_val):
+                if not body_val:
+                    return ''
+                body_lines = json.loads(body_val) if isinstance(body_val, str) else (body_val or [])
+                if isinstance(body_lines, list):
+                    return '\n'.join(body_lines)
+                return str(body_lines) if body_lines else ''
+
+            # ── 查询版本代码 ──
+            version_row_selected = None
+            version_rows = _query_method(cursor, short_class_name, package_name,
+                                         method_name, version_project_id) \
+                if version_project_id is not None and version_project_id != baseline_project_id else []
+
+            if version_rows:
+                if len(version_rows) == 1:
+                    version_row_selected = version_rows[0]
+                else:
+                    # 过载方法：按 change_type 匹配
+                    target_ct = method_info.get('change_type', '')
+                    version_row_selected = _match_row_by_change_type(version_rows, target_ct) or version_rows[0]
+
+            # ── 查询基线代码 ──
+            baseline_row_selected = None
+            baseline_rows = _query_method(cursor, short_class_name, package_name,
+                                          method_name, baseline_project_id)
+
+            if baseline_rows:
+                if len(baseline_rows) == 1:
+                    baseline_row_selected = baseline_rows[0]
+                elif version_row_selected:
+                    # 过载方法：用版本行参数类型在基线中匹配
+                    version_param_types = _extract_param_types(version_row_selected['parameters'] or '')
+                    baseline_row_selected = _match_row_by_params(baseline_rows, version_param_types) or baseline_rows[0]
+                else:
+                    baseline_row_selected = baseline_rows[0]
+
+            # ── 提取字段 ──
+            baseline_code = _parse_body(baseline_row_selected['body']) if baseline_row_selected else ''
+            annotations = baseline_row_selected['annotations'] or '' if baseline_row_selected else ''
+            access_modifier = baseline_row_selected['access_modifier'] or '' if baseline_row_selected else ''
+            return_type = baseline_row_selected['return_type'] or '' if baseline_row_selected else ''
+            parameters = baseline_row_selected['parameters'] or '' if baseline_row_selected else ''
+
+            current_code = _parse_body(version_row_selected['body']) if version_row_selected else ''
+            if not version_rows:
+                current_code = baseline_code
+
+            conn.close()
+
+            # 4) 填充到 method_info
+            method_info['baseline_code'] = baseline_code
+            method_info['current_code'] = current_code
+            method_info['annotations'] = annotations
+            method_info['access_modifier'] = access_modifier
+            method_info['return_type'] = return_type
+            method_info['parameters'] = parameters
+
+        except Exception as e:
+            print(f"[BATCH] 加载方法代码失败 {class_name}.{method_name}: {e}")
+
+        return method_info
+
     def _build_chain_aggregation_prompt(
         self,
         chain_data: Dict,
@@ -611,12 +842,15 @@ class LLMService:
             return "{}\n\n以下是对调用链中各个方法的分析结果，请基于这些结果进行汇总分析：\n\n{}".format(
                 custom_prompt, methods_text)
 
+
         mi = chain_data.get('method_info', {})
         class_name = mi.get('class_name', '')
         method_name = mi.get('method_name', '')
         direction_cn = '向上（影响面评估）' if direction == 'upwards' else '向下（功能风险评估）'
 
+
         prompt = f"""请基于以下完整的调用链信息和各方法的 LLM 分析结果进行聚合分析：
+
 
 【分析任务】
 - 方向: {direction_cn}
@@ -624,12 +858,14 @@ class LLMService:
 - 变更类型: {mi.get('change_type', 'UNKNOWN')}
 """
 
+
         # 第一部分：调用链完整拓扑
         full_chain = None
         entry_points = []
         if baseline and version:
             full_chain = self._load_chain_from_disk(
                 baseline, version, direction, class_name, method_name)
+
 
         if full_chain:
             chain_tree = full_chain.get('chain_tree')
@@ -643,8 +879,10 @@ class LLMService:
 【调用链完整拓扑】
 （缩进表示调用深度，箭头表示调用方向，行号来自源码调用点）
 
+
 {topology_text}
 """
+
 
         # 第二部分：入口点分类
         if direction == 'upwards' and entry_points:
@@ -662,6 +900,7 @@ class LLMService:
             for rt, eps in sorted(entry_by_type.items()):
                 label = entry_type_labels.get(rt, rt)
                 prompt += f"{label}: {len(eps)} 个\n"
+
 
         # 第三部分：方法源码
         if full_chain and full_chain.get('chain_tree'):
@@ -681,11 +920,13 @@ class LLMService:
                     ct_tag = ct_map.get(m['change_type'], '')
                     prompt += f"\n### {key} {ct_tag}\n```java\n{body.get('body', '')[:1500]}\n```\n"
 
+
         # 第四部分：子方法 LLM 分析结果
         prompt += "\n【各方法 LLM 分析结果】\n"
         for i, r in enumerate(sub_results[:12], 1):
             cache_mark = '缓存' if r.get('from_cache') else '全新'
             prompt += f"\n### {i}. {r['class_name']}.{r['method_name']} ({cache_mark})\n{r['result'][:2000]}\n"
+
 
         # 第五部分：聚合分析要求
         if direction == 'upwards':
@@ -693,26 +934,32 @@ class LLMService:
 【聚合分析要求】
 **重要：请在你的汇总报告最开头，首先输出【调用链路图谱】章节——直接引用上文【调用链完整拓扑】中的图谱结构（可简化为 类名.方法名 格式，保留缩进层次和箭头方向），作为用户对照的基准。然后再按以下要求进行汇总：**
 
+
 请结合以上的链拓扑、方法源码和子方法分析结果，从架构视角进行汇总：
+
 
 1. **综合影响面评估**
    - 按入口点类型分类评估（HTTP API、定时任务、消息队列等）
    - 区分 DIRECT 调用和 CHA 推断的置信度差异
    - 识别级联影响（A->B->C 链式影响）
 
+
 2. **跨方法影响矩阵**
    - 各变更方法之间的相互影响关系
    - 新增方法 vs 修改方法的不同风险特征
+
 
 3. **整体风险评级**
    - 按入口点给出风险评级（高/中/低）及依据
    - 标注需要人工确认的 CHA 推断路径
    - 上线建议（全量/灰度/回滚策略）
 
+
 4. **端到端测试策略**
    - 按入口点设计核心测试场景（含输入/预期/优先级）
    - 跨服务的集成测试要点
    - 监控和告警指标建议
+
 
 5. **上线检查清单**
    - 代码审查要点
@@ -720,34 +967,43 @@ class LLMService:
    - 数据库变更（DDL/DML）验证
    - 回滚方案
 
+
 请使用中文回答，综合所有信息给出完整、可执行的汇总分析。"""
         else:
             prompt += """
 【聚合分析要求】
 **重要：请在你的汇总报告最开头，首先输出【调用链路图谱】章节——直接引用上文【调用链完整拓扑】中的图谱结构（可简化为 类名.方法名 格式，保留缩进层次和箭头方向），作为用户对照的基准。然后再按以下要求进行汇总：**
 
+
 请结合以上的链拓扑、方法源码和子方法分析结果进行汇总：
+
 
 1. **综合功能风险评估**
    - 下游调用链的整体风险画像
    - SQL 操作的风险汇总（表、类型、性能影响）
 
+
 2. **级联影响分析**
    - 变更方法对下游方法的逐层影响
    - 异常传播路径分析
 
+
 3. **整体风险评级**（高/中/低）及依据
+
 
 4. **端到端测试策略**
    - 从变更方法到末端方法的完整测试场景
    - SQL 验证策略
 
+
 5. **上线检查清单**
+
 
 请使用中文回答。"""
 
+
         return prompt
-    
+   
     def analyze_method(
         self,
         method_info: Dict,
@@ -761,7 +1017,7 @@ class LLMService:
     ) -> Dict:
         """
         分析单个方法的变更和测试建议
-        
+       
         Args:
             method_info: 方法信息字典
             db_info: 数据库补充信息
@@ -771,14 +1027,14 @@ class LLMService:
             force_fresh: 是否强制全新分析
             custom_system_prompt: 自定义系统提示词
             custom_analysis_prompt: 自定义分析提示词
-            
+           
         Returns:
             分析结果字典（含 duration）
         """
         change_type = method_info.get('change_type', 'UNKNOWN')
         class_name = method_info.get('class_name', '')
         method_name = method_info.get('method_name', '')
-        
+       
         # 尝试从缓存获取
         if not force_fresh:
             cached = self._get_from_cache('method', direction, baseline, version,
@@ -794,7 +1050,6 @@ class LLMService:
                         'analysis_duration': cached['analysis_duration']
                     }
                 }
-        
         # 如果提供了 baseline 和 version，从数据库获取方法源码
         source_code = None
         if baseline and version:
@@ -804,20 +1059,25 @@ class LLMService:
                 'class_name': short_class,
                 'method_name': method_name
             }]).get(f"{short_class}.{method_name}")
-        
+       
         # 构建提示词
-        prompt = custom_analysis_prompt or self._build_method_prompt(method_info, db_info, source_code)
-        system_prompt = custom_system_prompt or self._get_system_prompt('method')
-        
+        # prompt = custom_analysis_prompt or self._build_method_prompt(method_info, db_info, source_code)
+        prompt =  self._build_method_prompt(method_info, db_info, source_code)
+        # print(f"prompt：{prompt}")
+        # system_prompt = custom_system_prompt or self._get_system_prompt('method')
+        system_prompt = self._get_system_prompt('method')
+        # print(f"system_prompt：{system_prompt}")
+
+       
         # 调用 LLM API
         start_time = time.time()
         result = self._call_llm_api(prompt, system_prompt)
         duration = time.time() - start_time
-        
+       
         # 检测 API 错误响应（非异常但返回了错误文本）
         if result.startswith('请求异常') or result.startswith('API调用失败'):
             raise Exception(result)
-        
+       
         # 保存到缓存
         self._save_to_cache(
             analysis_type='method',
@@ -830,14 +1090,14 @@ class LLMService:
             analysis_result=result,
             analysis_duration=duration
         )
-        
+       
         return {
             'result': result,
             'from_cache': False,
             'duration': duration,
             'cache_info': None
         }
-    
+   
     def analyze_chain(
         self,
         chain_data: Dict,
@@ -850,7 +1110,7 @@ class LLMService:
     ) -> Dict:
         """
         分析整个调用链的影响和风险
-        
+       
         Args:
             chain_data: 调用链数据字典
             direction: 分析方向
@@ -859,16 +1119,16 @@ class LLMService:
             force_fresh: 是否强制全新分析
             custom_system_prompt: 自定义系统提示词
             custom_analysis_prompt: 自定义分析提示词
-            
+           
         Returns:
             分析结果字典
         """
         method_info = chain_data.get('method_info', {})
-        
+       
         class_name = method_info.get('class_name', '')
         method_name = method_info.get('method_name', '')
         change_type = method_info.get('change_type', 'UNKNOWN')
-        
+       
         # 尝试从缓存获取
         if not force_fresh:
             cached = self._get_from_cache('chain', direction, baseline, version,
@@ -884,20 +1144,20 @@ class LLMService:
                         'analysis_duration': cached['analysis_duration']
                     }
                 }
-        
+       
         # 构建提示词
         prompt = custom_analysis_prompt or self._build_chain_prompt(chain_data, direction, baseline, version)
         system_prompt = custom_system_prompt or self._get_system_prompt('chain')
-        
+       
         # 调用 LLM API
         start_time = time.time()
         result = self._call_llm_api(prompt, system_prompt)
         duration = time.time() - start_time
-        
+       
         # 检测 API 错误响应（非异常但返回了错误文本）
         if result.startswith('请求异常') or result.startswith('API调用失败'):
             raise Exception(result)
-        
+       
         # 保存到缓存
         self._save_to_cache(
             analysis_type='chain',
@@ -910,14 +1170,14 @@ class LLMService:
             analysis_result=result,
             analysis_duration=duration
         )
-        
+       
         return {
             'result': result,
             'from_cache': False,
             'duration': duration,
             'cache_info': None
         }
-    
+   
     def _get_from_cache(
         self,
         analysis_type: str,
@@ -933,11 +1193,11 @@ class LLMService:
             conn = sqlite3.connect(settings.DB_PATH)
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
-            
+           
             cursor.execute("""
                 SELECT analysis_result, created_at, model_name, analysis_duration
                 FROM llm_analysis_cache
-                WHERE analysis_type = ? 
+                WHERE analysis_type = ?
                   AND direction = ?
                   AND baseline = ?
                   AND version = ?
@@ -948,17 +1208,17 @@ class LLMService:
                 LIMIT 1
             """, (analysis_type, direction, baseline, version,
                   class_name, method_name, change_type))
-            
+           
             row = cursor.fetchone()
             conn.close()
-            
+           
             if row:
                 return dict(row)
             return None
         except Exception as e:
             print(f"查询缓存失败: {e}")
             return None
-    
+   
     def _save_to_cache(
         self,
         analysis_type: str,
@@ -975,11 +1235,11 @@ class LLMService:
         try:
             conn = sqlite3.connect(settings.DB_PATH)
             cursor = conn.cursor()
-            
+           
             cursor.execute("""
-                INSERT OR REPLACE INTO llm_analysis_cache 
+                INSERT OR REPLACE INTO llm_analysis_cache
                 (analysis_type, direction, baseline, version,
-                 class_name, method_name, 
+                 class_name, method_name,
                  change_type, analysis_result, model_name, analysis_duration,
                  is_fresh_analysis, updated_at)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, CURRENT_TIMESTAMP)
@@ -988,12 +1248,12 @@ class LLMService:
                 class_name, method_name,
                 change_type, analysis_result, self.model, analysis_duration
             ))
-            
+           
             conn.commit()
             conn.close()
         except Exception as e:
             print(f"保存缓存失败: {e}")
-    
+   
     def _load_chain_from_disk(
         self, baseline: str, version: str, direction: str,
         class_name: str, method_name: str
@@ -1004,6 +1264,7 @@ class LLMService:
         from app.config import settings as s
         result_dir = s.RESULT_DIR
 
+
         # 尝试直接路径
         data_dir = os.path.join(result_dir, baseline, version)
         data = None
@@ -1012,6 +1273,7 @@ class LLMService:
                 data = load_call_chains_json_from_dir(data_dir, direction)
             except FileNotFoundError:
                 pass
+
 
         # 尝试短标签路径
         if data is None:
@@ -1024,15 +1286,16 @@ class LLMService:
                 except FileNotFoundError:
                     pass
 
+
         if data is None:
             return None
-    
+   
         # 查找匹配的链
         chains_key = 'impact_chains' if direction == 'upwards' else 'call_chains'
         if chains_key not in data:
             chains_key = 'dependency_chains'
         chains = data.get(chains_key, [])
-    
+   
         for chain in chains:
             mi = chain.get('method_info', {})
             if mi.get('class_name') == class_name and mi.get('method_name') == method_name:
@@ -1044,17 +1307,17 @@ class LLMService:
                     'method_signature': chain.get('method_signature', ''),
                     'has_incomplete_paths': chain.get('has_incomplete_paths', False)
                 }
-    
+   
         return None
-    
+   
     def _collect_chain_methods(self, node: Dict, collected: Optional[set] = None) -> List[Dict]:
         """递归收集链树中所有唯一方法（按深度排序）"""
         if collected is None:
             collected = set()
-    
+   
         if not node:
             return []
-    
+   
         results = []
         key = (node.get('class_name', ''), node.get('method_name', ''))
         if key not in collected and key[0] and key[1]:
@@ -1071,12 +1334,12 @@ class LLMService:
                 'db_method_id': node.get('db_method_id'),
                 'dao_info': node.get('dao_info')
             })
-    
+   
         for child in node.get('children', []):
             results.extend(self._collect_chain_methods(child, collected))
-    
+   
         return sorted(results, key=lambda m: m['depth'])
-    
+   
     def _format_chain_topology(
         self, node: Dict, direction: str, lines: list, depth: int = 0,
         is_root: bool = True, parent_info: Optional[Dict] = None
@@ -1084,7 +1347,7 @@ class LLMService:
         """递归格式化链树拓扑为结构化文本"""
         if not node:
             return
-    
+   
         class_name = node.get('class_name', '?')
         method_sig = node.get('method_signature', node.get('method_name', '?'))
         change_type = node.get('change_type', 'UNKNOWN')
@@ -1093,39 +1356,39 @@ class LLMService:
         inv_lines = node.get('invocation_lines', [])
         is_leaf = node.get('is_leaf', False)
         dao_info = node.get('dao_info')
-    
+   
         indent = '  ' * depth
-    
+   
         # 调用类型标记
         call_tag = ''
         if call_type == 'CHA_RESOLVED':
             call_tag = ' [CHA推断]'
         elif call_type == 'DIRECT':
             call_tag = ''
-    
+   
         # 变更类型标记
         ct_map = {'ADDED': '[新增]', 'MODIFIED': '[修改]', 'DELETED': '[删除]', 'UNCHANGED': ''}
         ct_tag = ct_map.get(change_type, '')
-    
+   
         # 行号
         line_info = ''
         if inv_lines:
             line_str = ','.join(str(line) for line in inv_lines[:3])
             line_info = f' (行{line_str})'
-    
+   
         # 构建节点行
         if is_root:
             lines.append(f"{indent}▼ {class_name}.{method_sig} {ct_tag} [变更方法]")
         else:
             arrow = '↑ called by' if direction == 'upwards' else '↓ calls'
             lines.append(f"{indent}{arrow} {class_name}.{method_sig} {ct_tag}{call_tag}{line_info}")
-    
+   
         # SQL 节点特殊标注
         if dao_info and isinstance(dao_info, dict) and dao_info.get('sql_type'):
             sql_type = dao_info.get('sql_type', '?').upper()
             tables = ', '.join(dao_info.get('tables', []))
             lines.append(f"{indent}  └─ [SQL: {sql_type}] 表: {tables or 'N/A'}")
-    
+   
         # 入口/叶子标记
         if is_leaf and not is_root:
             if direction == 'upwards':
@@ -1139,24 +1402,24 @@ class LLMService:
             else:
                 leaf_label = 'SQL操作' if dao_info else '末端方法'
                 lines.append(f"{indent}  └─ [LEAF: {leaf_label}]")
-    
+   
         # 递归子节点
         for child in node.get('children', []):
             self._format_chain_topology(child, direction, lines, depth + 1, is_root=False, parent_info=node)
-    
+   
     def _fetch_method_bodies(
         self, baseline: str, version: str, methods: List[Dict]
     ) -> Dict[str, Dict]:
         """批量从数据库获取方法的源码和元信息"""
         if not methods:
             return {}
-    
+   
         from app.config import settings as s
         result_dir = s.RESULT_DIR
         from jcci.utils.tag_utils import extract_short_tag
-    
+   
         baseline_short = extract_short_tag(baseline)
-        
+       
         # 查找数据库文件
         db_path = None
         for candidate in [
@@ -1166,7 +1429,7 @@ class LLMService:
             if os.path.exists(candidate):
                 db_path = candidate
                 break
-    
+   
         if not db_path:
             # 扫描带项目前缀的目录
             suffix = '_' + baseline_short
@@ -1177,16 +1440,16 @@ class LLMService:
                     if os.path.exists(db_candidate):
                         db_path = db_candidate
                         break
-    
+   
         if not db_path:
             return {}
-    
+   
         result = {}
         try:
             conn = sqlite3.connect(db_path)
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
-    
+   
             for m in methods:
                 class_name = m.get('class_name', '')
                 if not class_name:
@@ -1195,7 +1458,7 @@ class LLMService:
                 if not method_name:
                     continue
                 key = f"{class_name}.{method_name}"
-    
+   
                 cursor.execute('''
                     SELECT m.body, m.annotations, m.parameters, m.return_type,
                            m.access_modifier, m.change_type, c.class_name
@@ -1205,7 +1468,7 @@ class LLMService:
                     LIMIT 1
                 ''', (class_name, method_name))
                 row = cursor.fetchone()
-    
+   
                 if row:
                     body_lines = self._parse_body(row['body'])
                     # 限制每方法源码最多 80 行，避免上下文溢出
@@ -1220,13 +1483,13 @@ class LLMService:
                         'access_modifier': row['access_modifier'] or '',
                         'change_type': row['change_type'] or 'UNCHANGED'
                     }
-    
+   
             conn.close()
         except Exception as e:
             print(f"[CHAIN] 批量获取方法源码失败: {e}")
-    
+   
         return result
-    
+   
     @staticmethod
     def _parse_body(body) -> list:
         """解析 DB body 字段为行列表"""
@@ -1236,7 +1499,7 @@ class LLMService:
             return json.loads(body) if isinstance(body, str) else body
         except (json.JSONDecodeError, TypeError):
             return [body] if isinstance(body, str) else []
-    
+   
     def _build_method_prompt(self, method_info: Dict, db_info: Dict, source_code: Dict = None) -> str:
         """构建方法分析提示词（六部分结构化输出）"""
         change_type = method_info.get('change_type', 'UNKNOWN')
@@ -1264,14 +1527,17 @@ class LLMService:
         else:
             params_str = str(parameters) if parameters else '(无参数)'
 
+
         # 多版本类名
         full_class_name = db_info.get('package_name', '') + '.' + class_name.split('.')[-1] if db_info.get('package_name') else class_name
+
 
         # 构建代码版本信息
         baseline_code = method_info.get('baseline_code', '')
         current_code = method_info.get('current_code', '')
         baseline_label = method_info.get('baseline_version', '基线版本')
         current_label = method_info.get('current_version', '目标版本')
+
 
         # 根据变更类型构建变更前/后代码段
         if change_type == 'ADDED':
@@ -1288,6 +1554,7 @@ class LLMService:
             before_code_block = f'【变更前代码（{baseline_label}）】\n```java\n{baseline_code or source_code.get("body", "") if source_code else ""}\n```'
             after_code_block = f'【变更后代码（{current_label}）】\n```java\n{current_code or source_code.get("body", "") if source_code else ""}\n```'
 
+
         # 构建代码输入段
         if change_type == 'ADDED':
             code_input = f'{after_code_block}\n\n【变更前代码】\n{before_code}'
@@ -1298,8 +1565,10 @@ class LLMService:
         else:
             code_input = f'{before_code_block}\n\n{after_code_block}'
 
+
         prompt = f"""# 角色与任务
 你是一名资深Java开发工程师及代码审计专家。请根据我提供的"变更前代码"与"变更后代码"，生成一份专业、结构化、可直接用于技术评审或发布说明的《变更前后代码对比与分析报告》。
+
 
 # 输入格式
 请严格基于以下输入内容进行分析：
@@ -1309,22 +1578,28 @@ class LLMService:
 - 变更前版本号: {baseline_label}
 - 变更后版本号: {current_label}
 
+
 {code_input}
 
+
 # 输出要求（严格按以下六部分结构输出，使用Markdown格式）
+
 
 ## 一、代码说明
 - 分别展示变更前/后代码（使用Java代码块）。
 - 关键要求：为代码添加逐逻辑块的详细注释，采用"步骤编号+核心逻辑说明"格式（如：// 1. 按发票币种分组并求和...），确保非原作者也能快速理解执行流与数据走向。
+
 
 ## 二、代码差异对比表
 - 使用Markdown表格，列名固定为：变更点 | 变更前代码 | 变更后代码 | 说明
 - 表格内容需提炼核心差异（如：币种处理、校验逻辑、计算方式、复杂度等），语言精炼。
 - 表格后附一段"核心逻辑差异总结"（3-4句话，点明业务/技术层面的本质变化）。
 
+
 ## 三、逻辑流程图对比
 - 分别绘制变更前/后的逻辑流程图。
 - 格式要求：使用纯文本/ASCII字符绘制，采用箭头(↓, →, ↓ 是 ↓ 否)表示流程走向，保持简洁清晰，避免复杂图形或换行混乱。
+
 
 ## 四、逻辑差异详解
 - 分点阐述（建议3-5点），需覆盖：
@@ -1334,16 +1609,19 @@ class LLMService:
   4. 潜在依赖或前置条件变化（如：上游数据格式假设、外部服务调用变更）
 - 语言需专业、精准，避免主观臆断，基于代码事实分析。若涉及未明确的外部依赖，需合理推断并标注"基于代码上下文推断"。
 
+
 ## 五、测试场景建议
 - 提供两个Markdown表格：功能案例场景 与 流程案例场景。
 - 列名固定：测试点 | 预期结果 | 备注
 - 覆盖维度：正常场景、异常场景、边界场景、流程完整性、数据一致性。
 - 测试点描述需具体可执行（如："正常场景：单币种核销"而非"测试正常情况"），预期结果需明确可验证。
 
+
 ## 六、总结
 - 结构化输出：
   1. 变更影响：分"优点/收益"与"潜在风险/依赖"
   2. 实施建议：给出3条可落地的建议（如：数据验证、单元测试覆盖、回滚预案、上下游协同等）
+
 
 # 约束与风格要求
 - 严格遵循上述六部分结构，不增删章节，不添加额外寒暄。
@@ -1351,8 +1629,9 @@ class LLMService:
 - 所有表格、代码块、流程图必须符合Markdown规范，排版整洁。
 - 直接输出报告内容，无需解释生成过程。"""
 
+
         return prompt
-    
+   
     def _build_chain_prompt(
         self, chain_data: Dict, direction: str,
         baseline: str = '', version: str = ''
@@ -1362,9 +1641,12 @@ class LLMService:
         class_name = method_info.get('class_name', '')
         method_name = method_info.get('method_name', '')
 
+
         direction_cn = '向上（影响面评估）' if direction == 'upwards' else '向下（功能风险评估）'
 
+
         prompt = f"""请基于以下完整的调用链信息进行{'向上' if direction == 'upwards' else '向下'}链路分析：
+
 
 【分析任务】
 - 方向: {direction_cn}
@@ -1372,17 +1654,21 @@ class LLMService:
 - 变更类型: {method_info.get('change_type', 'UNKNOWN')}
 """
 
+
         # ── 第一部分：调用链完整拓扑 ──
         full_chain = None
         entry_points = []
+
 
         if baseline and version:
             full_chain = self._load_chain_from_disk(
                 baseline, version, direction, class_name, method_name)
 
+
         if full_chain:
             chain_tree = full_chain.get('chain_tree')
             entry_points = full_chain.get('entry_points', [])
+
 
             if chain_tree:
                 topology_lines = []
@@ -1393,8 +1679,10 @@ class LLMService:
 【调用链完整拓扑】
 （缩进表示调用深度，箭头表示调用方向，行号来自源码中的调用点）
 
+
 {topology_text}
 """
+
 
         # ── 第二部分：入口/出口点分类 ──
         if direction == 'upwards' and entry_points:
@@ -1403,12 +1691,14 @@ class LLMService:
                 rt = ep.get('root_type', 'UNKNOWN')
                 entry_by_type.setdefault(rt, []).append(ep)
 
+
             entry_type_labels = {
                 'HTTP_API': 'HTTP API端点', 'SCHEDULED_TASK': '定时任务',
                 'EVENT_LISTENER': '事件监听器', 'MESSAGE_CONSUMER': '消息队列消费者',
                 'CONTROLLER_BY_CONVENTION': 'Controller（约定）',
                 'NO_STATIC_CALLER': '无静态调用者（可能是动态调用）'
             }
+
 
             prompt += f"\n【入口点分类汇总】(共 {len(entry_points)} 个)\n"
             for rt, eps in sorted(entry_by_type.items()):
@@ -1421,11 +1711,13 @@ class LLMService:
                 if len(eps) > 5:
                     prompt += f"  ... 还有 {len(eps) - 5} 个\n"
 
+
         elif direction == 'downwards' and full_chain:
             chain_tree = full_chain.get('chain_tree')
             if chain_tree:
                 total_nodes = len(self._collect_chain_methods(chain_tree))
                 prompt += f"\n【链路规模】\n- 总节点数: {total_nodes}\n"
+
 
         # ── 第三部分：链路中各方法源码 ──
         if full_chain and full_chain.get('chain_tree'):
@@ -1434,10 +1726,13 @@ class LLMService:
             changed = [m for m in chain_methods if m['change_type'] != 'UNCHANGED']
             unchanged = [m for m in chain_methods if m['change_type'] == 'UNCHANGED']
 
+
             # 限制总数避免上下文溢出
             methods_to_show = changed + unchanged[:max(0, 15 - len(changed))]
 
+
             bodies = self._fetch_method_bodies(baseline, version, methods_to_show)
+
 
             if bodies:
                 prompt += "\n【链路中各方法详情】\n"
@@ -1447,9 +1742,11 @@ class LLMService:
                     if not body:
                         continue
 
+
                     sig = m.get('method_signature', m['method_name'])
                     ct_map = {'ADDED': '[新增]', 'MODIFIED': '[修改]', 'DELETED': '[删除]', 'UNCHANGED': ''}
                     ct_tag = ct_map.get(m['change_type'], '')
+
 
                     prompt += f"\n### {key}.{sig} {ct_tag} (深度={m['depth']})\n"
                     if body.get('annotations'):
@@ -1464,26 +1761,31 @@ class LLMService:
                           f"{entry.get('package_class', 'N/A')}."
                           f"{entry.get('method_signature', 'N/A')}\n")
 
+
         # ── 第四部分：分析要求 ──
         if direction == 'upwards':
             prompt += """
 【分析要求】
 **重要：请在你的分析报告最开头，首先输出【调用链路图谱】章节——直接引用上文【调用链完整拓扑】中的图谱结构（可简化为 类名.方法名 格式，保留缩进层次和箭头方向），作为用户对照的基准。然后再按以下要求逐层分析：**
 
+
 1. **调用链路逐层分析**
    - 从入口点到变更方法的每一层调用中，变更如何传递影响
    - CHA推断的调用注明不确定性
    - 识别间接影响的模块和功能
+
 
 2. **入口点影响面**
    - 每个入口 API / 定时任务 / 事件监听器受到的具体影响
    - 对外部调用方（前端、第三方）的兼容性影响
    - 如果入口方法本身有变更，重点分析 API 契约变化
 
+
 3. **数据流与状态变化追踪**
    - 参数在各层方法间如何传递和变换
    - 数据库操作的影响（表、SQL类型、事务范围）
    - 缓存、消息队列等中间件的级联影响
+
 
 4. **风险评估（按入口点分组）**
    - 高风险变更（数据破坏、资金安全、权限绕过）
@@ -1491,10 +1793,12 @@ class LLMService:
    - 低风险变更（内部实现调整）
    - CHA推断的调用注明风险置信度
 
+
 5. **端到端测试策略**
    - 按入口点分别设计测试场景（含输入、预期、优先级）
    - 回归测试清单（受影响的核心链路）
    - 性能测试建议（如涉及SQL变更）
+
 
 请使用中文回答，结合源码细节给出具体可执行的分析。"""
         else:
@@ -1502,41 +1806,50 @@ class LLMService:
 【分析要求】
 **重要：请在你的分析报告最开头，首先输出【调用链路图谱】章节——直接引用上文【调用链完整拓扑】中的图谱结构（可简化为 类名.方法名 格式，保留缩进层次和箭头方向），作为用户对照的基准。然后再按以下要求分析：**
 
+
 请基于以上完整的调用链拓扑和源码，分析变更方法向下调用链的功能风险：
+
 
 1. **调用链路逐层分析**
    - 从变更方法到末端方法的每一层调用关系和功能
    - 识别关键的依赖节点和SQL操作
    - CHA推断的调用注明不确定性
 
+
 2. **下游影响评估**
    - 各下游方法的变更影响（数据修改、异常传播）
    - SQL操作的风险（表变更、性能、数据一致性）
    - 外部依赖（RPC、HTTP调用、消息队列）的稳定性
+
 
 3. **数据流追踪**
    - 变更方法的返回值如何被下游使用
    - 数据库读写链路和事务边界
    - 可能的副作用（缓存更新、事件发布）
 
+
 4. **风险评估**
    - 高风险：N+1查询、大事务、无WHERE的UPDATE/DELETE
    - 中风险：异常未处理、缓存不一致
    - 低风险：日志、审计等辅助功能
+
 
 5. **测试策略**
    - 各下游方法的单元/集成测试场景设计
    - SQL验证（执行计划、锁、回滚）
    - 性能基准测试建议
 
+
 请使用中文回答，结合源码细节给出具体可执行的分析。"""
 
+
         return prompt
-    
+   
     def _get_system_prompt(self, analysis_type: str) -> str:
         """获取系统提示词"""
         if analysis_type == 'method':
             return """你是一名资深Java开发工程师及代码审计专家。请根据提供的变更前/后代码，生成专业、结构化、可直接用于技术评审或发布说明的《变更前后代码对比与分析报告》。
+
 
 约束要求：
 1. 使用中文，严格遵循六部分输出结构，不增删章节
@@ -1545,6 +1858,7 @@ class LLMService:
 4. 直接输出报告内容，无需解释生成过程"""
         else:
             return """你是一位拥有 15 年经验的资深 Java 代码审查专家和测试架构师。你的任务是基于完整的调用链拓扑（含调用顺序、深度关系、调用行号）、每个方法的源码、以及入口点分类信息，识别变更的级联影响、评估系统风险，并给出可执行的端到端测试策略。
+
 
 分析原则：
 1. 使用中文，结构清晰，深度分析
@@ -1555,45 +1869,43 @@ class LLMService:
 6. SQL 节点需关注表操作类型、WHERE 条件、事务边界、性能风险
 7. 测试建议必须具体可执行（含具体输入参数、预期结果、优先级 P0/P1/P2）
 8. 风险评估结合业务场景，避免泛泛而谈，引用的源码行号需标注"""
-    
+   
     def get_default_prompts(self, analysis_type: str, method_info: Optional[Dict] = None, chain_data: Optional[Dict] = None, direction: str = 'upwards') -> Dict:
         """
         获取默认的系统提示词和分析提示词模板
-        
+       
         Args:
             analysis_type: 'method' | 'chain'
             method_info: 方法信息（用于生成分析方法提示词）
             chain_data: 调用链数据（用于生成链分析提示词）
             direction: 分析方向
-            
+           
         Returns:
             { system_prompt, analysis_prompt }
         """
         system_prompt = self._get_system_prompt(analysis_type)
-        
+       
         if analysis_type == 'method':
             analysis_prompt = self._build_method_prompt(method_info or {}, {})
         else:
             analysis_prompt = self._build_chain_prompt(chain_data or {}, direction, '', '')
-        
+       
         return {
             'system_prompt': system_prompt,
             'analysis_prompt': analysis_prompt
         }
-    
+   
     def _call_llm_api(self, prompt: str, system_prompt: str) -> str:
         """调用 LLM API（公司内网版本）"""
-        # 如果未配置 LLM API，返回模拟结果
-        if not self.api_url or not self.api_key:
-            return self._get_mock_result(prompt)
-
         try:
             import requests
+
 
             headers = {
                 "Content-Type": "application/json",
                 "Authorization": f"Bearer {self.api_key}"
             }
+
 
             # 公司内网 API 请求格式
             payload = {
@@ -1605,6 +1917,7 @@ class LLMService:
             max_retries = 3
             base_delay = 5  # 首次重试等待 5 秒
             last_error = None
+
 
             for attempt in range(max_retries):
                 try:
@@ -1618,11 +1931,14 @@ class LLMService:
                         result = response.json()
                         # 根据公司内网 API 响应格式提取结果
                         if 'answer' in result:
-                            return result['answer']
+                            raw_answer = result['answer']
                         elif 'text' in result:
-                            return result['text']
+                            raw_answer = result['text']
                         else:
                             return f"API响应格式异常: {result}"
+
+                        # 清理思考过程内容
+                        return self._clean_thinking_content(raw_answer)
                     else:
                         # HTTP 错误不重试
                         return f"API调用失败: HTTP {response.status_code}\n{response.text}"
@@ -1632,50 +1948,55 @@ class LLMService:
                         delay = base_delay * (2 ** attempt)
                         print(f"[LLM] API 调用异常，{delay}s 后重试({attempt + 1}/{max_retries}): {last_error}")
                         time.sleep(delay)
-            
+           
             return f"请求异常(已重试{max_retries}次): {last_error}"
         except Exception as e:
             return f"请求异常: {str(e)}"
-    
-    def _get_mock_result(self, prompt: str) -> str:
-        """生成模拟分析结果（用于测试）"""
-        return """## 分析报告（模拟数据）
 
-### 一、变更内容分析
-- 这是一个模拟的分析结果
-- 实际使用时需要配置 LLM API
+    def _clean_thinking_content(self, text: str) -> str:
+        """
+        清理文本中的思考过程内容（<think>...</think>标签及其内容）
 
-### 二、代码质量评估
-| 评估维度 | 分析要点 |
-|---------|---------|
-| 方法设计 | 当前为测试模式 |
-| 参数校验 | 请在 config.py 中配置 LLM_API_URL 和 LLM_API_KEY |
-| 异常处理 | 配置后即可获得真实分析 |
-| 性能考量 | N/A（模拟数据） |
-| 幂等性 | N/A（模拟数据） |
-| 线程安全 | N/A（模拟数据） |
+        处理嵌套的 think 标签，移除所有思考过程，保留最终回答
 
-### 三、测试建议
-| 测试场景 | 输入条件 | 预期结果 | 优先级 |
-|---------|---------|---------|--------|
-| 模拟测试 | N/A | N/A | P2 |
+        Args:
+            text: 包含可能的思考过程的原始文本
 
-### 四、风险评估
-- 🔴 高风险操作: N/A（模拟数据）
-- ⚠️ 可能的副作用: N/A（模拟数据）
-- 📋 回归测试建议: N/A（模拟数据）
+        Returns:
+            清理后的文本，已移除所有 think 标签及其内容
+        """
+        if not text:
+            return text
 
-### 五、改进建议
-- 当前为模拟数据，不影响核心功能测试
+        # 方法1: 使用循环处理嵌套标签
+        cleaned_text = text
 
----
-💡 **提示**: 要启用真实的 LLM 分析，请在 backend/app/config.py 中配置：
-```python
-LLM_API_URL = "https://api.openai.com/v1"
-LLM_API_KEY = "your-api-key"
-LLM_MODEL = "gpt-3.5-turbo"
-```
-"""
+        # 持续移除最内层的 think 标签，直到没有更多标签
+        while '<think>' in cleaned_text and '</think>' in cleaned_text:
+            # 匹配最内层的 think 标签（不包含其他 think 标签的内容）
+            pattern = r'<think>([^<]*(?:<(?!\/?think>)[^<]*)*)<\/think>'
+            cleaned_text = re.sub(pattern, '', cleaned_text, flags=re.DOTALL)
+
+            # 防止无限循环
+            if '<think>' in cleaned_text and '</think>' in cleaned_text:
+                # 如果还有标签，继续循环
+                continue
+            else:
+                break
+
+        # 方法2: 备用方案 - 如果还有残留的 think 标签，使用更激进的方法
+        if '<think>' in cleaned_text or '</think>' in cleaned_text:
+            # 移除所有 think 标签（保留内容）
+            cleaned_text = re.sub(r'<\/?think>', '', cleaned_text, flags=re.DOTALL)
+
+        # 清理多余的空行和空格
+        cleaned_text = re.sub(r'\n{3,}', '\n\n', cleaned_text)  # 最多保留两个连续换行
+        cleaned_text = re.sub(r'^\s+', '', cleaned_text)  # 移除开头的空白
+        cleaned_text = re.sub(r'\s+$', '', cleaned_text)  # 移除结尾的空白
+
+        return cleaned_text.strip()
+
+
 
 
 # 全局实例

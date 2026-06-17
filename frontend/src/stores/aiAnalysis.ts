@@ -210,12 +210,15 @@ export const useAIAnalysisStore = defineStore('aiAnalysis', () => {
     nodeStatusLoading.value = true
     try {
       const response = await getNodesStatus(baseline, version, nodes)
-      const newMap = new Map<string, NodeStatus>()
+      // 增量更新：只更新本次查询返回的节点，不覆盖未出现的已有节点
+      // 防止不同树实例或定时刷新导致已分析状态丢失
+      if (!nodesStatusMap.value) {
+        nodesStatusMap.value = new Map()
+      }
       for (const node of response.data.nodes) {
         const key = `${node.class_name}.${node.method_name}`
-        newMap.set(key, node)
+        nodesStatusMap.value.set(key, node)
       }
-      nodesStatusMap.value = newMap
     } catch (err) {
       console.error('加载节点状态失败:', err)
     } finally {

@@ -23,17 +23,17 @@ task_service = TaskService(settings.DB_PATH)
 async def submit_task(request: TaskSubmitRequest):
     """提交分析任务（含去重检查）"""
     try:
-        # 第零步：验证 Git tag/commit 是否在远程仓库中真实存在
+        # 第一步：验证 Git tag/commit 是否在远程仓库中真实存在
         is_valid, validation_error = task_service.validate_git_refs(
             request.git_url, request.tag_old, request.tag_new
         )
         if not is_valid:
             raise HTTPException(
                 status_code=400,
-                detail=f"Git 引用验证失败: {validation_error}"
+                detail=f"Git 引用验证失败: {validation_error}，可能的原因：Git仓库地址错误或80174613未获得Git仓库地址授权"
             )
         
-        # 第一步：检查是否有相同参数的活跃任务（pending 或 running）
+        # 第二步：检查是否有相同参数的活跃任务（pending 或 running）
         active = task_service.find_active_task(
             git_url=request.git_url,
             tag_old=request.tag_old,
@@ -53,7 +53,7 @@ async def submit_task(request: TaskSubmitRequest):
                 result_url=None
             )
         
-        # 第二步：检查是否有相同参数的已完成任务
+        # 第三步：检查是否有相同参数的已完成任务
         duplicate = task_service.find_duplicate_task(
             git_url=request.git_url,
             tag_old=request.tag_old,
@@ -71,7 +71,8 @@ async def submit_task(request: TaskSubmitRequest):
                 duplicate=True,
                 result_url=duplicate['result_url']
             )
-        
+
+        # 第三步：创建分析任务
         task_id = task_service.create_task(
             git_url=request.git_url,
             username=request.username,
@@ -86,6 +87,35 @@ async def submit_task(request: TaskSubmitRequest):
             user_id=request.user_id
         )
         
+        # 第四步：保存Git URL映射关系到PipelineAnalysisV2
+        if request.pipeline_name:
+            try:
+                import httpx
+                from app.config import settings
+
+                # 调用PipelineAnalysisV2的save-mapping API
+                pipeline_v2_api_url = f"{settings.PIPELINE_V2_API_BASE_URL}/api/v2/save-mapping"
+
+                async with httpx.AsyncClient() as client:
+                    response = await client.post(
+                        pipeline_v2_api_url,
+                        json={
+                            "pipeline_name": request.pipeline_name,
+                            "git_url": request.git_url
+                        },
+                        timeout=10.0
+                    )
+
+                    if response.status_code == 200:
+                        result = response.json()
+                        print(f"Git URL映射保存成功: {result.get('message', '')}")
+                    else:
+                        print(f"Git URL映射保存失败: {response.status_code} - {response.text}")
+
+            except Exception as mapping_error:
+                # 映射保存失败不影响主任务提交流程，仅记录日志
+                print(f"Git URL映射保存异常: {str(mapping_error)}")
+
         return TaskResponse(
             task_id=task_id,
             status="pending",
@@ -157,12 +187,36 @@ async def cancel_task(task_id: str):
 
 @router.post("/abandon")
 async def abandon_task(request: AbandonTaskRequest):
-    """放弃分析任务（更新PipelineAnalysisV2数据库中的robot_is_send状态为-1）"""
+    """放弃分析任务（通过API调用更新PipelineAnalysisV2数据库中的is_analyzed状态为-1）"""
     try:
-        # 这里需要调用PipelineAnalysisV2的服务来更新robot_is_send状态
-        # 由于跨项目调用，这里需要实现具体的逻辑
+        import httpx
 
-        # 暂时返回成功，实际实现需要连接PipelineAnalysisV2数据库
-        return {"message": "已放弃分析任务，该流水线发版将不再要求分析"}
+        # PipelineAnalysisV2 API地址 - 使用正确的配置
+        # 从配置文件获取或使用相对路径
+        from app.config import settings
+        pipeline_v2_api_url = f"{settings.PIPELINE_V2_API_BASE_URL}/api/v2/abandon-task"
+
+        # 调用PipelineAnalysisV2的API
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                pipeline_v2_api_url,
+                json={
+                    "pipeline_analysis_id": request.pipeline_analysis_id,
+                    "username": request.username
+                },
+                timeout=30.0
+            )
+
+            if response.status_code == 200:
+                result = response.json()
+                return {"message": result.get("message", "已放弃分析任务")}
+            else:
+                error_detail = f"PipelineAnalysisV2 API调用失败: {response.status_code} - {response.text}"
+                raise HTTPException(status_code=500, detail=error_detail)
+
+    except httpx.ConnectError:
+        raise HTTPException(status_code=500, detail="无法连接到PipelineAnalysisV2 API服务，请确保服务已启动")
+    except httpx.TimeoutException:
+        raise HTTPException(status_code=500, detail="PipelineAnalysisV2 API调用超时")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"放弃任务失败: {str(e)}")

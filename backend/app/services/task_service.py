@@ -232,7 +232,7 @@ class TaskService:
         try:
             subprocess.run(
                 ["git", "--version"],
-                capture_output=True, text=True, timeout=5
+                capture_output=True, text=True, encoding='utf-8', errors='ignore', timeout=5
             )
         except FileNotFoundError:
             return False, "系统未安装 Git"
@@ -272,7 +272,7 @@ class TaskService:
             # 策略 1：尝试作为 tag
             result = subprocess.run(
                 ["git", "ls-remote", "--tags", remote_url, f"refs/tags/{ref}"],
-                capture_output=True, text=True, timeout=30
+                capture_output=True, text=True, encoding='utf-8', errors='ignore', timeout=30
             )
             if result.stdout.strip():
                 return True
@@ -280,7 +280,7 @@ class TaskService:
             # 策略 2：全量查询（匹配 commit hash）
             result = subprocess.run(
                 ["git", "ls-remote", remote_url],
-                capture_output=True, text=True, timeout=30
+                capture_output=True, text=True, encoding='utf-8', errors='ignore', timeout=30
             )
             for line in result.stdout.strip().split('\n'):
                 if line.startswith(ref):

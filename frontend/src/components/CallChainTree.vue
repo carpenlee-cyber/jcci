@@ -270,7 +270,9 @@ const startBatchPolling = (taskId: string) => {
         bulkAnalyzing.value = false
         bulkRunning.value = false
         bulkComplete.value = true
-        await loadNodesStatus() // 最后一次刷新确保全部更新
+        // 最后刷新两次确保全部更新（含数据库提交延迟）
+        await loadNodesStatus()
+        setTimeout(() => { loadNodesStatus() }, 500)
       } else if (task.status === 'failed') {
         stopBatchPolling()
         bulkAnalyzing.value = false
@@ -395,7 +397,8 @@ const startBulkAnalysis = async () => {
 const parseNodeInfo = (data: any) => {
   const label = data.label || ''
   // 标签格式: ClassName.methodSignature  📝...
-  const match = label.match(/^([\w.]+)\.(\w+)\(?/)
+  // 支持内部类名（含 $ 符号，如 Outer$Inner）
+  const match = label.match(/^([\w.$]+)\.(\w+)\(?/)
   if (match) {
     return { class_name: match[1], method_name: match[2] }
   }

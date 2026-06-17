@@ -8,6 +8,7 @@ export interface TaskSubmitRequest {
   max_depth?: number
   password?: string
   project_code?: string
+  project_name?: string
   task_stage?: string
   user_ip?: string
   user_name?: string

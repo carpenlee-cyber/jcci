@@ -15,50 +15,61 @@ from app.config import settings
 from app.services.llm_service import llm_service, llm_status
 from app.services.sql_analyzer import sql_analyzer
 
+
 # 添加项目根目录到路径（用于导入 jcci 核心引擎）
 _project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
 if _project_root not in sys.path:
     sys.path.insert(0, _project_root)
 
+
 from jcci.utils.tag_utils import extract_short_tag as _extract_short_tag
 
+
 router = APIRouter(prefix="/api/analysis", tags=["analysis"])
+
+
 
 
 # ── 标签辅助函数 ──────────────────────────────────────────────
 # _extract_short_tag 已从 jcci.utils.tag_utils 统一导入（见文件顶部）
 
 
+
+
 def _resolve_data_path(baseline: str, version: str) -> str:
     """接受完整标签或短标签, 映射到磁盘上的实际路径"""
     result_dir = settings.RESULT_DIR
-    
+   
     # 先尝试原始路径（短标签或目录名直接命中的情况）
     direct_path = os.path.join(result_dir, baseline, version)
     if os.path.exists(direct_path):
         return direct_path
-    
+   
     # 回退：转换为短标签再尝试（完整长标签的情况）
     baseline_short = _extract_short_tag(baseline)
     version_short = _extract_short_tag(version)
     short_path = os.path.join(result_dir, baseline_short, version_short)
     if os.path.exists(short_path):
         return short_path
-    
+   
     # 二次回退：扫描带项目前缀的目录名（如 mall_20031225_01）
     baseline_suffix = '_' + baseline_short
     for item in sorted(os.listdir(result_dir)):
         if item.endswith(baseline_suffix) and os.path.isdir(os.path.join(result_dir, item)):
             return os.path.join(result_dir, item, version_short)
-    
+   
     # 最终回退
     return short_path
+
+
 
 
 class BaselineInfo(BaseModel):
     """基线信息"""
     name: str
     versions: List[str]
+
+
 
 
 class VersionInfo(BaseModel):
@@ -70,6 +81,8 @@ class VersionInfo(BaseModel):
     has_text: bool
 
 
+
+
 @router.get("/baselines", response_model=List[BaselineInfo])
 async def list_baselines():
     """
@@ -78,10 +91,10 @@ async def list_baselines():
     """
     result_dir = settings.RESULT_DIR
     task_db_path = settings.DB_PATH
-    
+   
     if not os.path.exists(result_dir):
         return []
-    
+   
     # ── 一次性读取所有磁盘目录 ──
     disk_dirs: Dict[str, set] = {}  # baseline_dir → {version_dir, ...}
     for item in sorted(os.listdir(result_dir)):
@@ -95,15 +108,15 @@ async def list_baselines():
                 versions.add(version)
         if versions:
             disk_dirs[item] = versions
-    
+   
     if not disk_dirs:
         return []
-    
+   
     # ── 一次性从任务表建立完整标签↔短标签映射 ──
     has_task_db = os.path.exists(task_db_path)
     short_to_full: Dict[str, str] = {}       # 短标签 → 完整标签
     full_to_versions: Dict[str, List[tuple]] = {}  # 完整基线 → [(完整版本, 短版本), ...]
-    
+   
     if has_task_db:
         try:
             conn = sqlite3.connect(task_db_path)
@@ -127,11 +140,11 @@ async def list_baselines():
             conn.close()
         except Exception:
             pass
-    
+   
     # ── 组装基线列表 ──
     baselines = []
     seen_full_names = set()
-    
+   
     for dir_name, disk_versions in disk_dirs.items():
         # 解析目录名 → 完整基线标签
         if has_task_db:
@@ -144,11 +157,11 @@ async def list_baselines():
                 baseline_full = short_to_full.get(dir_short, dir_name)
         else:
             baseline_full = dir_name
-        
+       
         if baseline_full in seen_full_names:
             continue
         seen_full_names.add(baseline_full)
-        
+       
         # 解析版本列表 → 完整版本标签
         versions = []
         if has_task_db and baseline_full in full_to_versions:
@@ -156,7 +169,7 @@ async def list_baselines():
             for new_full, new_short in full_to_versions[baseline_full]:
                 if new_short in disk_versions:
                     versions.append(new_full)
-        
+       
         # 补全：磁盘有但任务表没有的版本（用目录名）
         if not versions:
             task_versions_set = set()
@@ -167,38 +180,40 @@ async def list_baselines():
                     # 尝试映射为完整标签
                     dv_short = _extract_short_tag(dv)
                     versions.append(short_to_full.get(dv_short, dv))
-        
+       
         if versions:
             baselines.append(BaselineInfo(name=baseline_full, versions=versions))
-    
+   
     return baselines
+
+
 
 
 @router.get("/{baseline}/{version}/info", response_model=VersionInfo)
 async def get_version_info(baseline: str, version: str):
     """
     获取指定基线和版本的文件存在情况
-    
+   
     Args:
         baseline: 基线名称
         version: 版本名称
-        
+       
     Returns:
         版本信息
     """
     result_dir = settings.RESULT_DIR
     version_dir = _resolve_data_path(baseline, version)
-    
+   
     if not os.path.exists(version_dir):
         raise HTTPException(status_code=404, detail="Version not found")
-    
+   
     upwards_json_gz = os.path.join(version_dir, "upwards_call_chains.json.gz")
     downwards_json_gz = os.path.join(version_dir, "downwards_call_chains.json.gz")
     upwards_json = os.path.join(version_dir, "upwards_call_chains.json")
     downwards_json = os.path.join(version_dir, "downwards_call_chains.json")
     upwards_txt = os.path.join(version_dir, "upwards.txt")
     downwards_txt = os.path.join(version_dir, "downwards.txt")
-    
+   
     return VersionInfo(
         baseline=baseline,
         version=version,
@@ -208,15 +223,17 @@ async def get_version_info(baseline: str, version: str):
     )
 
 
+
+
 @router.get("/{baseline}/{version}/upwards")
 async def get_upwards_chains(baseline: str, version: str):
     """
     获取向上调用链数据
-    
+   
     Args:
         baseline: 基线名称
         version: 版本名称
-        
+       
     Returns:
         向上调用链 JSON 数据
     """
@@ -235,15 +252,17 @@ async def get_upwards_chains(baseline: str, version: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+
+
 @router.get("/{baseline}/{version}/downwards")
 async def get_downwards_chains(baseline: str, version: str):
     """
     获取向下调用链数据
-    
+   
     Args:
         baseline: 基线名称
         version: 版本名称
-        
+       
     Returns:
         向下调用链 JSON 数据
     """
@@ -262,24 +281,26 @@ async def get_downwards_chains(baseline: str, version: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+
+
 @router.get("/{baseline}/{version}/text/upwards")
 async def get_upwards_text(baseline: str, version: str):
     """
     获取向上调用链文本
-    
+   
     Args:
         baseline: 基线名称
         version: 版本名称
-        
+       
     Returns:
         文本内容
     """
     result_dir = settings.RESULT_DIR
     filepath = os.path.join(_resolve_data_path(baseline, version), "upwards.txt")
-    
+   
     if not os.path.exists(filepath):
         raise HTTPException(status_code=404, detail="Upwards text file not found")
-    
+   
     try:
         with open(filepath, 'r', encoding='utf-8') as f:
             content = f.read()
@@ -288,26 +309,28 @@ async def get_upwards_text(baseline: str, version: str):
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
 
 
 @router.get("/{baseline}/{version}/text/downwards")
 async def get_downwards_text(baseline: str, version: str):
     """
     获取向下调用链文本
-    
+   
     Args:
         baseline: 基线名称
         version: 版本名称
-        
+       
     Returns:
         文本内容
     """
     result_dir = settings.RESULT_DIR
     filepath = os.path.join(_resolve_data_path(baseline, version), "downwards.txt")
-    
+   
     if not os.path.exists(filepath):
         raise HTTPException(status_code=404, detail="Downwards text file not found")
-    
+   
     try:
         with open(filepath, 'r', encoding='utf-8') as f:
             content = f.read()
@@ -316,6 +339,8 @@ async def get_downwards_text(baseline: str, version: str):
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
 
 
 class MethodAnalysisRequest(BaseModel):
@@ -328,6 +353,8 @@ class MethodAnalysisRequest(BaseModel):
     version: str = ''
 
 
+
+
 class ChainAnalysisRequest(BaseModel):
     """调用链分析请求"""
     chain_data: Dict[str, Any]
@@ -335,9 +362,13 @@ class ChainAnalysisRequest(BaseModel):
     force_fresh: bool = False
 
 
+
+
 class UpwardsSummaryRequest(BaseModel):
     """向上链批量分析请求"""
     force_fresh: bool = False
+
+
 
 
 class CreateTaskRequest(BaseModel):
@@ -358,11 +389,15 @@ class CreateTaskRequest(BaseModel):
     selected_methods: Optional[List[Dict[str, Any]]] = None
 
 
+
+
 class NodeStatusRequest(BaseModel):
     """批量节点状态查询请求"""
     baseline: str
     version: str
     nodes: List[Dict[str, Any]]
+
+
 
 
 class BatchMethodRequest(BaseModel):
@@ -372,6 +407,8 @@ class BatchMethodRequest(BaseModel):
     direction: str = 'upwards'
     force_fresh: bool = False
     methods: List[Dict[str, Any]] = []
+
+
 
 
 @router.get("/default-prompts")
@@ -384,7 +421,7 @@ async def get_default_prompts(
 ):
     """
     获取默认的系统提示词和分析提示词模板
-    
+   
     前端在 AI 分析配置页加载时调用，预填提示词编辑区。
     """
     method_info = {
@@ -401,6 +438,8 @@ async def get_default_prompts(
     )
 
 
+
+
 @router.get("/method-code")
 async def get_method_code(
     baseline: str = '',
@@ -413,24 +452,26 @@ async def get_method_code(
     获取方法的基线版本和当前版本源代码
     用于 AI 分析配置页的代码版本对比展示
 
+
     基线 DB 中 project 表记录了每次分析（基线/版本），每个 project_id
     对应 methods 表中的不同版本代码：
     - project_id=0: 基线版本代码 (commit_or_branch_new == commit_or_branch_old == baseline)
     - project_id>0: 各差异版本代码 (commit_or_branch_new == version)
 
+
     支持通过 signature 参数精确定位重载方法（同名不同参）。
     """
     import sqlite3
     import os as _os
-    
+   
     print(f"[method-code] 请求: baseline={baseline}, version={version}, class={class_name}, method={method_name}", flush=True)
-    
+   
     result_dir = settings.RESULT_DIR
-    
+   
     # 将完整 tag 或短标签映射到磁盘上的实际基线目录
     # （复用 _resolve_data_path 的三级回退逻辑：直接路径 → 短标签 → 前缀扫描）
     baseline_short = _extract_short_tag(baseline)
-    
+   
     # 1) 直接路径
     candidate = os.path.join(result_dir, baseline)
     if os.path.isdir(candidate):
@@ -454,12 +495,12 @@ async def get_method_code(
         else:
             baseline_dir = os.path.join(result_dir, baseline_short)
             baseline_dirname = baseline_short
-    
+   
     base_db = os.path.join(baseline_dir, f"{baseline_dirname}_baseline.db")
     print(f"[method-code] RESULT_DIR={result_dir}", flush=True)
     print(f"[method-code] baseline_dir={baseline_dir}, baseline_dirname={baseline_dirname}", flush=True)
     print(f"[method-code] base_db={base_db}, exists={os.path.exists(base_db)}", flush=True)
-    
+   
     baseline_code = ''
     current_code = ''
     annotations = ''
@@ -467,7 +508,7 @@ async def get_method_code(
     return_type = ''
     parameters = ''
     change_type_val = 'UNCHANGED'
-    
+   
     if not os.path.exists(base_db):
         print(f"[method-code] DB 不存在: {base_db}", flush=True)
         return {
@@ -482,11 +523,11 @@ async def get_method_code(
             'return_type': '',
             'parameters': ''
         }
-    
+   
     conn = sqlite3.connect(base_db)
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
-    
+   
     # class_name 可能是全限定名 (如 com.macro.mall.controller.PmsProductAttributeController)
     # DB 中 class 表的 class_name 存储的是短类名，package_name 存储包名
     short_class_name = class_name
@@ -495,18 +536,18 @@ async def get_method_code(
         parts = class_name.rsplit('.', 1)
         package_name = parts[0]
         short_class_name = parts[1]
-    
+   
     # 从基线/版本名称中提取 commit 标识
     from app.core.workflow1 import extract_short_tag
     baseline_commit = extract_short_tag(baseline)
     version_commit = extract_short_tag(version)
     print(f"[method-code] baseline_commit={baseline_commit}, version_commit={version_commit}", flush=True)
     print(f"[method-code] short_class_name={short_class_name}, package_name={package_name}", flush=True)
-    
+   
     # ── 解析 signature 中的参数类型列表（用于重载方法精确匹配） ──
     sig_param_types = _parse_signature_param_types(signature) if signature else []
     print(f"[method-code] signature={signature}, sig_param_types={sig_param_types}", flush=True)
-    
+   
     # 查找版本对应的 project_id
     cursor.execute('''
         SELECT project_id FROM project
@@ -516,7 +557,7 @@ async def get_method_code(
     version_proj = cursor.fetchone()
     version_project_id = version_proj['project_id'] if version_proj else None
     print(f"[method-code] version_project_id={version_project_id}", flush=True)
-    
+   
     # 查找基线 project_id (project_id=0，即 commit_or_branch_new==commit_or_branch_old==baseline)
     cursor.execute('''
         SELECT project_id FROM project
@@ -526,18 +567,18 @@ async def get_method_code(
     baseline_proj = cursor.fetchone()
     baseline_project_id = baseline_proj['project_id'] if baseline_proj else 0
     print(f"[method-code] baseline_project_id={baseline_project_id}", flush=True)
-    
+   
     # ── 查询方法（移除 LIMIT 1，获取所有同名方法后按参数类型精确匹配） ──
     baseline_row = None
     version_row = None
     documentation = ''
-    
+   
     # 基线代码查询
     baseline_rows = _query_method_rows(cursor, short_class_name, package_name, method_name, baseline_project_id)
     if baseline_rows:
         baseline_row = _match_method_by_params(baseline_rows, sig_param_types)
     print(f"[method-code] baseline_row found={baseline_row is not None}, total_rows={len(baseline_rows)}, sig_param_types={sig_param_types}", flush=True)
-    
+   
     if baseline_row:
         body_lines = _parse_body_to_lines(baseline_row['body'])
         baseline_code = '\n'.join(body_lines)
@@ -549,14 +590,14 @@ async def get_method_code(
         if isinstance(documentation_val, str) and documentation_val != 'None':
             documentation = documentation_val
         change_type_val = baseline_row['change_type'] or 'UNCHANGED'
-    
+   
     # 版本代码查询
     if version_project_id is not None and version_project_id != baseline_project_id:
         version_rows = _query_method_rows(cursor, short_class_name, package_name, method_name, version_project_id)
         if version_rows:
             version_row = _match_method_by_params(version_rows, sig_param_types)
         print(f"[method-code] version_row found={version_row is not None}, total_rows={len(version_rows)}", flush=True)
-    
+   
         if version_row:
             version_body_lines = _parse_body_to_lines(version_row['body'])
             current_code = '\n'.join(version_body_lines)
@@ -565,7 +606,7 @@ async def get_method_code(
             if version_change:
                 change_type_val = version_change
             # 版本 documentation 可能更新
-            version_doc = version_row.get('documentation', '') or ''
+            version_doc = version_row['documentation'] if 'documentation' in version_row else ''
             if isinstance(version_doc, str) and version_doc != 'None' and not documentation:
                 documentation = version_doc
         else:
@@ -574,9 +615,9 @@ async def get_method_code(
     else:
         # 版本=基线，或方法未变更
         current_code = baseline_code
-    
+   
     conn.close()
-    
+   
     return {
         'class_name': class_name,
         'method_name': method_name,
@@ -592,6 +633,8 @@ async def get_method_code(
     }
 
 
+
+
 def _parse_body_to_lines(body):
     """将 DB 中的 body 字段解析为代码行列表"""
     if not body:
@@ -600,6 +643,8 @@ def _parse_body_to_lines(body):
         return json.loads(body) if isinstance(body, str) else body
     except (json.JSONDecodeError, TypeError):
         return [body] if isinstance(body, str) else []
+
+
 
 
 def _parse_signature_param_types(signature: str):
@@ -615,7 +660,12 @@ def _parse_signature_param_types(signature: str):
     paren_idx = signature.find('(')
     if paren_idx < 0:
         return []
-    params_str = signature[paren_idx + 1:].rstrip(')')
+    # 精确查找右括号位置，兼容签名后有额外内容的情况
+    # （前端传入的 signature 可能是完整树节点标签，含 📝 MODIFIED 等后缀）
+    paren_end_idx = signature.find(')', paren_idx)
+    if paren_end_idx < 0:
+        return []
+    params_str = signature[paren_idx + 1:paren_end_idx]
     if not params_str.strip():
         return []
     # 按逗号分割，注意泛型如 List<com.xx.Yy>
@@ -637,6 +687,8 @@ def _parse_signature_param_types(signature: str):
     return param_types
 
 
+
+
 def _extract_param_types_from_json(parameters_json: str):
     """
     从 DB parameters JSON 中提取参数类型列表。
@@ -651,6 +703,8 @@ def _extract_param_types_from_json(parameters_json: str):
         return [p.get('parameter_type', '') for p in params_list if isinstance(p, dict)]
     except (json.JSONDecodeError, TypeError):
         return []
+
+
 
 
 def _match_param_types(sig_types: list, db_types: list) -> bool:
@@ -671,6 +725,8 @@ def _match_param_types(sig_types: list, db_types: list) -> bool:
             continue
         return False
     return True
+
+
 
 
 def _query_method_rows(cursor, short_class_name: str, package_name: str, method_name: str, project_id: int):
@@ -694,6 +750,8 @@ def _query_method_rows(cursor, short_class_name: str, package_name: str, method_
     return cursor.fetchall()
 
 
+
+
 def _match_method_by_params(rows, sig_param_types: list):
     """
     从同名方法行列表中按参数类型精确匹配。
@@ -714,32 +772,36 @@ def _match_method_by_params(rows, sig_param_types: list):
     return rows[0]
 
 
+
+
 @router.get("/llm-status")
 async def get_llm_status():
     """
     查询 LLM 分析状态
-    
+   
     Returns:
         当前 LLM 分析状态信息
     """
     return llm_status.to_dict()
 
 
+
+
 @router.post("/analyze/method")
 async def analyze_method(request: MethodAnalysisRequest):
     """
     分析方法变更和测试建议
-    
+   
     Args:
         request: 方法分析请求
-        
+       
     Returns:
         分析结果
     """
     # 并发防护：检查是否有正在进行的分析
     if not llm_status.start(f"方法分析: {request.method_info.get('class_name', '')}.{request.method_info.get('method_name', '')}"):
         raise HTTPException(status_code=409, detail="已有 LLM 分析正在执行中，请等待完成后再试")
-    
+   
     try:
         result = llm_service.analyze_method(
             method_info=request.method_info,
@@ -758,20 +820,22 @@ async def analyze_method(request: MethodAnalysisRequest):
         llm_status.finish()
 
 
+
+
 @router.post("/{baseline}/{version}/analyze/upwards-summary")
 async def analyze_upwards_summary(baseline: str, version: str, request: UpwardsSummaryRequest):
     """
     批量分析所有向上调用链（影响面评估）
-    
+   
     加载向上调用链JSON，对每条链进行AI分析，
     汇总所有链路结果生成综合影响面报告。
     支持缓存和强制刷新。
-    
+   
     Args:
         baseline: 基线名称
         version: 版本名称
         request: 批量分析请求（force_fresh: 是否强制全新分析）
-        
+       
     Returns:
         汇总分析结果
     """
@@ -785,26 +849,26 @@ async def analyze_upwards_summary(baseline: str, version: str, request: UpwardsS
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-    
+   
     impact_chains = data.get('impact_chains', [])
-    
+   
     if not impact_chains:
         return {"result": "没有找到向上调用链", "from_cache": True}
-    
+   
     # 并发防护：检查是否有正在进行的分析
     if not llm_status.start(f"批量影响面分析: {baseline}/{version}"):
         raise HTTPException(status_code=409, detail="已有 LLM 分析正在执行中，请等待完成后再试")
-    
+   
     # 逐条分析每条链
     all_results = []
     any_fresh = False
-    
+   
     try:
         for idx, chain_data in enumerate(impact_chains, 1):
             method_info = chain_data.get('method_info', {})
             class_name = method_info.get('class_name', '')
             method_name = method_info.get('method_name', '')
-            
+           
             try:
                 result = llm_service.analyze_chain(
                     chain_data=chain_data,
@@ -830,7 +894,7 @@ async def analyze_upwards_summary(baseline: str, version: str, request: UpwardsS
                 })
     finally:
         llm_status.finish()
-    
+   
     # 构建汇总报告
     summary_parts = []
     summary_parts.append("# 向上调用链批量影响面分析报告\n")
@@ -838,13 +902,13 @@ async def analyze_upwards_summary(baseline: str, version: str, request: UpwardsS
     summary_parts.append(f"**总链路数**: {len(all_results)}\n")
     summary_parts.append(f"**分析模式**: {'强制全新分析' if request.force_fresh else '优先使用缓存'}\n")
     summary_parts.append("\n---\n")
-    
+   
     for r in all_results:
         cache_tag = "♻️缓存" if r['from_cache'] else "🆕全新"
         summary_parts.append(f"\n## {r['index']}. [{r['change_type']}] {r['method']} ({cache_tag})\n\n")
         summary_parts.append(r['analysis'])
         summary_parts.append("\n---\n")
-    
+   
     return {
         "result": "".join(summary_parts),
         "from_cache": not any_fresh,
@@ -853,21 +917,23 @@ async def analyze_upwards_summary(baseline: str, version: str, request: UpwardsS
     }
 
 
+
+
 @router.post("/analyze/chain")
 async def analyze_chain(request: ChainAnalysisRequest):
     """
     分析调用链影响和风险
-    
+   
     Args:
         request: 调用链分析请求
-        
+       
     Returns:
         分析结果
     """
     # 并发防护：检查是否有正在进行的分析
     if not llm_status.start("调用链分析"):
         raise HTTPException(status_code=409, detail="已有 LLM 分析正在执行中，请等待完成后再试")
-    
+   
     try:
         result = llm_service.analyze_chain(
             chain_data=request.chain_data,
@@ -883,11 +949,13 @@ async def analyze_chain(request: ChainAnalysisRequest):
         llm_status.finish()
 
 
+
+
 @router.get("/{baseline}/{version}/sql-summary")
 async def get_sql_summary(baseline: str, version: str):
     """获取 SQL 分析汇总（v4.2: 优先使用预计算的 SQL 摘要文件）"""
     data_dir = _resolve_data_path(baseline, version)
-    
+   
     # v4.2: 优先尝试 SQL 摘要文件（KB 级）
     sql_summary_filepath = os.path.join(data_dir, "downwards_sql_summary.json")
     if os.path.exists(sql_summary_filepath):
@@ -905,7 +973,7 @@ async def get_sql_summary(baseline: str, version: str):
         except Exception as e:
             logger = __import__('logging').getLogger(__name__)
             logger.warning(f"SQL 摘要文件读取失败，回退到大 JSON: {e}")
-    
+   
     # Fallback: 旧格式大 JSON
     from jcci.utils.path_utils import load_call_chains_json_from_dir
     try:
@@ -913,6 +981,7 @@ async def get_sql_summary(baseline: str, version: str):
         call_chains = data.get('dependency_chains') or data.get('call_chains', [])
         dao_methods = sql_analyzer.extract_dao_methods(call_chains)
         summary = sql_analyzer.get_sql_summary(dao_methods)
+
 
         return {
             'summary': summary,
@@ -927,13 +996,16 @@ async def get_sql_summary(baseline: str, version: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+
+
 # ========== 异步任务 API ==========
+
 
 @router.post("/tasks")
 async def create_analysis_task(request: CreateTaskRequest, background_tasks: BackgroundTasks):
     """
     创建异步 LLM 分析任务
-    
+   
     返回 task_id，前端通过 GET /tasks/{task_id} 轮询进度。
     """
     # 检查是否有同一方法的冲突任务
@@ -950,14 +1022,14 @@ async def create_analysis_task(request: CreateTaskRequest, background_tasks: Bac
           request.baseline, request.version))
     existing = cursor.fetchone()
     conn.close()
-    
+   
     if existing:
         return {
             'task_id': existing['task_id'],
             'status': 'conflict',
             'message': '该方法已有分析任务正在执行中，返回已有任务ID'
         }
-    
+   
     # 创建任务
     task_id = llm_service.create_task(
         analysis_type=request.analysis_type,
@@ -972,7 +1044,7 @@ async def create_analysis_task(request: CreateTaskRequest, background_tasks: Bac
         custom_analysis_prompt=request.custom_analysis_prompt,
         total_methods=len(request.selected_methods) if request.selected_methods else 1
     )
-    
+   
     # 后台执行
     if request.analysis_type == 'method':
         background_tasks.add_task(
@@ -987,20 +1059,20 @@ async def create_analysis_task(request: CreateTaskRequest, background_tasks: Bac
             custom_system_prompt=request.custom_system_prompt,
             custom_analysis_prompt=request.custom_analysis_prompt
         )
-    elif request.analysis_type == 'chain':
-        background_tasks.add_task(
-            llm_service.run_chain_task,
-            task_id=task_id,
-            chain_data=request.chain_data or {},
-            selected_methods=request.selected_methods or [],
-            direction=request.direction,
-            baseline=request.baseline,
-            version=request.version,
-            force_fresh=request.force_fresh,
-            custom_system_prompt=request.custom_system_prompt,
-            custom_analysis_prompt=request.custom_analysis_prompt
-        )
-    
+    # elif request.analysis_type == 'chain':
+    #     background_tasks.add_task(
+    #         llm_service.run_chain_task,
+    #         task_id=task_id,
+    #         chain_data=request.chain_data or {},
+    #         selected_methods=request.selected_methods or [],
+    #         direction=request.direction,
+    #         baseline=request.baseline,
+    #         version=request.version,
+    #         force_fresh=request.force_fresh,
+    #         custom_system_prompt=request.custom_system_prompt,
+    #         custom_analysis_prompt=request.custom_analysis_prompt
+    #     )
+   
     return {
         'task_id': task_id,
         'status': 'pending',
@@ -1008,17 +1080,19 @@ async def create_analysis_task(request: CreateTaskRequest, background_tasks: Bac
     }
 
 
+
+
 @router.post("/batch-methods")
 async def create_batch_method_task(request: BatchMethodRequest, background_tasks: BackgroundTasks):
     """
     创建批量方法分析任务（逐方法调用 analyze_method）
-    
+   
     每完成一个方法分析，自动保存结果到 llm_analysis_results，
     前端轮询 nodes-status API 即可实时看到 Tree 节点标签更新。
     """
     if not request.methods:
         raise HTTPException(status_code=400, detail="methods 列表不能为空")
-    
+   
     task_id = llm_service.create_task(
         analysis_type='batch',
         direction=request.direction,
@@ -1026,7 +1100,7 @@ async def create_batch_method_task(request: BatchMethodRequest, background_tasks
         version=request.version,
         total_methods=len(request.methods)
     )
-    
+   
     background_tasks.add_task(
         llm_service.run_batch_method_task,
         task_id=task_id,
@@ -1036,7 +1110,7 @@ async def create_batch_method_task(request: BatchMethodRequest, background_tasks
         version=request.version,
         force_fresh=request.force_fresh
     )
-    
+   
     return {
         'task_id': task_id,
         'status': 'pending',
@@ -1044,18 +1118,20 @@ async def create_batch_method_task(request: BatchMethodRequest, background_tasks
     }
 
 
+
+
 @router.get("/tasks/{task_id}")
 async def get_analysis_task(task_id: str):
     """
     查询分析任务状态
-    
+   
     Returns:
         任务详情，含状态、进度、子结果列表
     """
     task = llm_service.get_task(task_id)
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
-    
+   
     # 如果有子结果，构建摘要
     sub_tasks = []
     for r in task.get('sub_results', []):
@@ -1066,7 +1142,7 @@ async def get_analysis_task(task_id: str):
             'status': 'completed',
             'from_cache': bool(r.get('from_cache'))
         })
-    
+   
     return {
         'task_id': task['task_id'],
         'analysis_type': task.get('analysis_type'),
@@ -1091,6 +1167,8 @@ async def get_analysis_task(task_id: str):
     }
 
 
+
+
 @router.get("/results/{result_id}")
 async def get_analysis_result(result_id: str):
     """
@@ -1100,32 +1178,41 @@ async def get_analysis_result(result_id: str):
     if not result:
         raise HTTPException(status_code=404, detail="Result not found")
 
+
     # 查询同一任务下的其他结果作为子结果（用于链分析 Tab 切换）
     sub_results = []
     task_id = result.get('task_id', '')
     if task_id:
-        conn = __import__('sqlite3').connect(settings.DB_PATH)
-        conn.row_factory = __import__('sqlite3').Row
+        # 检查任务类型：batch 类型任务每个方法独立，不需要子结果
+        import sqlite3
+        conn = sqlite3.connect(settings.DB_PATH)
+        conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
-        cursor.execute('''
-            SELECT result_id, class_name, method_name, analysis_result,
-                   analysis_duration, from_cache, created_at
-            FROM llm_analysis_results
-            WHERE (task_id = ? OR parent_task_id = ?)
-              AND result_id != ?
-            ORDER BY created_at
-        ''', (task_id, task_id, result_id))
-        for row in cursor.fetchall():
-            sub_results.append({
-                'result_id': row['result_id'],
-                'class_name': row['class_name'] or '',
-                'method_name': row['method_name'] or '',
-                'analysis_result': row['analysis_result'],
-                'analysis_duration': row['analysis_duration'],
-                'from_cache': bool(row['from_cache']),
-                'created_at': row['created_at']
-            })
+        cursor.execute('SELECT analysis_type FROM llm_analysis_tasks WHERE task_id = ?', (task_id,))
+        task_row = cursor.fetchone()
+        is_batch = task_row and task_row['analysis_type'] == 'batch'
+
+        if not is_batch:
+            cursor.execute('''
+                SELECT result_id, class_name, method_name, analysis_result,
+                       analysis_duration, from_cache, created_at
+                FROM llm_analysis_results
+                WHERE (task_id = ? OR parent_task_id = ?)
+                  AND result_id != ?
+                ORDER BY created_at
+            ''', (task_id, task_id, result_id))
+            for row in cursor.fetchall():
+                sub_results.append({
+                    'result_id': row['result_id'],
+                    'class_name': row['class_name'] or '',
+                    'method_name': row['method_name'] or '',
+                    'analysis_result': row['analysis_result'],
+                    'analysis_duration': row['analysis_duration'],
+                    'from_cache': bool(row['from_cache']),
+                    'created_at': row['created_at']
+                })
         conn.close()
+
 
     return {
         'result_id': result['result_id'],
@@ -1141,6 +1228,8 @@ async def get_analysis_result(result_id: str):
     }
 
 
+
+
 @router.post("/nodes-status")
 async def get_nodes_status(request: NodeStatusRequest):
     """
@@ -1149,13 +1238,13 @@ async def get_nodes_status(request: NodeStatusRequest):
     conn = __import__('sqlite3').connect(settings.DB_PATH)
     conn.row_factory = __import__('sqlite3').Row
     cursor = conn.cursor()
-    
+   
     nodes_status = []
     for node in request.nodes:
         class_name = node.get('class_name', '')
         method_name = node.get('method_name', '')
         change_type = node.get('change_type', 'UNKNOWN')
-        
+       
         status = {
             'class_name': class_name,
             'method_name': method_name,
@@ -1168,7 +1257,7 @@ async def get_nodes_status(request: NodeStatusRequest):
             'latest_upwards_chain_result_id': None,
             'latest_downwards_chain_result_id': None
         }
-        
+       
         # 检查方法分析缓存（含链分析的逐方法子结果 + 批量分析结果）
         cursor.execute('''
             SELECT r.result_id FROM llm_analysis_results r
@@ -1182,7 +1271,7 @@ async def get_nodes_status(request: NodeStatusRequest):
         if row:
             status['method_status'] = 'analyzed'
             status['latest_method_result_id'] = row['result_id']
-        
+       
         # 检查向上调用链分析缓存（仅 chain 类型的聚合结果，排除子结果和 batch 类型）
         cursor.execute('''
             SELECT r.result_id FROM llm_analysis_results r
@@ -1198,7 +1287,7 @@ async def get_nodes_status(request: NodeStatusRequest):
         if row:
             status['upwards_chain_status'] = 'analyzed'
             status['latest_upwards_chain_result_id'] = row['result_id']
-        
+       
         # 检查向下调用链分析缓存（仅 chain 类型的聚合结果，排除子结果和 batch 类型）
         cursor.execute('''
             SELECT r.result_id FROM llm_analysis_results r
@@ -1214,7 +1303,7 @@ async def get_nodes_status(request: NodeStatusRequest):
         if row:
             status['downwards_chain_status'] = 'analyzed'
             status['latest_downwards_chain_result_id'] = row['result_id']
-        
+       
         # 检查是否有运行中的任务（排除超时 30 分钟的僵尸任务）
         cursor.execute('''
             SELECT task_id FROM llm_analysis_tasks
@@ -1227,16 +1316,21 @@ async def get_nodes_status(request: NodeStatusRequest):
         row = cursor.fetchone()
         if row:
             status['running_task_id'] = row['task_id']
-        
+       
         nodes_status.append(status)
-    
+   
     conn.close()
     return {'nodes': nodes_status}
 
 
+
+
 # ── 入口节点提取辅助函数 ──────────────────────────────────
 
+
 _ENTRY_ROOT_TYPES = {'HTTP_API', 'SCHEDULED_TASK', 'EVENT_LISTENER', 'MESSAGE_CONSUMER', 'CONTROLLER_BY_CONVENTION'}
+
+
 
 
 def _find_endpoint_nodes(children: list, direction: str) -> list:
@@ -1293,6 +1387,8 @@ def _find_endpoint_nodes(children: list, direction: str) -> list:
     return endpoints
 
 
+
+
 def _find_node_documentation(chain_tree: dict, package_class: str, method_signature: str) -> str:
     """
     在调用链树中递归查找匹配节点的 documentation。
@@ -1311,6 +1407,8 @@ def _find_node_documentation(chain_tree: dict, package_class: str, method_signat
     return ''
 
 
+
+
 @router.get("/{baseline}/{version}/chain-methods")
 async def get_chain_methods(baseline: str, version: str, direction: str = 'upwards',
                              offset: int = 0, limit: int = 100):
@@ -1319,7 +1417,7 @@ async def get_chain_methods(baseline: str, version: str, direction: str = 'upwar
     支持分页：offset 为起始位置，limit 为每次返回数量。
     """
     data_dir = _resolve_data_path(baseline, version)
-    
+   
     # v4.2: 优先尝试索引文件
     index_filename = f"{direction}_index.json"
     index_filepath = os.path.join(data_dir, index_filename)
@@ -1327,15 +1425,15 @@ async def get_chain_methods(baseline: str, version: str, direction: str = 'upwar
         try:
             with open(index_filepath, 'r', encoding='utf-8') as f:
                 index_data = json.load(f)
-            
+           
             index_methods = index_data.get('methods', [])
             methods_with_cache = []
             seen = set()
-            
+           
             conn = __import__('sqlite3').connect(settings.DB_PATH)
             conn.row_factory = __import__('sqlite3').Row
             cursor = conn.cursor()
-            
+           
             for im in index_methods:
                 class_name = im.get('class_name', '')
                 method_name = im.get('method_name', '')
@@ -1343,12 +1441,12 @@ async def get_chain_methods(baseline: str, version: str, direction: str = 'upwar
                 if key in seen:
                     continue
                 seen.add(key)
-                
+               
                 # 查询 AI 分析状态（与 nodes-status API 逻辑一致）
                 method_status = 'none'
                 upwards_chain_status = 'none'
                 downwards_chain_status = 'none'
-                
+               
                 try:
                     cursor.execute('''
                         SELECT r.result_id FROM llm_analysis_results r
@@ -1362,7 +1460,7 @@ async def get_chain_methods(baseline: str, version: str, direction: str = 'upwar
                         method_status = 'analyzed'
                 except Exception:
                     pass
-                
+               
                 try:
                     cursor.execute('''
                         SELECT r.result_id FROM llm_analysis_results r
@@ -1378,7 +1476,7 @@ async def get_chain_methods(baseline: str, version: str, direction: str = 'upwar
                         upwards_chain_status = 'analyzed'
                 except Exception:
                     pass
-                
+               
                 try:
                     cursor.execute('''
                         SELECT r.result_id FROM llm_analysis_results r
@@ -1394,7 +1492,7 @@ async def get_chain_methods(baseline: str, version: str, direction: str = 'upwar
                         downwards_chain_status = 'analyzed'
                 except Exception:
                     pass
-                
+               
                 methods_with_cache.append({
                     'class_name': class_name,
                     'method_name': method_name,
@@ -1408,9 +1506,9 @@ async def get_chain_methods(baseline: str, version: str, direction: str = 'upwar
                     'downwards_chain_status': downwards_chain_status,
                     'endpoints': []
                 })
-            
+           
             conn.close()
-            
+           
             # 向下方向：从 JSON 补充 endpoints（索引文件不含链数据）
             if direction == 'downwards':
                 try:
@@ -1418,7 +1516,7 @@ async def get_chain_methods(baseline: str, version: str, direction: str = 'upwar
                     chain_data = load_call_chains_json_from_dir(data_dir, "downwards")
                 except FileNotFoundError:
                     chain_data = None
-                
+               
                 if chain_data:
                     chains_list = chain_data.get('call_chains', chain_data.get('dependency_chains', []))
                     # 构建 class_name.method_name -> chain 映射
@@ -1450,11 +1548,11 @@ async def get_chain_methods(baseline: str, version: str, direction: str = 'upwar
                             else:
                                 chain_children = cr.get('children', [])
                                 m['endpoints'] = _find_endpoint_nodes(chain_children, direction)
-            
+           
             total = len(methods_with_cache)
             # 分页切片
             paged = methods_with_cache[offset:offset + limit]
-            
+           
             return {
                 'methods': paged,
                 'total': total,
@@ -1466,7 +1564,7 @@ async def get_chain_methods(baseline: str, version: str, direction: str = 'upwar
         except Exception as e:
             logger = __import__('logging').getLogger(__name__)
             logger.warning(f"索引文件读取失败，回退到大 JSON: {e}")
-    
+   
     # Fallback: 从 JSON 加载
     from jcci.utils.path_utils import load_call_chains_json_from_dir
     try:
@@ -1477,21 +1575,21 @@ async def get_chain_methods(baseline: str, version: str, direction: str = 'upwar
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-    
+   
     # 根据方向提取方法列表
     if direction == 'upwards':
         chains_data = data.get('impact_chains', [])
     else:
         chains_data = data.get('call_chains', data.get('dependency_chains', []))
-    
+   
     methods_with_cache = []
     seen = set()
-    
+   
     # 统一数据库连接，批量查询状态
     conn = __import__('sqlite3').connect(settings.DB_PATH)
     conn.row_factory = __import__('sqlite3').Row
     cursor = conn.cursor()
-    
+   
     for chain in chains_data:
         mi = chain.get('method_info', {})
         class_name = mi.get('class_name', '')
@@ -1500,12 +1598,12 @@ async def get_chain_methods(baseline: str, version: str, direction: str = 'upwar
         if key in seen:
             continue
         seen.add(key)
-        
+       
         # 查询状态（与 nodes-status API 逻辑一致）
         method_status = 'none'
         upwards_chain_status = 'none'
         downwards_chain_status = 'none'
-        
+       
         try:
             # 方法分析状态（含链分析的逐方法子结果 + 批量分析结果）
             cursor.execute('''
@@ -1520,7 +1618,7 @@ async def get_chain_methods(baseline: str, version: str, direction: str = 'upwar
                 method_status = 'analyzed'
         except Exception:
             pass
-        
+       
         try:
             # 向上链分析状态（仅 chain 类型的聚合结果）
             cursor.execute('''
@@ -1537,7 +1635,7 @@ async def get_chain_methods(baseline: str, version: str, direction: str = 'upwar
                 upwards_chain_status = 'analyzed'
         except Exception:
             pass
-        
+       
         try:
             # 向下链分析状态（仅 chain 类型的聚合结果）
             cursor.execute('''
@@ -1554,7 +1652,7 @@ async def get_chain_methods(baseline: str, version: str, direction: str = 'upwar
                 downwards_chain_status = 'analyzed'
         except Exception:
             pass
-        
+       
         # 提取端点节点（入口或出口）
         # 1) 优先使用 chain 顶层 entry_points（最准确）
         raw_entry_points = chain.get('entry_points', [])
@@ -1616,6 +1714,7 @@ async def get_chain_methods(baseline: str, version: str, direction: str = 'upwar
             chain_children = chain.get('chain', {}).get('children', [])
             endpoints = _find_endpoint_nodes(chain_children, direction)
 
+
         methods_with_cache.append({
             'class_name': class_name,
             'method_name': method_name,
@@ -1629,13 +1728,13 @@ async def get_chain_methods(baseline: str, version: str, direction: str = 'upwar
             'downwards_chain_status': downwards_chain_status,
             'endpoints': endpoints
         })
-    
+   
     conn.close()
-    
+   
     total = len(methods_with_cache)
     # 分页切片
     paged = methods_with_cache[offset:offset + limit]
-    
+   
     return {
         'methods': paged,
         'total': total,
@@ -1646,23 +1745,26 @@ async def get_chain_methods(baseline: str, version: str, direction: str = 'upwar
     }
 
 
+
+
 # ── v4.2: 按需单链加载 API ──
+
 
 @router.get("/{baseline}/{version}/chain/{direction}")
 async def get_single_chain(baseline: str, version: str, direction: str, class_name: str = '', method_name: str = ''):
     """
     v4.2: 按需加载单条调用链（KB-MB 级，而非加载整个 GB 级文件）。
-    
+   
     优先从独立单链文件加载，回退到大 JSON。
     """
     if not class_name or not method_name:
         raise HTTPException(status_code=400, detail="class_name and method_name are required")
-    
+   
     if direction not in ('upwards', 'downwards'):
         raise HTTPException(status_code=400, detail="direction must be 'upwards' or 'downwards'")
-    
+   
     data_dir = _resolve_data_path(baseline, version)
-    
+   
     # v4.2: 优先尝试独立单链文件
     # 索引文件中记录了 chain_file，但我们通过扫描目录来查找
     chain_dir = os.path.join(data_dir, direction)
@@ -1687,7 +1789,7 @@ async def get_single_chain(baseline: str, version: str, direction: str, class_na
                         }
                     except Exception:
                         continue
-    
+   
     # Fallback: 从 JSON 中查找
     from jcci.utils.path_utils import load_call_chains_json_from_dir
     try:
@@ -1696,10 +1798,10 @@ async def get_single_chain(baseline: str, version: str, direction: str, class_na
         raise HTTPException(status_code=404, detail=f"{direction} call chains file not found")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-    
+   
     chains_list = data.get('impact_chains' if direction == 'upwards' else 'call_chains',
                           data.get('dependency_chains', []))
-    
+   
     for chain in chains_list:
         mi = chain.get('method_info', {})
         if mi.get('class_name') == class_name and mi.get('method_name') == method_name:
@@ -1707,5 +1809,5 @@ async def get_single_chain(baseline: str, version: str, direction: str, class_na
                 'chain': chain.get('chain', {}),
                 'source': 'legacy'
             }
-    
+   
     raise HTTPException(status_code=404, detail=f"Chain not found for {class_name}.{method_name}")

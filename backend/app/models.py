@@ -14,7 +14,8 @@ class TaskSubmitRequest(BaseModel):
     tag_new: str = Field(..., description="新版本标签")
     max_depth: int = Field(default=5, ge=1, le=10, description="最大分析深度")
     password: Optional[str] = Field(None, description="Git 密码（可选）")
-    
+    pipeline_name: Optional[str] = Field(None, description="流水线名称（用于映射Git URL）")
+
     # 埋点字段
     project_code: Optional[str] = Field("", description="项目编号")
     task_stage: Optional[str] = Field("", description="子任务阶段")

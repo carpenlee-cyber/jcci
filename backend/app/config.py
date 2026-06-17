@@ -41,18 +41,18 @@ class Settings(BaseSettings):
         return [o.strip() for o in self.ALLOWED_ORIGINS.split(",") if o.strip()]
     
     # # LLM API 配置
-    # LLM_API_URL: str = "http://testhub-ai-runtime-gateway.paasuat.china.cn/v1"
-    # LLM_API_KEY: str = "app-gf4FuFGcnrgim1KX2t2ae6DV"
+    # LLM_API_URL: str = "https://openai.good.hidns.vip/v1"
+    # LLM_API_KEY: str = "sk-B882bCwUweSeMRscoNwxZw4vxpjXmvWTLBxO5aXC7WAYhfwa"
     # # LLM_MODEL: str = "minimaxai/minimax-m2.7"
     # LLM_MODEL: str = "moonshotai/kimi-k2.6"
     
     # LLM API 配置
-    LLM_API_URL: str = "http://192.168.50.46:8317/v1"
-    LLM_API_KEY: str = "sk-JDKWFDsjavDzhGMWR"
-    LLM_MODEL: str = "gemini-3.1-flash-lite"
-    
+    LLM_API_URL: str = "http://testhub-ai-runtime-gateway.paasuat.cmbchina.cn/v1"
+    LLM_API_KEY: str = "app-gf4FuFGcnrgim1KX2t2ae6DV"
+    LLM_MODEL: str = "公司内部模型"
 
-
+    # PipelineAnalysisV2 API 配置
+    PIPELINE_V2_API_BASE_URL: str = "http://localhost:8001"
 
     class Config:
         env_file = ".env"
