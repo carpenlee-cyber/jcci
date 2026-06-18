@@ -80,19 +80,37 @@ export const useAIAnalysisStore = defineStore('aiAnalysis', () => {
   /**
    * 切换方法勾选
    */
-  function toggleMethod(class_name: string, method_name: string) {
-    const key = `${class_name}.${method_name}`
+  function toggleMethod(method: ChainMethod | any) {
+    // 优先使用数据库ID精确匹配
+    if (method.class_id !== undefined && method.method_id !== undefined) {
+      const idx = selectedMethods.value.findIndex(
+        m => m.class_id === method.class_id && m.method_id === method.method_id
+      )
+      if (idx >= 0) {
+        selectedMethods.value.splice(idx, 1)
+      } else {
+        const found = chainMethods.value.find(
+          m => m.class_id === method.class_id && m.method_id === method.method_id
+        )
+        if (found) {
+          selectedMethods.value.push(found)
+        }
+      }
+      return
+    }
+    // 回退到文本匹配
+    const key = `${method.class_name}.${method.method_name}`
     const idx = selectedMethods.value.findIndex(
       m => `${m.class_name}.${m.method_name}` === key
     )
     if (idx >= 0) {
       selectedMethods.value.splice(idx, 1)
     } else {
-      const method = chainMethods.value.find(
-        m => m.class_name === class_name && m.method_name === method_name
+      const found = chainMethods.value.find(
+        m => m.class_name === method.class_name && m.method_name === method.method_name
       )
-      if (method) {
-        selectedMethods.value.push(method)
+      if (found) {
+        selectedMethods.value.push(found)
       }
     }
   }
@@ -131,13 +149,19 @@ export const useAIAnalysisStore = defineStore('aiAnalysis', () => {
       method_info: data.methodInfo,
       db_info: data.dbInfo,
       chain_data: data.chainData || (data.analysisType === 'chain' ? {
-        method_info: data.methodInfo,
+        method_info: {
+          ...data.methodInfo,
+          class_id: data.methodInfo?.class_id,
+          method_id: data.methodInfo?.method_id
+        },
         methods: selectedMethods.value.map(m => ({
           class_name: m.class_name,
           method_name: m.method_name,
           signature: m.signature || `${m.method_name}()`,
           change_type: m.change_type || 'UNKNOWN',
-          documentation: m.documentation || ''
+          documentation: m.documentation || '',
+          class_id: m.class_id,
+          method_id: m.method_id
         }))
       } : undefined),
       selected_methods: data.analysisType === 'chain' ? selectedMethods.value : undefined

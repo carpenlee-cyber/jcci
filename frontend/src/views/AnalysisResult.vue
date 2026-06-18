@@ -127,6 +127,8 @@ const loadingMoreMethods = ref(false)
 const selectedMethodKey = ref('')
 const selectedChainData = ref<any[]>([])
 const chainLoading = ref(false)
+/** 当前选中的方法摘要（含 class_id/method_id） */
+const selectedMethodSummary = ref<ChainMethodSummary | null>(null)
 
 // 缓存全量链数据，避免重复请求
 const cachedChains = ref<Record<string, any[]>>({})
@@ -223,6 +225,7 @@ const handleMethodSelect = async (method: ChainMethodSummary) => {
   if (!baseline || !version) return
 
   selectedMethodKey.value = key
+  selectedMethodSummary.value = method
   chainLoading.value = true
   selectedChainData.value = []
 
@@ -327,6 +330,8 @@ const buildUpwardsChildren = (children: any[], isFirstLevel: boolean = false): a
       apiPaths: child.api_paths || [],
       rootType: child.root_type,
       isCyclic: child.is_cyclic || child.root_type === 'CYCLIC',
+      class_id: undefined,
+      method_id: child.db_method_id ?? undefined,
       children: buildUpwardsChildren(child.children || [])
     }
   })
@@ -345,6 +350,8 @@ const convertSingleUpwardsChain = (chain: any, index: number) => {
     label: rootLabel,
     changeType: mi.change_type,
     documentation: mi.documentation || ch.documentation || '',
+    class_id: selectedMethodSummary.value?.class_id ?? undefined,
+    method_id: selectedMethodSummary.value?.method_id ?? ch.db_method_id ?? undefined,
     children: buildUpwardsChildren(ch.children || [], true)
   }
 }
@@ -393,6 +400,8 @@ const buildDownwardsChildren = (children: any[]): any[] => {
         documentation: '',
         daoInfo: null,
         isCyclic: false,
+        class_id: undefined,
+        method_id: undefined,
         children: tagChildren
       })
     }
@@ -403,6 +412,8 @@ const buildDownwardsChildren = (children: any[]): any[] => {
       documentation: child.documentation || '',
       daoInfo: null,
       isCyclic: child.is_cyclic || false,
+      class_id: undefined,
+      method_id: child.db_method_id ?? undefined,
       children: grandChildren
     }
   })
@@ -421,6 +432,8 @@ const convertSingleDownwardsChain = (chain: any, index: number) => {
     label: rootLabel,
     changeType: mi.change_type,
     documentation: mi.documentation || ch.documentation || '',
+    class_id: selectedMethodSummary.value?.class_id ?? undefined,
+    method_id: selectedMethodSummary.value?.method_id ?? ch.db_method_id ?? undefined,
     children: buildDownwardsChildren(ch.children || [])
   }
 }
@@ -468,7 +481,7 @@ onMounted(async () => {
 
 <style scoped>
 .analysis-result {
-  max-width: 1400px;
+  max-width: 1600px;
   margin: 0 auto;
 }
 

@@ -58,6 +58,9 @@ export interface NodeStatus {
   latest_method_result_id: string | null
   latest_upwards_chain_result_id: string | null
   latest_downwards_chain_result_id: string | null
+  /** 数据库精确标识 */
+  class_id?: number
+  method_id?: number
 }
 
 export interface ChainMethod {
@@ -73,6 +76,9 @@ export interface ChainMethod {
   method_status: string
   upwards_chain_status: string
   downwards_chain_status: string
+  /** 数据库精确标识 */
+  class_id?: number
+  method_id?: number
 }
 
 /**
@@ -144,6 +150,8 @@ export function getMethodCode(params: {
   class_name: string
   method_name: string
   signature?: string
+  class_id?: number
+  method_id?: number
 }) {
   return apiClient.get<{
     baseline_code: string

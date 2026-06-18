@@ -76,7 +76,7 @@
             <div class="method-header">
               <el-checkbox
                 :model-value="isMethodSelected(method)"
-                @change="store.toggleMethod(method.class_name, method.method_name)"
+                @change="store.toggleMethod(method)"
               />
               <span class="method-index">{{ idx + 1 }}️</span>
               <span class="method-name">{{ method.class_name }}.{{ method.signature || method.method_name + '()' }}</span>
@@ -140,7 +140,7 @@ import { ref, onMounted, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { Back } from '@element-plus/icons-vue'
-import { useAIAnalysisStore } from '@/stores/aiAnalysis'
+import { useAIAnalysisStore } from '@/stores/analysisStore'
 import { getMethodCode } from '@/api/aiAnalysis'
 
 const route = useRoute()
@@ -161,7 +161,9 @@ const currentMethod = computed(() => ({
   class_name: (route.query.class_name as string) || '',
   method_name: (route.query.method_name as string) || '',
   change_type: (route.query.change_type as string) || 'UNKNOWN',
-  signature: (route.query.signature as string) || ''
+  signature: (route.query.signature as string) || '',
+  class_id: route.query.class_id ? Number(route.query.class_id) : undefined,
+  method_id: route.query.method_id ? Number(route.query.method_id) : undefined
 }))
 
 const changeTypeTag = (type: string) => {
@@ -209,6 +211,13 @@ const onDirectionChange = async () => {
 }
 
 const isMethodSelected = (method: any) => {
+  // 优先使用数据库ID精确匹配
+  if (method.class_id !== undefined && method.method_id !== undefined) {
+    return store.selectedMethods.some(
+      m => m.class_id === method.class_id && m.method_id === method.method_id
+    )
+  }
+  // 回退到文本匹配
   return store.selectedMethods.some(
     m => m.class_name === method.class_name && m.method_name === method.method_name
   )
@@ -248,6 +257,8 @@ const startAnalysis = async () => {
         method_name: currentMethod.value.method_name,
         change_type: currentMethod.value.change_type,
         signature: currentMethod.value.signature || '',
+        class_id: currentMethod.value.class_id,
+        method_id: currentMethod.value.method_id,
         baseline_code: methodCode.value?.baseline_code || '',
         current_code: methodCode.value?.current_code || '',
         annotations: methodCode.value?.annotations || '',
@@ -309,7 +320,9 @@ onMounted(async () => {
         baseline, version,
         class_name: currentMethod.value.class_name,
         method_name: currentMethod.value.method_name,
-        signature: currentMethod.value.signature || undefined
+        signature: currentMethod.value.signature || undefined,
+        class_id: currentMethod.value.class_id,
+        method_id: currentMethod.value.method_id
       })
       methodCode.value = res.data
     } catch (err) {

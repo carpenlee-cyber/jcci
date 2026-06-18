@@ -5,10 +5,6 @@
         <div class="card-header">
           <h2>📋 AI 分析结果</h2>
           <div>
-            <el-button @click="retryAnalysis" v-if="aiTaskId">
-              <el-icon><Refresh /></el-icon>
-              重新分析
-            </el-button>
             <el-button @click="backToAnalysis">
               <el-icon><Back /></el-icon>
               返回分析结果
@@ -87,9 +83,9 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, reactive } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { Back, Refresh } from '@element-plus/icons-vue'
+import { Back } from '@element-plus/icons-vue'
 import { marked } from 'marked'
-import { useAIAnalysisStore } from '@/stores/aiAnalysis'
+import { useAIAnalysisStore } from '@/stores/analysisStore'
 import { getAnalysisResult as fetchResult, getNodesStatus } from '@/api/aiAnalysis'
 
 const route = useRoute()
@@ -146,21 +142,6 @@ const renderedMarkdown = computed(() => {
   return marked(displayContent.value)
 })
 
-const retryAnalysis = () => {
-  // 跳转到 AI 分析配置页，携带当前方法信息
-  router.push({
-    name: 'AIAnalysisConfig',
-    params: { taskId: route.params.taskId as string },
-    query: {
-      class_name: result.value?.class_name || '',
-      method_name: result.value?.method_name || '',
-      change_type: 'UNKNOWN',
-      baseline: route.query.baseline || '',
-      version: route.query.version || '',
-      direction: route.query.direction || 'upwards'
-    }
-  })
-}
 
 const backToAnalysis = () => {
   router.push({

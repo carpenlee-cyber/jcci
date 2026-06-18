@@ -88,6 +88,9 @@ export interface ChainMethodSummary {
   upwards_chain_status: string
   downwards_chain_status: string
   endpoints: EndpointNode[]
+  /** 数据库精确标识 */
+  class_id?: number
+  method_id?: number
 }
 
 /**

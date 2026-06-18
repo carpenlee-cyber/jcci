@@ -8,46 +8,63 @@ import time
 import sqlite3
 import threading
 import uuid
+import requests
+import concurrent.futures
 from typing import Dict, Optional, List
 from app.config import settings
-
-
+from app.utils.llm_load_balancer import LLMKeyManager
 
 
 class LLMAnalysisStatus:
-    """全局 LLM 分析状态管理（线程安全）"""
-   
+    """
+    LLM 分析状态管理（线程安全，支持多任务并发）
+
+    改造说明：
+    - 原设计：全局单任务锁，只允许一个分析任务
+    - 新设计：任务级状态管理，支持多个批量任务并发执行
+    - 单方法分析（analyze_method）仍使用全局锁防止重复
+    - 批量分析（batch）通过任务ID管理状态
+    """
+
     IDLE = "idle"
     ANALYZING = "analyzing"
-   
+
     _instance = None
-   
+
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super().__new__(cls)
             cls._instance._lock = threading.Lock()
-            cls._instance._status = cls.IDLE
-            cls._instance._current_task = None
+            cls._instance._status = cls.IDLE  # 全局状态（用于单方法分析）
+            cls._instance._current_task = None  # 当前单方法任务描述
             cls._instance._started_at = None
+            cls._instance._tasks: Dict[str, Dict] = {}  # 批量任务状态: task_id -> {status, description, started_at}
         return cls._instance
-   
+
     @property
     def status(self) -> str:
+        """获取全局状态"""
         with self._lock:
             return self._status
-   
+
     @property
     def current_task(self) -> Optional[str]:
+        """获取当前单方法任务描述"""
         with self._lock:
             return self._current_task
-   
+
     @property
     def started_at(self) -> Optional[float]:
+        """获取单方法任务开始时间"""
         with self._lock:
             return self._started_at
-   
-    def start(self, task_description: str = ""):
-        """开始分析，返回 True 表示获取锁成功"""
+
+    def start(self, task_description: str = "") -> bool:
+        """
+        开始单方法分析，返回 True 表示获取锁成功
+
+        注意：此方法仅用于单方法分析，批量分析使用 start_task
+        """
         with self._lock:
             if self._status == self.ANALYZING:
                 return False
@@ -55,22 +72,74 @@ class LLMAnalysisStatus:
             self._current_task = task_description
             self._started_at = time.time()
             return True
-   
+
     def finish(self):
-        """完成分析"""
+        """完成单方法分析"""
         with self._lock:
             self._status = self.IDLE
             self._current_task = None
             self._started_at = None
-   
+
+    # ========== 批量任务状态管理 ==========
+
+    def start_task(self, task_id: str, task_description: str = "") -> bool:
+        """
+        开始批量任务（允许多任务并发）
+
+        Args:
+            task_id: 任务ID
+            task_description: 任务描述
+
+        Returns:
+            True 表示任务创建成功
+        """
+        with self._lock:
+            if task_id in self._tasks:
+                return False
+            self._tasks[task_id] = {
+                'status': 'running',
+                'description': task_description,
+                'started_at': time.time()
+            }
+            return True
+
+    def finish_task(self, task_id: str):
+        """完成批量任务"""
+        with self._lock:
+            if task_id in self._tasks:
+                del self._tasks[task_id]
+
+    def get_running_tasks(self) -> List[str]:
+        """获取运行中的批量任务列表"""
+        with self._lock:
+            return list(self._tasks.keys())
+
+    def get_task_count(self) -> int:
+        """获取运行中的批量任务数量"""
+        with self._lock:
+            return len(self._tasks)
+
+    def is_task_running(self, task_id: str) -> bool:
+        """检查指定任务是否在运行"""
+        with self._lock:
+            return task_id in self._tasks
+
     def to_dict(self) -> dict:
         with self._lock:
             elapsed = (time.time() - self._started_at) if self._started_at else 0
             return {
                 "status": self._status,
                 "current_task": self._current_task,
-                "elapsed_seconds": round(elapsed, 1)
+                "elapsed_seconds": round(elapsed, 1),
+                "running_batch_tasks": len(self._tasks),
+                "batch_task_ids": list(self._tasks.keys())
             }
+
+
+
+
+
+
 
 
 
@@ -81,17 +150,47 @@ llm_status = LLMAnalysisStatus()
 
 
 
+
+
+
+
+
+
 class LLMService:
     """LLM 分析服务"""
-   
+
     def __init__(self):
         self.api_url = settings.LLM_API_URL
-        self.api_key = settings.LLM_API_KEY
-        self.model = settings.LLM_MODEL
         self.db_path = settings.DB_PATH
         self._api_lock = threading.Lock()  # 全局 LLM API 并发锁
+
+        # 并发配置
+        self.concurrent_workers = settings.LLM_CONCURRENT_WORKERS
+        self.concurrent_enabled = settings.LLM_CONCURRENT_ENABLED
+        self.task_timeout = settings.LLM_TASK_TIMEOUT
+
+        # 初始化负载均衡器
+        self._init_load_balancer()
+
         self._ensure_cache_table()
         self._ensure_task_tables()
+
+    def _init_load_balancer(self):
+        """初始化负载均衡器"""
+        # 使用多KEY配置（如果配置了LLM_API_KEYS）
+        if hasattr(settings, 'LLM_API_KEYS') and settings.LLM_API_KEYS:
+            # 使用字典列表格式
+            keys_list = settings.llm_api_keys_dict
+            self.key_manager = LLMKeyManager(keys_list)
+            self.api_key = None  # 不再使用单个API KEY
+            self.model = ""  # 将在每次调用时更新为实际使用的模型
+            print(f"[LLMService] 已启用多KEY负载均衡，共{len(keys_list)}个API KEY")
+        else:
+            # 向后兼容：使用单个API KEY
+            self.key_manager = None
+            self.api_key = settings.LLM_API_KEY
+            self.model = settings.LLM_MODEL
+            print(f"[LLMService] 使用单个API KEY: {self.api_key[:8]}...")
 
 
     def _ensure_cache_table(self):
@@ -436,120 +535,7 @@ class LLMService:
         except Exception as e:
             self.update_task_status(task_id, 'failed', error_message=str(e))
    
-    # def run_chain_task(
-    #     self,
-    #     task_id: str,
-    #     chain_data: Dict,
-    #     selected_methods: List[Dict],
-    #     direction: str = 'upwards',
-    #     baseline: str = '',
-    #     version: str = '',
-    #     force_fresh: bool = False,
-    #     custom_system_prompt: str = '',
-    #     custom_analysis_prompt: str = ''
-    # ):
-    #     """后台执行链路分析任务（逐方法分析 + 聚合）"""
-    #     try:
-    #         total = len(selected_methods)
-    #         self.update_task_status(task_id, 'running', progress=0.05,
-    #                                 total_methods=total, completed_methods=0,
-    #                                 current_stage='method_analysis')
-    #
-    #         sub_results = []
-    #         for idx, method_info in enumerate(selected_methods):
-    #             class_name = method_info.get('class_name', '')
-    #             method_name = method_info.get('method_name', '')
-    #
-    #             try:
-    #                 result = self.analyze_method(
-    #                     method_info=method_info,
-    #                     db_info=method_info.get('db_info', {}),
-    #                     direction=direction,
-    #                     baseline=baseline,
-    #                     version=version,
-    #                     force_fresh=force_fresh,
-    #                     custom_system_prompt=custom_system_prompt,
-    #                     custom_analysis_prompt=custom_analysis_prompt
-    #                 )
-    #
-    #                 self.save_result(
-    #                     task_id=task_id,
-    #                     class_name=class_name,
-    #                     method_name=method_name,
-    #                     analysis_result=result['result'],
-    #                     analysis_duration=result.get('duration', 0.0),
-    #                     from_cache=result.get('from_cache', False),
-    #                     parent_task_id=task_id
-    #                 )
-    #
-    #                 sub_results.append({
-    #                     'class_name': class_name,
-    #                     'method_name': method_name,
-    #                     'result': result['result'],
-    #                     'from_cache': result.get('from_cache', False)
-    #                 })
-    #             except Exception as e:
-    #                 sub_results.append({
-    #                     'class_name': class_name,
-    #                     'method_name': method_name,
-    #                     'result': f"分析失败: {str(e)}",
-    #                     'from_cache': False,
-    #                     'error': str(e)
-    #                 })
-    #
-    #             # 更新进度
-    #             completed = idx + 1
-    #             progress = 0.05 + (0.55 * completed / total)
-    #             self.update_task_status(task_id, 'running', progress=progress,
-    #                                     completed_methods=completed)
-    #
-    #         # 阶段2：聚合分析
-    #         self.update_task_status(task_id, 'running', progress=0.65,
-    #                                 current_stage='aggregation')
-    #
-    #         success_results = [r for r in sub_results if 'error' not in r]
-    #         if not success_results:
-    #             raise Exception("所有子方法分析均失败，无法进行聚合分析")
-    #
-    #         # 构建聚合提示词
-    #         aggregation_prompt = self._build_chain_aggregation_prompt(
-    #             chain_data, direction, success_results,
-    #             custom_analysis_prompt,
-    #             baseline=baseline, version=version
-    #         )
-    #         system_prompt = custom_system_prompt or self._get_system_prompt('chain')
-    #
-    #         start_time = time.time()
-    #         aggregation_result = self._call_llm_api(aggregation_prompt, system_prompt)
-    #         duration = time.time() - start_time
-    #
-    #         # 保存聚合结果
-    #         mi = chain_data.get('method_info', {})
-    #         self.save_result(
-    #             task_id=task_id,
-    #             class_name=mi.get('class_name', ''),
-    #             method_name=mi.get('method_name', ''),
-    #             analysis_result=aggregation_result,
-    #             analysis_duration=duration,
-    #             from_cache=False
-    #         )
-    #
-    #         # 保存到缓存
-    #         self._save_to_cache(
-    #             analysis_type='chain',
-    #             direction=direction,
-    #             baseline=baseline,
-    #             version=version,
-    #             class_name=mi.get('class_name', ''),
-    #             method_name=mi.get('method_name', ''),
-    #             change_type=mi.get('change_type', 'UNKNOWN'),
-    #             analysis_result=aggregation_result,
-    #             analysis_duration=duration
-    #         )
-    #
-    #         self.update_task_status(task_id, 'completed', progress=1.0)
-    #     except Exception as e:
-    #         self.update_task_status(task_id, 'failed', error_message=str(e))
+
    
     def run_batch_method_task(
         self,
@@ -562,55 +548,203 @@ class LLMService:
         custom_system_prompt: str = '',
         custom_analysis_prompt: str = ''
     ):
-        """后台执行批量方法分析（逐方法调用 analyze_method，实时更新 Tree 标签）"""
+        """
+        后台执行批量方法分析（支持并发执行，实时更新 Tree 标签）
+
+        根据 LLM_CONCURRENT_ENABLED 配置决定是否并发执行：
+        - 启用并发：使用线程池并发调用多个 LLM API KEY
+        - 禁用并发：顺序执行（兼容模式）
+        """
         try:
             total = len(methods)
             self.update_task_status(task_id, 'running', progress=0.05,
                                     total_methods=total, completed_methods=0,
                                     current_stage='method_analysis')
-           
-            for idx, method_info in enumerate(methods):
-                class_name = method_info.get('class_name', '')
-                method_name = method_info.get('method_name', '')
-               
-                try:
-                    # 从数据库加载方法的完整代码信息，确保与单次分析提示词一致
-                    method_info = self._enrich_method_info_with_code(
-                        method_info, baseline, version
-                    )
-                    result = self.analyze_method(
-                        method_info=method_info,
-                        db_info=method_info.get('db_info', {}),
-                        direction=direction,
-                        baseline=baseline,
-                        version=version,
-                        force_fresh=force_fresh,
-                        custom_system_prompt=custom_system_prompt,
-                        custom_analysis_prompt=custom_analysis_prompt
-                    )
-                   
-                    self.save_result(
-                        task_id=task_id,
-                        class_name=class_name,
-                        method_name=method_name,
-                        analysis_result=result['result'],
-                        analysis_duration=result.get('duration', 0.0),
-                        from_cache=result.get('from_cache', False),
-                        parent_task_id=task_id
-                    )
-                except Exception as e:
-                    print(f"[BATCH] 批量分析子方法失败 {class_name}.{method_name}: {e}")
-               
-                # 更新进度
-                completed = idx + 1
-                progress = 0.05 + (0.9 * completed / total)
-                self.update_task_status(task_id, 'running', progress=progress,
-                                        completed_methods=completed)
-           
+
+            # 根据配置选择执行模式
+            if self.concurrent_enabled and total > 1:
+                print(f"[BATCH] 启用并发模式，并发度={self.concurrent_workers}，共{total}个方法")
+                self._run_batch_concurrent(
+                    task_id, methods, direction, baseline, version,
+                    force_fresh, custom_system_prompt, custom_analysis_prompt
+                )
+            else:
+                print(f"[BATCH] 使用顺序模式，共{total}个方法")
+                self._run_batch_sequential(
+                    task_id, methods, direction, baseline, version,
+                    force_fresh, custom_system_prompt, custom_analysis_prompt
+                )
+
             self.update_task_status(task_id, 'completed', progress=1.0)
         except Exception as e:
+            print(f"[BATCH] 批量分析任务失败: {e}")
             self.update_task_status(task_id, 'failed', error_message=str(e))
-   
+
+    def _run_batch_sequential(
+        self,
+        task_id: str,
+        methods: List[Dict],
+        direction: str,
+        baseline: str,
+        version: str,
+        force_fresh: bool,
+        custom_system_prompt: str,
+        custom_analysis_prompt: str
+    ):
+        """顺序执行批量分析（兼容模式）"""
+        total = len(methods)
+        for idx, method_info in enumerate(methods):
+            class_name = method_info.get('class_name', '')
+            method_name = method_info.get('method_name', '')
+
+            try:
+                # 从数据库加载方法的完整代码信息，确保与单次分析提示词一致
+                method_info = self._enrich_method_info_with_code(
+                    method_info, baseline, version
+                )
+                result = self.analyze_method(
+                    method_info=method_info,
+                    db_info=method_info.get('db_info', {}),
+                    direction=direction,
+                    baseline=baseline,
+                    version=version,
+                    force_fresh=force_fresh,
+                    custom_system_prompt=custom_system_prompt,
+                    custom_analysis_prompt=custom_analysis_prompt
+                )
+
+                self.save_result(
+                    task_id=task_id,
+                    class_name=class_name,
+                    method_name=method_name,
+                    analysis_result=result['result'],
+                    analysis_duration=result.get('duration', 0.0),
+                    from_cache=result.get('from_cache', False),
+                    parent_task_id=task_id
+                )
+            except Exception as e:
+                print(f"[BATCH] 批量分析子方法失败 {class_name}.{method_name}: {e}")
+
+            # 更新进度
+            completed = idx + 1
+            progress = 0.05 + (0.9 * completed / total)
+            self.update_task_status(task_id, 'running', progress=progress,
+                                    completed_methods=completed)
+
+    def _run_batch_concurrent(
+        self,
+        task_id: str,
+        methods: List[Dict],
+        direction: str,
+        baseline: str,
+        version: str,
+        force_fresh: bool,
+        custom_system_prompt: str,
+        custom_analysis_prompt: str
+    ):
+        """
+        并发执行批量分析（核心并发逻辑）
+
+        使用 ThreadPoolExecutor 实现并发，每个线程独立调用 LLM API，
+        负载均衡器自动分配不同的 API KEY，实现真正的并发处理。
+        """
+        total = len(methods)
+        completed_count = [0]  # 使用列表以便在闭包中修改
+        lock = threading.Lock()
+
+        def analyze_single_method(method_info: Dict) -> Dict:
+            """单个方法分析任务（线程工作函数）"""
+            class_name = method_info.get('class_name', '')
+            method_name = method_info.get('method_name', '')
+
+            try:
+                # 从数据库加载方法的完整代码信息
+                enriched_info = self._enrich_method_info_with_code(
+                    method_info.copy(), baseline, version
+                )
+
+                result = self.analyze_method(
+                    method_info=enriched_info,
+                    db_info=enriched_info.get('db_info', {}),
+                    direction=direction,
+                    baseline=baseline,
+                    version=version,
+                    force_fresh=force_fresh,
+                    custom_system_prompt=custom_system_prompt,
+                    custom_analysis_prompt=custom_analysis_prompt
+                )
+
+                # 保存结果
+                self.save_result(
+                    task_id=task_id,
+                    class_name=class_name,
+                    method_name=method_name,
+                    analysis_result=result['result'],
+                    analysis_duration=result.get('duration', 0.0),
+                    from_cache=result.get('from_cache', False),
+                    parent_task_id=task_id
+                )
+
+                return {
+                    'success': True,
+                    'class_name': class_name,
+                    'method_name': method_name,
+                    'from_cache': result.get('from_cache', False)
+                }
+
+            except Exception as e:
+                print(f"[BATCH-CONCURRENT] 分析失败 {class_name}.{method_name}: {e}")
+                return {
+                    'success': False,
+                    'class_name': class_name,
+                    'method_name': method_name,
+                    'error': str(e)
+                }
+
+            finally:
+                # 更新进度（线程安全）
+                with lock:
+                    completed_count[0] += 1
+                    progress = 0.05 + (0.9 * completed_count[0] / total)
+                    self.update_task_status(
+                        task_id, 'running',
+                        progress=progress,
+                        completed_methods=completed_count[0]
+                    )
+
+        # 使用线程池并发执行
+        with concurrent.futures.ThreadPoolExecutor(
+            max_workers=self.concurrent_workers
+        ) as executor:
+            # 提交所有任务
+            futures = {
+                executor.submit(analyze_single_method, method): method
+                for method in methods
+            }
+
+            # 等待所有任务完成（带超时）
+            total_timeout = self.task_timeout * max(1, total // self.concurrent_workers)
+            try:
+                for future in concurrent.futures.as_completed(
+                    futures, timeout=total_timeout
+                ):
+                    method = futures[future]
+                    try:
+                        result = future.result(timeout=self.task_timeout)
+                        if result['success']:
+                            cache_mark = '缓存' if result.get('from_cache') else '全新'
+                            print(f"[BATCH-CONCURRENT] 完成 {result['class_name']}.{result['method_name']} ({cache_mark})")
+                        else:
+                            print(f"[BATCH-CONCURRENT] 方法分析失败: {result}")
+                    except concurrent.futures.TimeoutError:
+                        class_name = method.get('class_name', '?')
+                        method_name = method.get('method_name', '?')
+                        print(f"[BATCH-CONCURRENT] 方法分析超时: {class_name}.{method_name}")
+                    except Exception as e:
+                        print(f"[BATCH-CONCURRENT] 方法分析异常: {e}")
+            except concurrent.futures.TimeoutError:
+                print(f"[BATCH-CONCURRENT] 批量分析总超时，已完成 {completed_count[0]}/{total}")
+
     def _enrich_method_info_with_code(
         self,
         method_info: Dict,
@@ -695,6 +829,115 @@ class LLMService:
             baseline_proj = cursor.fetchone()
             baseline_project_id = baseline_proj['project_id'] if baseline_proj else 0
 
+            # 辅助：将 body 解析为代码行字符串
+            def _parse_body(body_val):
+                if not body_val:
+                    return ''
+                body_lines = json.loads(body_val) if isinstance(body_val, str) else (body_val or [])
+                if isinstance(body_lines, list):
+                    return '\n'.join(body_lines)
+                return str(body_lines) if body_lines else ''
+
+            # ── ID 精确查询路径（优先使用，跳过文本匹配） ──
+            class_id = method_info.get('class_id')
+            method_id = method_info.get('method_id')
+            if class_id is not None and method_id is not None:
+                def _query_by_id(_cursor, _proj_id):
+                    _cursor.execute('''
+                        SELECT m.body, m.annotations, m.access_modifier,
+                               m.return_type, m.parameters, m.change_type
+                        FROM methods m
+                        WHERE m.class_id = ? AND m.method_id = ? AND m.project_id = ?
+                        LIMIT 1
+                    ''', (class_id, method_id, _proj_id))
+                    return _cursor.fetchone()
+
+                baseline_row_selected = _query_by_id(cursor, baseline_project_id)
+
+                baseline_code = _parse_body(baseline_row_selected['body']) if baseline_row_selected else ''
+                annotations = baseline_row_selected['annotations'] or '' if baseline_row_selected else ''
+                access_modifier = baseline_row_selected['access_modifier'] or '' if baseline_row_selected else ''
+                return_type = baseline_row_selected['return_type'] or '' if baseline_row_selected else ''
+                parameters = baseline_row_selected['parameters'] or '' if baseline_row_selected else ''
+
+                # 版本代码：不用(class_id, method_id)查（跨project ID不同！），
+                # 用 类名+方法名+project_id+参数签名 查询（支持重载方法）
+                current_code = ''
+                if class_name and method_name:
+                    _short_cls = short_class_name
+                    _pkg = package_name
+
+                    if version_project_id is not None and version_project_id != baseline_project_id:
+                        if _pkg:
+                            cursor.execute('''
+                                SELECT m.body, m.annotations, m.access_modifier,
+                                       m.return_type, m.parameters, m.change_type
+                                FROM methods m
+                                JOIN class c ON m.class_id = c.class_id
+                                WHERE c.class_name = ? AND c.package_name = ?
+                                  AND m.method_name = ? AND m.project_id = ?
+                            ''', (_short_cls, _pkg, method_name, version_project_id))
+                        else:
+                            cursor.execute('''
+                                SELECT m.body, m.annotations, m.access_modifier,
+                                       m.return_type, m.parameters, m.change_type
+                                FROM methods m
+                                JOIN class c ON m.class_id = c.class_id
+                                WHERE c.class_name = ? AND m.method_name = ?
+                                  AND m.project_id = ?
+                            ''', (_short_cls, method_name, version_project_id))
+                        version_rows = cursor.fetchall()
+                    else:
+                        # 无project_id时，查询所有非基线project的记录
+                        if _pkg:
+                            cursor.execute('''
+                                SELECT m.body, m.annotations, m.access_modifier,
+                                       m.return_type, m.parameters, m.change_type
+                                FROM methods m
+                                JOIN class c ON m.class_id = c.class_id
+                                WHERE c.class_name = ? AND c.package_name = ?
+                                  AND m.method_name = ? AND m.project_id != ?
+                                ORDER BY m.project_id DESC
+                            ''', (_short_cls, _pkg, method_name, baseline_project_id))
+                        else:
+                            cursor.execute('''
+                                SELECT m.body, m.annotations, m.access_modifier,
+                                       m.return_type, m.parameters, m.change_type
+                                FROM methods m
+                                JOIN class c ON m.class_id = c.class_id
+                                WHERE c.class_name = ? AND m.method_name = ?
+                                  AND m.project_id != ?
+                                ORDER BY m.project_id DESC
+                            ''', (_short_cls, method_name, baseline_project_id))
+                        version_rows = cursor.fetchall()
+
+                    if version_rows:
+                        if len(version_rows) == 1:
+                            version_row_selected = version_rows[0]
+                        else:
+                            # 重载方法：使用 change_type 匹配
+                            target_ct = method_info.get('change_type', '')
+                            version_row_selected = None
+                            for row in version_rows:
+                                if row['change_type'] == target_ct:
+                                    version_row_selected = row
+                                    break
+                            if not version_row_selected:
+                                version_row_selected = version_rows[0]
+                        current_code = _parse_body(version_row_selected['body'])
+
+                if not current_code:
+                    current_code = baseline_code
+
+                conn.close()
+                method_info['baseline_code'] = baseline_code
+                method_info['current_code'] = current_code
+                method_info['annotations'] = annotations
+                method_info['access_modifier'] = access_modifier
+                method_info['return_type'] = return_type
+                method_info['parameters'] = parameters
+                return method_info
+
             # 辅助：按包名查询方法（返回所有行，用于处理过载方法）
             def _query_method(cursor, short_cls, pkg, mtd, proj_id):
                 if pkg:
@@ -759,15 +1002,6 @@ class LLMService:
                     if _match_param_types(param_types, db_types):
                         return row
                 return None
-
-            # 辅助：将 body 解析为代码行字符串
-            def _parse_body(body_val):
-                if not body_val:
-                    return ''
-                body_lines = json.loads(body_val) if isinstance(body_val, str) else (body_val or [])
-                if isinstance(body_lines, list):
-                    return '\n'.join(body_lines)
-                return str(body_lines) if body_lines else ''
 
             # ── 查询版本代码 ──
             version_row_selected = None
@@ -1057,7 +1291,9 @@ class LLMService:
             short_class = class_name.rsplit('.', 1)[-1] if '.' in class_name else class_name
             source_code = self._fetch_method_bodies(baseline, version, [{
                 'class_name': short_class,
-                'method_name': method_name
+                'method_name': method_name,
+                'class_id': method_info.get('class_id'),
+                'method_id': method_info.get('method_id')
             }]).get(f"{short_class}.{method_name}")
        
         # 构建提示词
@@ -1081,86 +1317,6 @@ class LLMService:
         # 保存到缓存
         self._save_to_cache(
             analysis_type='method',
-            direction=direction,
-            baseline=baseline,
-            version=version,
-            class_name=class_name,
-            method_name=method_name,
-            change_type=change_type,
-            analysis_result=result,
-            analysis_duration=duration
-        )
-       
-        return {
-            'result': result,
-            'from_cache': False,
-            'duration': duration,
-            'cache_info': None
-        }
-   
-    def analyze_chain(
-        self,
-        chain_data: Dict,
-        direction: str = 'upwards',
-        baseline: str = '',
-        version: str = '',
-        force_fresh: bool = False,
-        custom_system_prompt: str = '',
-        custom_analysis_prompt: str = ''
-    ) -> Dict:
-        """
-        分析整个调用链的影响和风险
-       
-        Args:
-            chain_data: 调用链数据字典
-            direction: 分析方向
-            baseline: 基线名称
-            version: 版本名称
-            force_fresh: 是否强制全新分析
-            custom_system_prompt: 自定义系统提示词
-            custom_analysis_prompt: 自定义分析提示词
-           
-        Returns:
-            分析结果字典
-        """
-        method_info = chain_data.get('method_info', {})
-       
-        class_name = method_info.get('class_name', '')
-        method_name = method_info.get('method_name', '')
-        change_type = method_info.get('change_type', 'UNKNOWN')
-       
-        # 尝试从缓存获取
-        if not force_fresh:
-            cached = self._get_from_cache('chain', direction, baseline, version,
-                                          class_name, method_name, change_type)
-            if cached:
-                return {
-                    'result': cached['analysis_result'],
-                    'from_cache': True,
-                    'duration': 0.0,
-                    'cache_info': {
-                        'created_at': cached['created_at'],
-                        'model_name': cached['model_name'],
-                        'analysis_duration': cached['analysis_duration']
-                    }
-                }
-       
-        # 构建提示词
-        prompt = custom_analysis_prompt or self._build_chain_prompt(chain_data, direction, baseline, version)
-        system_prompt = custom_system_prompt or self._get_system_prompt('chain')
-       
-        # 调用 LLM API
-        start_time = time.time()
-        result = self._call_llm_api(prompt, system_prompt)
-        duration = time.time() - start_time
-       
-        # 检测 API 错误响应（非异常但返回了错误文本）
-        if result.startswith('请求异常') or result.startswith('API调用失败'):
-            raise Exception(result)
-       
-        # 保存到缓存
-        self._save_to_cache(
-            analysis_type='chain',
             direction=direction,
             baseline=baseline,
             version=version,
@@ -1458,7 +1614,11 @@ class LLMService:
                 if not method_name:
                     continue
                 key = f"{class_name}.{method_name}"
-   
+            
+                method_id = m.get('method_id')
+                class_id = m.get('class_id')
+            
+                # 优先用 类名+方法名 查询（跨project ID不同，类名+方法名更可靠）
                 cursor.execute('''
                     SELECT m.body, m.annotations, m.parameters, m.return_type,
                            m.access_modifier, m.change_type, c.class_name
@@ -1468,6 +1628,17 @@ class LLMService:
                     LIMIT 1
                 ''', (class_name, method_name))
                 row = cursor.fetchone()
+                if not row and class_id is not None and method_id is not None:
+                    # 类名+方法名未找到，回退到ID查询
+                    cursor.execute('''
+                        SELECT m.body, m.annotations, m.parameters, m.return_type,
+                               m.access_modifier, m.change_type, c.class_name
+                        FROM methods m
+                        JOIN class c ON m.class_id = c.class_id
+                        WHERE m.class_id = ? AND m.method_id = ?
+                        LIMIT 1
+                    ''', (class_id, method_id))
+                    row = cursor.fetchone()
    
                 if row:
                     body_lines = self._parse_body(row['body'])
@@ -1631,281 +1802,43 @@ class LLMService:
 
 
         return prompt
-   
-    def _build_chain_prompt(
-        self, chain_data: Dict, direction: str,
-        baseline: str = '', version: str = ''
-    ) -> str:
-        """构建增强版调用链分析提示词——含完整拓扑、方法源码、入口分类"""
-        method_info = chain_data.get('method_info', {})
-        class_name = method_info.get('class_name', '')
-        method_name = method_info.get('method_name', '')
 
-
-        direction_cn = '向上（影响面评估）' if direction == 'upwards' else '向下（功能风险评估）'
-
-
-        prompt = f"""请基于以下完整的调用链信息进行{'向上' if direction == 'upwards' else '向下'}链路分析：
-
-
-【分析任务】
-- 方向: {direction_cn}
-- 变更方法: {class_name}.{method_name}
-- 变更类型: {method_info.get('change_type', 'UNKNOWN')}
-"""
-
-
-        # ── 第一部分：调用链完整拓扑 ──
-        full_chain = None
-        entry_points = []
-
-
-        if baseline and version:
-            full_chain = self._load_chain_from_disk(
-                baseline, version, direction, class_name, method_name)
-
-
-        if full_chain:
-            chain_tree = full_chain.get('chain_tree')
-            entry_points = full_chain.get('entry_points', [])
-
-
-            if chain_tree:
-                topology_lines = []
-                self._format_chain_topology(
-                    chain_tree, direction, topology_lines, depth=0, is_root=True)
-                topology_text = '\n'.join(topology_lines)
-                prompt += f"""
-【调用链完整拓扑】
-（缩进表示调用深度，箭头表示调用方向，行号来自源码中的调用点）
-
-
-{topology_text}
-"""
-
-
-        # ── 第二部分：入口/出口点分类 ──
-        if direction == 'upwards' and entry_points:
-            entry_by_type = {}
-            for ep in entry_points:
-                rt = ep.get('root_type', 'UNKNOWN')
-                entry_by_type.setdefault(rt, []).append(ep)
-
-
-            entry_type_labels = {
-                'HTTP_API': 'HTTP API端点', 'SCHEDULED_TASK': '定时任务',
-                'EVENT_LISTENER': '事件监听器', 'MESSAGE_CONSUMER': '消息队列消费者',
-                'CONTROLLER_BY_CONVENTION': 'Controller（约定）',
-                'NO_STATIC_CALLER': '无静态调用者（可能是动态调用）'
-            }
-
-
-            prompt += f"\n【入口点分类汇总】(共 {len(entry_points)} 个)\n"
-            for rt, eps in sorted(entry_by_type.items()):
-                label = entry_type_labels.get(rt, rt)
-                prompt += f"\n{label} ({len(eps)} 个):\n"
-                for ep in eps[:5]:  # 每类最多显示5个
-                    pc = ep.get('package_class', '?')
-                    ms = ep.get('method_signature', '?')
-                    prompt += f"  - {pc}.{ms}\n"
-                if len(eps) > 5:
-                    prompt += f"  ... 还有 {len(eps) - 5} 个\n"
-
-
-        elif direction == 'downwards' and full_chain:
-            chain_tree = full_chain.get('chain_tree')
-            if chain_tree:
-                total_nodes = len(self._collect_chain_methods(chain_tree))
-                prompt += f"\n【链路规模】\n- 总节点数: {total_nodes}\n"
-
-
-        # ── 第三部分：链路中各方法源码 ──
-        if full_chain and full_chain.get('chain_tree'):
-            chain_methods = self._collect_chain_methods(full_chain['chain_tree'])
-            # 优先展示变更方法（ADDED/MODIFIED/DELETED）
-            changed = [m for m in chain_methods if m['change_type'] != 'UNCHANGED']
-            unchanged = [m for m in chain_methods if m['change_type'] == 'UNCHANGED']
-
-
-            # 限制总数避免上下文溢出
-            methods_to_show = changed + unchanged[:max(0, 15 - len(changed))]
-
-
-            bodies = self._fetch_method_bodies(baseline, version, methods_to_show)
-
-
-            if bodies:
-                prompt += "\n【链路中各方法详情】\n"
-                for m in methods_to_show:
-                    key = f"{m['class_name']}.{m['method_name']}"
-                    body = bodies.get(key, {})
-                    if not body:
-                        continue
-
-
-                    sig = m.get('method_signature', m['method_name'])
-                    ct_map = {'ADDED': '[新增]', 'MODIFIED': '[修改]', 'DELETED': '[删除]', 'UNCHANGED': ''}
-                    ct_tag = ct_map.get(m['change_type'], '')
-
-
-                    prompt += f"\n### {key}.{sig} {ct_tag} (深度={m['depth']})\n"
-                    if body.get('annotations'):
-                        prompt += f"注解: {body['annotations']}\n"
-                    prompt += f"签名: {body.get('access_modifier', '')} {body.get('return_type', 'void')} {m['method_name']}({body.get('parameters', '')})\n"
-                    prompt += f"```java\n{body.get('body', '(源码未获取)')}\n```\n"
-        elif entry_points and not full_chain:
-            # 回退：仅有 entry_points 信息
-            prompt += "\n【入口点信息】(链拓扑文件未加载，仅显示入口点)\n"
-            for i, entry in enumerate(entry_points[:10], 1):
-                prompt += (f"{i}. [{entry.get('root_type', 'N/A')}] "
-                          f"{entry.get('package_class', 'N/A')}."
-                          f"{entry.get('method_signature', 'N/A')}\n")
-
-
-        # ── 第四部分：分析要求 ──
-        if direction == 'upwards':
-            prompt += """
-【分析要求】
-**重要：请在你的分析报告最开头，首先输出【调用链路图谱】章节——直接引用上文【调用链完整拓扑】中的图谱结构（可简化为 类名.方法名 格式，保留缩进层次和箭头方向），作为用户对照的基准。然后再按以下要求逐层分析：**
-
-
-1. **调用链路逐层分析**
-   - 从入口点到变更方法的每一层调用中，变更如何传递影响
-   - CHA推断的调用注明不确定性
-   - 识别间接影响的模块和功能
-
-
-2. **入口点影响面**
-   - 每个入口 API / 定时任务 / 事件监听器受到的具体影响
-   - 对外部调用方（前端、第三方）的兼容性影响
-   - 如果入口方法本身有变更，重点分析 API 契约变化
-
-
-3. **数据流与状态变化追踪**
-   - 参数在各层方法间如何传递和变换
-   - 数据库操作的影响（表、SQL类型、事务范围）
-   - 缓存、消息队列等中间件的级联影响
-
-
-4. **风险评估（按入口点分组）**
-   - 高风险变更（数据破坏、资金安全、权限绕过）
-   - 中风险变更（性能退化、兼容性）
-   - 低风险变更（内部实现调整）
-   - CHA推断的调用注明风险置信度
-
-
-5. **端到端测试策略**
-   - 按入口点分别设计测试场景（含输入、预期、优先级）
-   - 回归测试清单（受影响的核心链路）
-   - 性能测试建议（如涉及SQL变更）
-
-
-请使用中文回答，结合源码细节给出具体可执行的分析。"""
-        else:
-            prompt += """
-【分析要求】
-**重要：请在你的分析报告最开头，首先输出【调用链路图谱】章节——直接引用上文【调用链完整拓扑】中的图谱结构（可简化为 类名.方法名 格式，保留缩进层次和箭头方向），作为用户对照的基准。然后再按以下要求分析：**
-
-
-请基于以上完整的调用链拓扑和源码，分析变更方法向下调用链的功能风险：
-
-
-1. **调用链路逐层分析**
-   - 从变更方法到末端方法的每一层调用关系和功能
-   - 识别关键的依赖节点和SQL操作
-   - CHA推断的调用注明不确定性
-
-
-2. **下游影响评估**
-   - 各下游方法的变更影响（数据修改、异常传播）
-   - SQL操作的风险（表变更、性能、数据一致性）
-   - 外部依赖（RPC、HTTP调用、消息队列）的稳定性
-
-
-3. **数据流追踪**
-   - 变更方法的返回值如何被下游使用
-   - 数据库读写链路和事务边界
-   - 可能的副作用（缓存更新、事件发布）
-
-
-4. **风险评估**
-   - 高风险：N+1查询、大事务、无WHERE的UPDATE/DELETE
-   - 中风险：异常未处理、缓存不一致
-   - 低风险：日志、审计等辅助功能
-
-
-5. **测试策略**
-   - 各下游方法的单元/集成测试场景设计
-   - SQL验证（执行计划、锁、回滚）
-   - 性能基准测试建议
-
-
-请使用中文回答，结合源码细节给出具体可执行的分析。"""
-
-
-        return prompt
-   
     def _get_system_prompt(self, analysis_type: str) -> str:
         """获取系统提示词"""
         if analysis_type == 'method':
             return """你是一名资深Java开发工程师及代码审计专家。请根据提供的变更前/后代码，生成专业、结构化、可直接用于技术评审或发布说明的《变更前后代码对比与分析报告》。
 
-
-约束要求：
-1. 使用中文，严格遵循六部分输出结构，不增删章节
-2. 语言专业、客观、技术向，符合企业级代码评审标准
-3. 所有表格、代码块、流程图必须符合Markdown规范
-4. 直接输出报告内容，无需解释生成过程"""
-        else:
-            return """你是一位拥有 15 年经验的资深 Java 代码审查专家和测试架构师。你的任务是基于完整的调用链拓扑（含调用顺序、深度关系、调用行号）、每个方法的源码、以及入口点分类信息，识别变更的级联影响、评估系统风险，并给出可执行的端到端测试策略。
-
-
-分析原则：
-1. 使用中文，结构清晰，深度分析
-2. 必须基于提供的链拓扑理解调用顺序，逐层分析而非笼统概括
-3. 必须基于方法源码理解每个节点的具体功能，引用源码细节支撑判断
-4. 区分 DIRECT（确定调用，高置信度）和 CHA_RESOLVED（接口多态推断，需注明不确定性）
-5. 按入口点类型（HTTP API / 定时任务 / 消息队列 / 事件监听器）分别评估影响面
-6. SQL 节点需关注表操作类型、WHERE 条件、事务边界、性能风险
-7. 测试建议必须具体可执行（含具体输入参数、预期结果、优先级 P0/P1/P2）
-8. 风险评估结合业务场景，避免泛泛而谈，引用的源码行号需标注"""
-   
-    def get_default_prompts(self, analysis_type: str, method_info: Optional[Dict] = None, chain_data: Optional[Dict] = None, direction: str = 'upwards') -> Dict:
-        """
-        获取默认的系统提示词和分析提示词模板
-       
-        Args:
-            analysis_type: 'method' | 'chain'
-            method_info: 方法信息（用于生成分析方法提示词）
-            chain_data: 调用链数据（用于生成链分析提示词）
-            direction: 分析方向
-           
-        Returns:
-            { system_prompt, analysis_prompt }
-        """
-        system_prompt = self._get_system_prompt(analysis_type)
-       
-        if analysis_type == 'method':
-            analysis_prompt = self._build_method_prompt(method_info or {}, {})
-        else:
-            analysis_prompt = self._build_chain_prompt(chain_data or {}, direction, '', '')
-       
-        return {
-            'system_prompt': system_prompt,
-            'analysis_prompt': analysis_prompt
-        }
+            约束要求：
+            1. 使用中文，严格遵循六部分输出结构，不增删章节
+            2. 语言专业、客观、技术向，符合企业级代码评审标准
+            3. 所有表格、代码块、流程图必须符合Markdown规范
+            4. 直接输出报告内容，无需解释生成过程"""
    
     def _call_llm_api(self, prompt: str, system_prompt: str) -> str:
-        """调用 LLM API（公司内网版本）"""
+        """调用 LLM API（公司内网版本，支持多KEY负载均衡）"""
         try:
             import requests
+            import time
 
+            # 获取API KEY（支持多KEY负载均衡和单KEY模式）
+            if self.key_manager:
+                # 多KEY模式：使用负载均衡选择最优KEY
+                selected_key = self.key_manager.load_balancer.select_best_key(
+                    self.key_manager.get_keys()
+                )
+                if not selected_key:
+                    return "所有API KEY均不可用"
+                api_key = selected_key.key
+                self.model = selected_key.model  # 更新为实际使用的模型名称
+
+            else:
+                # 单KEY模式：使用配置的单个KEY
+                api_key = self.api_key
 
             headers = {
                 "Content-Type": "application/json",
-                "Authorization": f"Bearer {self.api_key}"
+                "Authorization": f"Bearer {api_key}"
             }
-
 
             # 公司内网 API 请求格式
             payload = {
@@ -1914,10 +1847,14 @@ class LLMService:
                 "user": "pipeline-analysis-v3"
             }
 
+            # 重试配置
             max_retries = 3
-            base_delay = 5  # 首次重试等待 5 秒
-            last_error = None
+            base_delay = 5  # 基础延迟
+            backoff_factor = 2  # 退避因子
+            retry_status_codes = {500, 502, 503, 504}  # 需要重试的状态码
 
+            last_error = None
+            start_time = time.time()
 
             for attempt in range(max_retries):
                 try:
@@ -1927,9 +1864,11 @@ class LLMService:
                         headers=headers,
                         timeout=300
                     )
+
+                    response_time = time.time() - start_time
+
                     if response.status_code == 200:
                         result = response.json()
-                        # 根据公司内网 API 响应格式提取结果
                         if 'answer' in result:
                             raw_answer = result['answer']
                         elif 'text' in result:
@@ -1937,19 +1876,74 @@ class LLMService:
                         else:
                             return f"API响应格式异常: {result}"
 
-                        # 清理思考过程内容
+                        # 记录成功调用（多KEY模式）
+                        if self.key_manager:
+                            self.key_manager.record_call_result(api_key, True, response_time)
+
                         return self._clean_thinking_content(raw_answer)
+
+                    elif response.status_code in retry_status_codes:
+                        last_error = f"HTTP {response.status_code}"
+                        if attempt < max_retries - 1:
+                            delay = base_delay * (backoff_factor ** attempt)
+                            print(f"[LLM] 服务端错误 {last_error}，{delay}s 后重试({attempt + 1}/{max_retries})")
+                            time.sleep(delay)
+                            continue
+                        else:
+                            # 记录失败（多KEY模式）
+                            if self.key_manager:
+                                self.key_manager.record_call_result(api_key, False, response_time)
+                            return f"API调用失败（已重试{max_retries}次）: {last_error}"
+
+                    elif response.status_code == 429:
+                        last_error = "请求限流"
+                        if attempt < max_retries - 1:
+                            delay = base_delay * (backoff_factor ** attempt) * 2  # 限流等待更久
+                            print(f"[LLM] {last_error}，{delay}s 后重试({attempt + 1}/{max_retries})")
+                            time.sleep(delay)
+                            continue
+                        else:
+                            # 记录失败（多KEY模式）
+                            if self.key_manager:
+                                self.key_manager.record_call_result(api_key, False, response_time)
+                            return f"API调用失败（已重试{max_retries}次）: {last_error}"
+
                     else:
-                        # HTTP 错误不重试
-                        return f"API调用失败: HTTP {response.status_code}\n{response.text}"
+                        # 记录失败（多KEY模式）
+                        if self.key_manager:
+                            self.key_manager.record_call_result(api_key, False, response_time)
+                        return f"API调用失败: HTTP {response.status_code}\n{response.text[:500]}"
+
+                except (requests.exceptions.Timeout,
+                        requests.exceptions.ConnectionError,
+                        requests.exceptions.RequestException) as e:
+                    last_error = f"{type(e).__name__}: {str(e)}"
+                    if attempt < max_retries - 1:
+                        delay = base_delay * (backoff_factor ** attempt)
+                        print(f"[LLM] 网络异常，{delay}s 后重试({attempt + 1}/{max_retries}): {last_error}")
+                        time.sleep(delay)
+                    else:
+                        # 记录失败（多KEY模式）
+                        if self.key_manager:
+                            response_time = time.time() - start_time
+                            self.key_manager.record_call_result(api_key, False, response_time)
+                        return f"API调用失败（已重试{max_retries}次）: {last_error}"
+
                 except Exception as e:
                     last_error = str(e)
                     if attempt < max_retries - 1:
-                        delay = base_delay * (2 ** attempt)
-                        print(f"[LLM] API 调用异常，{delay}s 后重试({attempt + 1}/{max_retries}): {last_error}")
+                        delay = base_delay * (backoff_factor ** attempt)
+                        print(f"[LLM] 未知异常，{delay}s 后重试({attempt + 1}/{max_retries}): {last_error}")
                         time.sleep(delay)
-           
+                    else:
+                        # 记录失败（多KEY模式）
+                        if self.key_manager:
+                            response_time = time.time() - start_time
+                            self.key_manager.record_call_result(api_key, False, response_time)
+                        return f"API调用失败（已重试{max_retries}次）: {last_error}"
+
             return f"请求异常(已重试{max_retries}次): {last_error}"
+
         except Exception as e:
             return f"请求异常: {str(e)}"
 
@@ -1995,6 +1989,12 @@ class LLMService:
         cleaned_text = re.sub(r'\s+$', '', cleaned_text)  # 移除结尾的空白
 
         return cleaned_text.strip()
+
+
+
+
+
+
 
 
 

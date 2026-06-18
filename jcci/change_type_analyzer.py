@@ -248,6 +248,7 @@ class ChangeTypeAnalyzer:
                         method_signature = f"{class_name}.{method_name}()"
                     
                     # 在基线 (project_id=0) 中查找相同文件、相同方法名的方法
+                    # 修复后的匹配逻辑
                     self.cursor.execute('''
                         SELECT m2.method_id
                         FROM methods m2
@@ -256,8 +257,9 @@ class ChangeTypeAnalyzer:
                         AND c2.commit_or_branch = ?
                         AND c2.filepath LIKE ?
                         AND m2.method_name = ?
+                        AND m2.parameters = ?   # ✅ 添加参数匹配
                         LIMIT 1
-                    ''', (commit_old, f'%{filepath}', method_name))
+                    ''', (commit_old, f'%{filepath}', method_name, parameters))
                     
                     old_method = self.cursor.fetchone()
                     

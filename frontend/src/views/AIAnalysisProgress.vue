@@ -21,7 +21,10 @@
             {{ statusLabel(store.taskStatus.status) }}
           </el-tag>
         </el-descriptions-item>
-        <el-descriptions-item label="当前阶段" v-if="store.taskStatus.current_stage">
+        <el-descriptions-item label="当前分析方法" v-if="store.taskStatus.current_stage && store.taskStatus.current_stage === 'method_analysis'">
+          {{ methodSignature(store.taskStatus) }}
+        </el-descriptions-item>
+        <el-descriptions-item label="当前阶段" v-else-if="store.taskStatus.current_stage">
           {{ stageLabel(store.taskStatus.current_stage) }}
         </el-descriptions-item>
       </el-descriptions>
@@ -122,7 +125,7 @@
 import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { Close } from '@element-plus/icons-vue'
-import { useAIAnalysisStore } from '@/stores/aiAnalysis'
+import { useAIAnalysisStore } from '@/stores/analysisStore'
 
 const route = useRoute()
 const router = useRouter()
@@ -172,6 +175,13 @@ const stageLabel = (s: string) => {
     aggregation: '聚合分析'
   }
   return m[s] || s
+}
+
+const methodSignature = (taskStatus: any) => {
+  if (taskStatus.class_name && taskStatus.method_name) {
+    return `${taskStatus.class_name}.${taskStatus.method_name}()`
+  }
+  return '未知方法'
 }
 
 const viewResult = () => {

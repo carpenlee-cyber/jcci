@@ -1,4 +1,5 @@
 dist
+backend/app/config.py
 tests
 jcci.egg-info
 .idea

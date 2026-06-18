@@ -209,7 +209,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { Connection, InfoFilled, WarningFilled } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import apiClient from '@/api/client'
-import { useAIAnalysisStore } from '@/stores/aiAnalysis'
+import { useAIAnalysisStore } from '@/stores/analysisStore'
 import { useSessionStore } from '@/stores/session'
 
 
@@ -399,10 +399,15 @@ const parseNodeInfo = (data: any) => {
   // 标签格式: ClassName.methodSignature  📝...
   // 支持内部类名（含 $ 符号，如 Outer$Inner）
   const match = label.match(/^([\w.$]+)\.(\w+)\(?/)
+  const result: any = { class_name: '', method_name: '' }
   if (match) {
-    return { class_name: match[1], method_name: match[2] }
+    result.class_name = match[1]
+    result.method_name = match[2]
   }
-  return { class_name: '', method_name: '' }
+  // 优先从 data 对象直接提取数据库ID（树节点构建时已填充）
+  if (data.class_id !== undefined) result.class_id = data.class_id
+  if (data.method_id !== undefined) result.method_id = data.method_id
+  return result
 }
 
 
@@ -422,7 +427,9 @@ const collectNodeKeys = (treeData: any[]): any[] => {
           nodes.push({
             class_name: info.class_name,
             method_name: info.method_name,
-            change_type: item.changeType || 'UNKNOWN'
+            change_type: item.changeType || 'UNKNOWN',
+            class_id: info.class_id,
+            method_id: info.method_id
           })
         }
       }
@@ -467,19 +474,24 @@ const openAIConfig = (data: any) => {
   const info = parseNodeInfo(data)
   const baseline = route.query.baseline as string
   const version = route.query.version as string
- 
+
+  const query: Record<string, any> = {
+    class_name: info.class_name,
+    method_name: info.method_name,
+    change_type: data.changeType || 'UNKNOWN',
+    signature: data.label || '',
+    baseline,
+    version,
+    direction: props.direction || 'upwards'
+  }
+  // 传递数据库精确ID（如有）
+  if (info.class_id !== undefined) query.class_id = info.class_id
+  if (info.method_id !== undefined) query.method_id = info.method_id
+
   const resolved = router.resolve({
     name: 'AIAnalysisConfig',
     params: { taskId: route.params.taskId as string },
-    query: {
-      class_name: info.class_name,
-      method_name: info.method_name,
-      change_type: data.changeType || 'UNKNOWN',
-      signature: data.label || '',
-      baseline,
-      version,
-      direction: props.direction || 'upwards'
-    }
+    query
   })
   window.open(resolved.href, '_blank')
 }
